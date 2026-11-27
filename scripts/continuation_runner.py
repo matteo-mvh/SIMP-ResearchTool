@@ -676,6 +676,7 @@ def verify_cycle(p, cycle, diagnostic=None, heartbeat=None):
         for name, values in zip(('M', 'S', 'P_area', 'N_area'), area):
             row.update({name+'_min': float(values.min()), name+'_max': float(values.max()),
                         name+'_mean': float(values[:-1].mean())})
+        row['cycle_log_state'] = z0.tolist()  # Preserve phase for the offline 3D viewer.
         diagnostic['verification_reason'] = 'verified_stable_cycle'
         return dict(row=row, seed=dict(log_state=z0.tolist(), period=T))
     except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError) as exc:

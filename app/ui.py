@@ -748,6 +748,10 @@ class Application(tk.Tk):
             label(seedrow,f'{count:,} saved parameter seeds',10,True,bg=C['blue2']).pack(side='left',padx=10,pady=9)
             button(seedrow,'Browse seeds',lambda:self.open_seeds_from_result(ident)).pack(side='right',padx=9,pady=4)
         folder=Path(job['output_dir'])
+        if job['analysis_id']=='continuation_1d' and job['status'] in ('completed','stopped','failed','interrupted'):
+            phasebar=tk.Frame(outer,bg=C['card']); phasebar.pack(fill='x',pady=(0,8))
+            button(phasebar,'Open 3D phase space',lambda:self.open_phase_space(job)).pack(side='left')
+            button(phasebar,'Rebuild',lambda:self.open_phase_space(job,True)).pack(side='left',padx=8)
         figs=sorted((folder/'figures').glob('*.png')) if (folder/'figures').is_dir() else []
         if figs:
             label(outer,'FIGURES',9,True,muted=True).pack(anchor='w',pady=(4,5))
@@ -765,6 +769,61 @@ class Application(tk.Tk):
         files=sorted(p.name for p in folder.glob('*') if p.is_file() and p.name.endswith(('.csv','.log','.json')))
         label(outer,'OUTPUT FILES',9,True,muted=True).pack(anchor='w',pady=(13,5))
         label(outer,'    ·    '.join(files)[:270] or 'No files',9,muted=True,wraplength=475,justify='left').pack(anchor='w')
+
+    def open_phase_space(self, job, rebuild=False):
+        """Build the standalone phase-space viewer off the Tk event thread."""
+        folder=Path(job['output_dir']); target=folder/'figures'/'phase_space_3d.html'
+        if target.is_file() and not rebuild:
+            self.open_folder(target); return
+        jobs=getattr(self,'_phase_space_jobs',{}); self._phase_space_jobs=jobs
+        if str(folder) in jobs and jobs[str(folder)].poll() is None:
+            messagebox.showinfo('Phase space','A viewer is already being generated for this result.'); return
+        dialog=tk.Toplevel(self); dialog.title('Generate 3D phase space'); dialog.transient(self)
+        body=tk.Frame(dialog,padx=16,pady=14); body.pack(fill='both',expand=True)
+        tk.Label(body,text='Precompute sampled basins and trajectories.\nThe browser viewer runs offline; generation can take time.',justify='left').grid(row=0,column=0,columnspan=2,sticky='w',pady=(0,10))
+        fields=[('Basin grid subdivisions','5'),('Base parameter frames','21'),('Maximum simulated days','20000'),('Parallel processes','2')]
+        entries=[]
+        for i,(name,default) in enumerate(fields,1):
+            tk.Label(body,text=name).grid(row=i,column=0,sticky='w',pady=3)
+            entry=ttk.Entry(body,width=12); entry.insert(0,default); entry.grid(row=i,column=1,sticky='ew',padx=(12,0)); entries.append(entry)
+        status=tk.StringVar(value='Verified periodic locations and Hopf points are included where available.')
+        tk.Label(body,textvariable=status,wraplength=410,justify='left').grid(row=5,column=0,columnspan=2,sticky='w',pady=10)
+        def launch():
+            try:
+                n,frames,days,workers=int(entries[0].get()),int(entries[1].get()),float(entries[2].get()),int(entries[3].get())
+                if not (3<=n<=12 and 5<=frames<=100 and 100<=days<=1000000 and 1<=workers<=8):
+                    raise ValueError('Grid 3–12; frames 5–100; days 100–1,000,000; workers 1–8.')
+            except ValueError as exc:
+                messagebox.showerror('Phase space',str(exc),parent=dialog); return
+            exe=Path(sys.executable)
+            if exe.name.lower()=='pythonw.exe' and exe.with_name('python.exe').is_file(): exe=exe.with_name('python.exe')
+            progress=folder/'phase_space_progress.json'; log=folder/'phase_space_build.log'
+            try:
+                progress.unlink(missing_ok=True)
+                with log.open('w',encoding='utf-8') as stream:
+                    proc=subprocess.Popen([str(exe),'-u','-m','scripts.phase_space',str(folder),
+                        '--grid',str(n),'--frames',str(frames),'--days',str(days),'--workers',str(workers)],
+                        cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT,
+                        creationflags=subprocess.CREATE_NO_WINDOW if sys.platform=='win32' else 0)
+            except OSError as exc:
+                messagebox.showerror('Phase space',str(exc),parent=dialog); return
+            jobs[str(folder)]=proc; start.configure(state='disabled')
+            for entry in entries: entry.configure(state='disabled')
+            status.set('Preparing phase-space analysis…')
+            def poll():
+                if proc.poll() is None:
+                    if dialog.winfo_exists():
+                        try:
+                            info=json.loads(progress.read_text(encoding='utf-8'))
+                            status.set(f"{info.get('detail','')}\n{info.get('stage','')} · {info.get('elapsed_seconds',0):.0f} s")
+                        except (OSError,ValueError,TypeError): pass
+                    self.after(600,poll); return
+                jobs.pop(str(folder),None)
+                if dialog.winfo_exists(): dialog.destroy()
+                if proc.returncode==0 and target.is_file(): self.open_folder(target)
+                else: messagebox.showerror('Phase space',f'Generation failed. See {log}')
+            self.after(600,poll)
+        start=ttk.Button(body,text='Generate HTML',command=launch); start.grid(row=6,column=0,columnspan=2,sticky='ew')
 
     def delete_result(self, ident):
         job = self.repo.get_job(ident)

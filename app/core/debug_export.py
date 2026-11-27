@@ -13,7 +13,7 @@ from .paths import ROOT
 DEBUG_ROOT = ROOT / "debug" / "runs"
 
 # Debugging settings
-KEEP_RUNS = 5
+KEEP_RUNS = 10
 UPDATE_INTERVAL = 30.0
 MAX_FILE_SIZE = 1024 * 1024       # 1 MiB
 MAX_LOG_SIZE = 128 * 1024         # 128 KiB
@@ -37,6 +37,11 @@ DIAGNOSTIC_PATTERNS = (
     "regions_*.json",
     "periodic_H*.json",
     "events_*.csv",
+    "branches_*.csv",
+    "stable_orbit_scan_*.csv",
+    "figures_revised/hopf_audit_*.json",
+    "figures_revised/bifurcation*.csv",
+    "figures_revised/bifurcation*.json",
     "bifurcations_*.csv",
     "bifurcation_summary*.json",
     "bifurcation_audit_failures_*.csv",
@@ -47,12 +52,80 @@ DIAGNOSTIC_PATTERNS = (
 )
 
 
+def log_export_warning(message):
+    """Persist export warnings even when the worker has no console."""
+    message = f'{time.strftime("%Y-%m-%d %H:%M:%S")} | {message}'
+    try:
+        path = DEBUG_ROOT.parent / 'export_errors.log'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open('a', encoding='utf-8') as stream:
+            stream.write(message + '\n')
+    except OSError:
+        pass
+    if sys.stderr is not None:
+        print(message, file=sys.stderr)
+
+
+def scientific_job(job):
+    """Keep test-fixture jobs out of scientific diagnostic storage."""
+    from .paths import SCRIPTS
+    fixtures = ROOT / 'tests' / 'fixtures'
+    return (not str(job.get('analysis_id', '')).endswith('_demo')
+            and not SCRIPTS.resolve().is_relative_to(fixtures.resolve()))
+
+
+def remove_debug_tree(path):
+    """Retry read-only entries; defer locked Windows directories."""
+    import os
+    import stat
+
+    def recover(func, name, info):
+        error = info[1]
+        if not isinstance(error, PermissionError):
+            raise error
+        # Never follow a symlink when changing file attributes.
+        if Path(name).is_symlink():
+            raise error
+        os.chmod(name, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+        func(name)
+
+    try:
+        shutil.rmtree(path, onerror=recover)
+        return True
+    except FileNotFoundError:
+        if not Path(path).exists():
+            return True
+        log_export_warning(f'Cleanup deferred: {path}: directory changed during removal')
+        return False
+    except OSError as exc:
+        log_export_warning(f'Cleanup deferred: {path}: {exc}')
+        return False
+
+
 def atomic_write(path, data):
-    """Avoid exposing partially written debugging files."""
+    """Use unique temporary files and retry transient sharing locks."""
+    import os
+    import tempfile
+    path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_name(path.name + ".debugtmp")
-    temp.write_bytes(data)
-    temp.replace(path)
+    fd, name = tempfile.mkstemp(prefix=path.name + '.', suffix='.debugtmp', dir=path.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(fd, 'wb') as stream:
+            stream.write(data)
+        for attempt in range(5):
+            try:
+                os.replace(temporary, path)
+                return
+            except PermissionError:
+                if attempt == 4:
+                    raise
+                time.sleep(.05 * (attempt + 1))
+    finally:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 def copy_diagnostic(source, target):
@@ -79,20 +152,33 @@ def copy_diagnostic(source, target):
 
 
 def cleanup_old_runs():
-    """Keep only the most recent automatically exported runs."""
-    folders = [
-        path for path in DEBUG_ROOT.iterdir()
-        if path.is_dir()
-        and not path.is_symlink()
-        and (path / "job_status.json").is_file()
-    ]
-    folders.sort(key=lambda path: (path / "job_status.json").stat().st_mtime, reverse=True,)
-    for folder in folders[KEEP_RUNS:]:
-        shutil.rmtree(folder)
+    """Retain recent scientific runs; never delete active snapshots."""
+    folders = []
+    for path in DEBUG_ROOT.iterdir():
+        if not path.is_dir() or path.is_symlink():
+            continue
+        try:
+            marker = path / 'job_status.json'
+            if not marker.is_file():
+                continue
+            status = json.loads(marker.read_text(encoding='utf-8'))
+            if status.get('status') in ('running', 'paused'):
+                continue
+            if str(status.get('analysis_id', '')).endswith('_demo'):
+                remove_debug_tree(path)
+                continue
+            folders.append((str(status.get('started_at') or ''), marker.stat().st_mtime, path))
+        except (OSError, ValueError) as exc:
+            log_export_warning(f'Cannot inspect {path.name}: {exc}')
+    folders.sort(key=lambda item: item[:2], reverse=True)
+    for _, _, folder in folders[KEEP_RUNS:]:
+        remove_debug_tree(folder)
 
 
 def export_debug(repo, job, final=False, failure=None):
     """Export diagnostics without interrupting the actual analysis."""
+    if not scientific_job(job):
+        return False
     try:
         ident = str(job["id"])
         source = Path(job["output_dir"])
@@ -135,7 +221,7 @@ def export_debug(repo, job, final=False, failure=None):
             if directory.is_dir() and not directory.is_symlink():
                 relative = str(directory.relative_to(target))
                 if relative not in keep:
-                    shutil.rmtree(directory, ignore_errors=True)
+                    remove_debug_tree(directory)
 
         skipped = [str(path.relative_to(source)) for path in extra[MAX_DIAGNOSTIC_FILES:]]
         for path in files:
@@ -147,17 +233,23 @@ def export_debug(repo, job, final=False, failure=None):
                 copied = copy_diagnostic(path, target / relative)
                 if not copied:
                     skipped.append(str(relative))
-            except OSError:
+            except OSError as exc:
                 skipped.append(str(relative))
+                log_export_warning(f"Copy failed: {relative}: {exc}")
 
         summarize_periodic(source, target)
         status["skipped_files"] = skipped
         atomic_write(target / "job_status.json", json.dumps(status, indent=2).encode("utf-8"),)
-        cleanup_old_runs()
+        try:
+            cleanup_old_runs()
+        except OSError as exc:
+            log_export_warning(f"Cleanup deferred: {exc}")
+        return True
 
     except Exception as exc:
         # Debugging must never cause a scientific run to fail.
-        print(f"Debug export failed: {exc}", file=sys.stderr,)
+        log_export_warning(f"Debug export failed: {exc}")
+        return False
 
 
 def summarize_periodic(source, target):
@@ -233,32 +325,30 @@ def summarize_periodic(source, target):
             atomic_write(target/name, json.dumps(summary, indent=2, default=str).encode('utf-8'),)
 
         except (OSError, ValueError, TypeError, KeyError) as exc:
-            print(f'Periodic diagnostic summary failed: {exc}', file=sys.stderr,)
+            log_export_warning(f'Periodic diagnostic summary failed: {exc}')
 
 
 def backfill_debug():
-    """Export existing results from the most recently started jobs."""
+    """Recover recent scientific runs from existing results."""
     from .storage import Repository
     repo = Repository()
+    query = ('SELECT * FROM jobs WHERE started_at IS NOT NULL '
+             'ORDER BY started_at DESC')
     with repo.connect() as db:
-        jobs = [
-            dict(row)
-            for row in db.execute(
-                """
-                SELECT * FROM jobs
-                WHERE started_at IS NOT NULL
-                ORDER BY started_at DESC
-                LIMIT 5
-                """
-            )
-        ]
-
-    for job in reversed(jobs):
-        if not Path(job['output_dir']).is_dir():
-            continue
-
-        export_debug(repo, job, final=job['status'] not in ('running', 'paused'),)
-        print('Exported:', job['id'], job['name'])
+        jobs = [dict(row) for row in db.execute(query)]
+    selected = [job for job in jobs
+                if scientific_job(job) and Path(job['output_dir']).is_dir()][:KEEP_RUNS]
+    successful = 0
+    for job in reversed(selected):
+        exported = export_debug(repo, job, final=job['status'] not in ('running', 'paused'))
+        if exported:
+            successful += 1
+            print('Snapshot written:', job['id'], job['name'])
+        else:
+            print('Export failed:', job['id'], job['name'])
+    print(f'Exported {successful}/{len(selected)} scientific runs')
+    print('Diagnostic directory:', DEBUG_ROOT)
+    print('Warnings:', DEBUG_ROOT.parent / 'export_errors.log')
 
 if __name__ == '__main__':
     backfill_debug()

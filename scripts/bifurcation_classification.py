@@ -382,6 +382,48 @@ def classify_local(f, j, uv, kind, residents, invader=None, state_step=1e-3):
     return result
 
 
+def classify_with_refinement(f, j, uv, kind, residents, invader, step):
+    """Refine uncertain Hopf coefficients without relaxing verification."""
+    original = classify_local(f, j, uv, kind, residents, invader, state_step=step)
+    if kind != 'hopf' or original['classification_status'] == 'verified':
+        return original
+    reasons = ('Vanishing or numerically uncertain parameter crossing',
+               'Possible degenerate Hopf / generalized Hopf')
+    if original.get('classification_reason') not in reasons:
+        return original
+    history, previous = [], None
+    for level in range(1, 7):
+        h = step / 2**level
+        if h < 1e-7:
+            break
+        try:
+            result = classify_local(f, j, uv, kind, residents, invader, state_step=h)
+        except (ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
+            history.append(dict(step=h, reason=str(exc)))
+            previous = None
+            continue
+        history.append(dict(step=h, classification=result['classification'],
+                            status=result['classification_status'],
+                            crossing=result.get('parameter_coefficient'),
+                            lyapunov=result.get('first_lyapunov_coefficient'),
+                            reason=result.get('classification_reason', '')))
+        if result['classification_status'] != 'verified':
+            previous = None
+            continue
+        if previous is not None and (
+            result['classification'] == previous['classification']
+            and reliable_nonzero(previous['parameter_coefficient'], result['parameter_coefficient'])
+            and reliable_nonzero(previous['first_lyapunov_coefficient'], result['first_lyapunov_coefficient'])
+        ):
+            result.update(derivative_step=h, derivative_refinements=level,
+                          derivative_refinement_history=history)
+            return result
+        previous = result
+    original['derivative_refinement_history'] = history
+    original['classification_reason'] += '; adaptive refinement inconclusive'
+    return original
+
+
 def classify_event(row, base, axes):
     """Apply local normal-form classification to a SIMP event."""
     output = dict(row)
@@ -437,7 +479,7 @@ def classify_event(row, base, axes):
             raise ValueError('Insufficient safe differentiation interval')
 
         invader = (SPECIES.index(row['invader']) if row['kind'] == 'invasion' else None)
-        result = classify_local(f, j, uv, row['kind'], residents, invader, state_step=step,)
+        result = classify_with_refinement(f, j, uv, row['kind'], residents, invader, step)
         output.update(result)
         if 'classification_axis' in result:
             output['classification_parameter'] = axes[result['classification_axis']].name
