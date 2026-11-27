@@ -1,0 +1,6 @@
+id = "sensitivity"
+name = "LHS sensitivity"
+group = "Sensitivity"
+description = "Explore parameter ranges to find where bistability occurs, which parameters matter most, and how much seagrass differs between stable states."
+entrypoint = "run.py"
+form = "sensitivity"

@@ -1,0 +1,24 @@
+
+# Ignore everything in the root folder
+/*
+
+# Only synchronize these folders
+!/app/
+!/model/
+!/scripts/
+!/.gitignore
+
+# Exclude generated files within those folders
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+.venv/
+.env
+.env.*
+*.sqlite
+*.sqlite3
+*.log
+*.lock
+*.pem
+*.key

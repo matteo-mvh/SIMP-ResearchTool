@@ -1,0 +1,6 @@
+id = "continuation_2d"
+name = "2D continuation"
+group = "Continuation"
+description = "Map stable states and bistability across two parameters, with continuation curves marking their transitions."
+entrypoint = "run.py"
+form = "continuation_2d"

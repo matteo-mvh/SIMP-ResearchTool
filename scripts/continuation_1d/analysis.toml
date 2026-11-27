@@ -1,0 +1,6 @@
+id = "continuation_1d"
+name = "1D continuation"
+group = "Continuation"
+description = "Explore how equilibria and their stability change as one parameter varies, and compare different depths."
+entrypoint = "run.py"
+form = "continuation_1d"

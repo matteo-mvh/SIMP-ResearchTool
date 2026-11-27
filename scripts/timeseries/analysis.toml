@@ -1,0 +1,6 @@
+id = "timeseries"
+name = "Time series analysis"
+group = "Time series Analysis"
+description = "Follow biomass changes over time from your chosen initial conditions, and compare species and depths."
+entrypoint = "run.py"
+form = "timeseries"
