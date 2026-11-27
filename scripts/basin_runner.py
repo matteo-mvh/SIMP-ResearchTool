@@ -215,7 +215,17 @@ def run(values, ctx):
     targets, discovery=discover_targets(p,eq,enabled,lambda msg:ctx.checkpoint(2,'Cycle discovery · '+msg))
     target_seconds=time.monotonic()-target_start
     (ctx.folder/'basin_targets.json').write_text(json.dumps(dict(targets=targets,cycle_discovery=discovery),indent=2,allow_nan=False),encoding='utf-8')
-    adaptive=str(values.get('basin_sampling_mode','adaptive'))=='adaptive'
+    requested=str(values.get('basin_sampling_mode','hybrid'))
+    if requested not in ('hybrid','adaptive','uniform'):
+        raise ValueError('Unknown basin sampling mode')
+    manifold_report={}
+    if requested=='hybrid':
+        from scripts.basin_manifold import run_manifold
+        if run_manifold(p,upper_s,eq,targets,discovery,values,ctx,target_seconds=target_seconds):
+            return
+        report_path=ctx.folder/'basin_manifold.json'
+        if report_path.is_file():manifold_report=json.loads(report_path.read_text(encoding='utf-8'))
+    adaptive=requested in ('hybrid','adaptive')
     mode=str(values.get('basin_backend','fast'))
     budget=int(values.get('basin_boundary_budget',128)); depth=int(values.get('basin_boundary_depth',5))
     compare=values.get('basin_compare_reference',False) in (True,'true','True',1,'1')
@@ -260,7 +270,8 @@ def run(values, ctx):
     summary=dict(seconds=time.monotonic()-started,N_wc=p.N_wc,H=p.H,S_max=upper_s,samples=n,seed=seed,workers=workers,
                  max_days=days,domain_volume_areal=volume,distribution='uniform on M>=0, HP>=0, M+HP<=N_wc, 0<=S<=S_max',
                  cycle_discovery=discovery['status'],fractions=rows,
-                 sampling_mode='adaptive' if adaptive else 'uniform',pilot_count=sampling.get('pilot_count',0),
+                 sampling_mode='adaptive' if adaptive else 'uniform',requested_sampling_mode=requested,
+                 manifold_attempt=manifold_report,pilot_count=sampling.get('pilot_count',0),
                  leaf_count=sampling.get('leaf_count',0),target_discovery_seconds=target_seconds,sampling_seconds=sampling_seconds,
                  backends=dict(Counter(r['backend'] for r in result_rows)),reference_comparison=comparison,
                  confidence_method='conditional weighted Hoeffding' if adaptive else 'Wilson',

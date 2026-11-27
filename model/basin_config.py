@@ -5,8 +5,12 @@ from model.parameter_metadata import parameter_schema
 def job_schema():
     schema = parameter_schema()
     schema.update({
-        'basin_sampling_mode': dict(type='choice', default='adaptive', options=['adaptive','uniform'], category='Basin sampling',
-                                    description='Adaptive boundary pilot and independent volume-weighted audit, or original uniform Monte Carlo.'),
+        'basin_sampling_mode': dict(type='choice', default='hybrid', options=['hybrid','adaptive','uniform'], category='Basin sampling',
+                                    description='Hybrid traces a supported saddle manifold and checks it independently; otherwise adaptive sampling.'),
+        'basin_manifold_resolution': dict(type='integer', default=12, min=6, max=64, category='Manifold tracing',
+                                          description='Coarse quadrature nodes; refined solve uses twice as many and a smaller S step.'),
+        'basin_manifold_audit': dict(type='integer', default=64, min=32, max=100000, category='Manifold tracing',
+                                     description='Independent uniform reference trajectories, in addition to paired surface checks.'),
         'basin_boundary_budget': dict(type='integer', default=128, min=18, max=100000, category='Basin sampling',
                                       description='Maximum extra pilot integrations for adaptive octree refinement.'),
         'basin_boundary_depth': dict(type='integer', default=5, min=1, max=12, category='Basin sampling',

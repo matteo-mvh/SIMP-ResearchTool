@@ -30,6 +30,9 @@ CORE_FILES = (
 )
 
 DIAGNOSTIC_PATTERNS = (
+    "basin_manifold_surface.json",
+    "basin_manifold_audit.csv",
+    "basin_manifold.json",
     "diagnostics_*.json",
     "performance_*.json",
     "geometry_*.json",
