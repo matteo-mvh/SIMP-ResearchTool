@@ -1,4 +1,3 @@
-
 """Automatic numerical settings for MSP periodic-orbit analysis."""
 
 import math
@@ -64,31 +63,18 @@ def periodic_schema():
 
 def periodic_options(values):
     """Validate and normalize the internal solver configuration."""
-
     schema = periodic_schema()
-    result = {
-        key: values.get(key, spec['default'])
-        for key, spec in schema.items()
-    }
-
+    result = {key: values.get(key, spec['default']) for key, spec in schema.items()}
     for key, spec in schema.items():
         value = result[key]
-
         if spec['type'] == 'choice':
             if value not in spec['options']:
                 raise ValueError(f'Invalid {key}: {value}')
 
         elif spec['type'] in ('float', 'integer'):
             number = float(value)
-
-            if (
-                not math.isfinite(number)
-                or not spec['min'] <= number <= spec['max']
-            ):
-                raise ValueError(
-                    f'{key} must be between '
-                    f'{spec["min"]} and {spec["max"]}'
-                )
+            if (not math.isfinite(number) or not spec['min'] <= number <= spec['max']):
+                raise ValueError(f'{key} must be between ' f'{spec["min"]} and {spec["max"]}')
 
             if spec['type'] == 'integer':
                 if number != int(number):
@@ -101,9 +87,7 @@ def periodic_options(values):
             if isinstance(value, (tuple, list)):
                 numbers = tuple(float(v) for v in value)
             else:
-                numbers = tuple(
-                    float(v.strip()) for v in str(value).split(',')
-                )
+                numbers = tuple(float(v.strip()) for v in str(value).split(','))
 
             if (
                 not numbers
@@ -125,14 +109,11 @@ def periodic_options(values):
 
 def standard_periodic_options():
     """Fixed numerical policy for all ordinary continuation jobs."""
-
     return periodic_options({'periodic_analysis': 'on'})
 
 
 def node_count(options, level=0):
     """Return a node count compatible with the collocation order."""
-
     n = options['periodic_nodes'] * 2**level
     multiple = math.lcm(2, options['periodic_order'])
-
     return ((n + multiple - 1) // multiple) * multiple

@@ -1,4 +1,3 @@
-
 """Export compact run diagnostics for remote debugging via GitHub."""
 
 from __future__ import annotations
@@ -85,14 +84,7 @@ def cleanup_old_runs():
         and not path.is_symlink()
         and (path / "job_status.json").is_file()
     ]
-
-    folders.sort(
-        key=lambda path: (
-            path / "job_status.json"
-        ).stat().st_mtime,
-        reverse=True,
-    )
-
+    folders.sort(key=lambda path: (path / "job_status.json").stat().st_mtime, reverse=True,)
     for folder in folders[KEEP_RUNS:]:
         shutil.rmtree(folder)
 
@@ -103,11 +95,8 @@ def export_debug(repo, job, final=False, failure=None):
         ident = str(job["id"])
         source = Path(job["output_dir"])
         target = DEBUG_ROOT / ident
-
         target.mkdir(parents=True, exist_ok=True)
-
         current = repo.get_job(ident) or job
-
         status = {
             key: current.get(key)
             for key in (
@@ -116,24 +105,14 @@ def export_debug(repo, job, final=False, failure=None):
                 "created_at", "started_at", "ended_at",
             )
         }
-
         status.update(
             exported_at=time.time(),
             final_snapshot=final,
             python=sys.version,
             worker_exception=failure,
         )
-
-        files = [
-            source / name for name in CORE_FILES
-        ]
-
-        extra = sorted({
-            path
-            for pattern in DIAGNOSTIC_PATTERNS
-            for path in source.glob(pattern)
-        })
-
+        files = [source / name for name in CORE_FILES]
+        extra = sorted({path for pattern in DIAGNOSTIC_PATTERNS for path in source.glob(pattern)})
         files.extend(extra[:MAX_DIAGNOSTIC_FILES])
 
         # Export recent native workers during AND after the run.
@@ -142,111 +121,63 @@ def export_debug(repo, job, final=False, failure=None):
             key=lambda path: path.stat().st_mtime,
             reverse=True,
         )
-
         for request in requests[:MAX_PERIODIC_WORKERS]:
-            files.extend((
-                request,
-                request.with_suffix(".jsonl"),
-                request.with_suffix(".log"),
-            ))
+            files.extend((request, request.with_suffix(".jsonl"), request.with_suffix(".log"),))
 
         # Keep only a bounded number of worker snapshots per job.
         keep = {
             str(request.parent.relative_to(source))
             for request in requests[:MAX_PERIODIC_WORKERS]
         }
-
         for directory in target.glob("periodic_workers_H*/*"):
-
             if directory.is_dir() and not directory.is_symlink():
-
                 relative = str(directory.relative_to(target))
-
                 if relative not in keep:
                     shutil.rmtree(directory, ignore_errors=True)
 
-        skipped = [
-            str(path.relative_to(source))
-            for path in extra[MAX_DIAGNOSTIC_FILES:]
-        ]
-
+        skipped = [str(path.relative_to(source)) for path in extra[MAX_DIAGNOSTIC_FILES:]]
         for path in files:
             if not path.is_file():
                 continue
 
             relative = path.relative_to(source)
-
             try:
-                copied = copy_diagnostic(
-                    path, target / relative
-                )
+                copied = copy_diagnostic(path, target / relative)
                 if not copied:
                     skipped.append(str(relative))
             except OSError:
                 skipped.append(str(relative))
 
         summarize_periodic(source, target)
-
         status["skipped_files"] = skipped
-
-        atomic_write(
-            target / "job_status.json",
-            json.dumps(status, indent=2).encode("utf-8"),
-        )
-
+        atomic_write(target / "job_status.json", json.dumps(status, indent=2).encode("utf-8"),)
         cleanup_old_runs()
 
     except Exception as exc:
         # Debugging must never cause a scientific run to fail.
-        print(
-            f"Debug export failed: {exc}",
-            file=sys.stderr,
-        )
+        print(f"Debug export failed: {exc}", file=sys.stderr,)
 
 
 def summarize_periodic(source, target):
     """Retain useful diagnostics even when raw output exceeds 1 MB."""
-
     from collections import Counter
     from statistics import median
-
     for path in source.glob('periodic_H*.json'):
-
         try:
-
-            data = json.loads(
-                path.read_text(encoding='utf-8')
-            )
-
+            data = json.loads(path.read_text(encoding='utf-8'))
             attempts = data.get('attempts', [])
             locations = data.get('locations', [])
-
-            durations = [
-                float(a['seconds'])
-                for a in attempts
-                if 'seconds' in a
-            ]
-
+            durations = [float(a['seconds']) for a in attempts if 'seconds' in a]
             coverage = dict(data.get('coverage', {}))
-
-            for key in (
-                'unvisited_locations',
-                'incomplete_locations',
-            ):
-
+            for key in ('unvisited_locations', 'incomplete_locations',):
                 if isinstance(coverage.get(key), list):
-
                     values = coverage.pop(key)
-
                     coverage[key+'_count'] = len(values)
                     coverage[key+'_examples'] = values[:10]
 
             branches = []
-
             for branch in data.get('branches', []):
-
                 points = branch.get('points', [])
-
                 branches.append(dict(
                     id=branch['id'],
                     points=len(points),
@@ -292,35 +223,18 @@ def summarize_periodic(source, target):
                 hopf=data.get('hopf', []),
                 recent_attempts=attempts[-20:],
             )
-
-            name = path.name.replace(
-                'periodic_', 'periodic_summary_', 1
-            )
-
-            atomic_write(
-                target/name,
-                json.dumps(
-                    summary, indent=2, default=str
-                ).encode('utf-8'),
-            )
+            name = path.name.replace('periodic_', 'periodic_summary_', 1)
+            atomic_write(target/name, json.dumps(summary, indent=2, default=str).encode('utf-8'),)
 
         except (OSError, ValueError, TypeError, KeyError) as exc:
-
-            print(
-                f'Periodic diagnostic summary failed: {exc}',
-                file=sys.stderr,
-            )
+            print(f'Periodic diagnostic summary failed: {exc}', file=sys.stderr,)
 
 
 def backfill_debug():
     """Export existing results from the most recently started jobs."""
-
     from .storage import Repository
-
     repo = Repository()
-
     with repo.connect() as db:
-
         jobs = [
             dict(row)
             for row in db.execute(
@@ -334,18 +248,11 @@ def backfill_debug():
         ]
 
     for job in reversed(jobs):
-
         if not Path(job['output_dir']).is_dir():
             continue
 
-        export_debug(
-            repo,
-            job,
-            final=job['status'] not in ('running', 'paused'),
-        )
-
+        export_debug(repo, job, final=job['status'] not in ('running', 'paused'),)
         print('Exported:', job['id'], job['name'])
-
 
 if __name__ == '__main__':
     backfill_debug()

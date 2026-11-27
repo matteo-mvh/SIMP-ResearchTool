@@ -1,4 +1,3 @@
-
 """Mathematically selective discovery and continuation of MSP periodic orbits."""
 
 from dataclasses import asdict, replace
@@ -39,7 +38,6 @@ def orbit_exclusion(p, margin=1e-10):
     A positive periodic orbit requires zero average per-capita growth
     for every resident species over a complete period.
     """
-
     if p.N_wc <= 0:
         return 'No nitrogen inventory available for M and P'
 
@@ -48,7 +46,6 @@ def orbit_exclusion(p, margin=1e-10):
     I_M = p.I_0 * np.exp(-p.H * p.kw)
     I_S = I_M
     I_P = p.I_0 * np.exp(-p.H * p.kw / 2)
-
     growth = {
         'M': (
             p.mu_M * I_M / (p.K_I_M + I_M)
@@ -65,7 +62,6 @@ def orbit_exclusion(p, margin=1e-10):
             - p.m_P - p.g_P
         ),
     }
-
     for species, maximum in growth.items():
         if maximum < -margin:
             return (
@@ -88,29 +84,18 @@ def orbit_exclusion(p, margin=1e-10):
 
 def equilibrium_evidence(p, known=None):
     """Distinguish rigorous orbit exclusion from missing equilibrium seeds."""
-
     if known is not None:
         roots = [row for row in known if admissible_msp(row, p)]
         if roots:
-            return dict(
-                status='msp_present', roots=known,
-                msp=roots, source='reused_equilibria',
-            )
+            return dict(status='msp_present', roots=known, msp=roots, source='reused_equilibria',)
 
     exclusion = orbit_exclusion(p)
-
     if exclusion:
-        return dict(
-            status='msp_absent_certified',
-            roots=known or [],
-            msp=[],
-            reason=exclusion,
-        )
+        return dict(status='msp_absent_certified', roots=known or [], msp=[], reason=exclusion,)
 
     # The reduced equilibrium certificate is useful information,
     # but is not used as an unconditional global orbit exclusion.
     hint = absence_certificate(p)
-
     if hint:
         return dict(
             status='msp_not_found',
@@ -128,9 +113,7 @@ def equilibrium_evidence(p, known=None):
             )
             for e in solve_equilibria(p, grid_points=513)
         ]
-
         msp = [row for row in roots if admissible_msp(row, p)]
-
         return dict(
             status='msp_present' if msp else 'msp_not_found',
             roots=roots,
@@ -148,28 +131,21 @@ def equilibrium_evidence(p, known=None):
         )
 
 
-def run_isolated(
-    task, base, axes, options, folder,
-    checkpoint, on_event=lambda _: None,
-):
+def run_isolated(task, base, axes, options, folder, checkpoint, on_event=lambda _: None,):
     """Run one native attempt in a disposable process.
 
     Timeout is based on the last completed native record.
     A productive continuation arm may run for longer than the timeout.
     """
-
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
-
     request = folder / f'request_{uuid4().hex}.json'
-
     request.write_text(json.dumps(dict(
         task=task,
         base=asdict(base),
         axes=[asdict(a) for a in axes],
         options=options,
     )), encoding='utf-8')
-
     env = os.environ.copy()
     env.update({
         key: '1' for key in (
@@ -180,9 +156,7 @@ def run_isolated(
             'PYTHONFAULTHANDLER',
         )
     })
-
     cwd = Path(__file__).resolve().parents[1]
-
     events = []
     position = 0
     pending = ''
@@ -193,7 +167,6 @@ def run_isolated(
 
     def read_events():
         nonlocal position, pending, covered, last_record
-
         path = request.with_suffix('.jsonl')
         if not path.exists():
             return
@@ -205,7 +178,6 @@ def run_isolated(
 
         lines = pending.split('\n')
         pending = lines.pop()
-
         for line in lines:
             if not line:
                 continue
@@ -233,10 +205,8 @@ def run_isolated(
                 stderr=subprocess.STDOUT,
                 creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
             )
-
             while process.poll() is None:
                 read_events()
-
                 if covered:
                     reason = 'covered_branch'
                     if process.poll() is None:
@@ -244,13 +214,11 @@ def run_isolated(
                     break
 
                 now = time.monotonic()
-
                 checkpoint(
                     f'Periodic {task["kind"]} · '
                     f'{now-started:.0f} s · '
                     f'{sum(e["type"] == "orbit" for e in events)} orbits'
                 )
-
                 if now - last_record > options['periodic_timeout']:
                     reason = 'worker_timeout'
                     if process.poll() is None:
@@ -261,13 +229,10 @@ def run_isolated(
 
             process.wait()
             read_events()
-
             if reason == 'completed':
                 if any(e['type'] == 'failure' for e in events):
                     reason = 'solver_failed'
-                elif process.returncode != 0 or not any(
-                    e['type'] == 'complete' for e in events
-                ):
+                elif process.returncode != 0 or not any(e['type'] == 'complete' for e in events):
                     reason = 'native_worker_crashed'
 
         except OSError as exc:
@@ -295,7 +260,6 @@ def _key(uv):
 
 def matching_branch(row, branches, dimensions, tolerance=.003):
     """Numerically identify previously covered periodic solutions."""
-
     keys = 'uv'[:dimensions]
     uv = np.array([row[k] for k in keys])
     signature = orbit_signature(row)
@@ -315,7 +279,6 @@ def matching_branch(row, branches, dimensions, tolerance=.003):
 
         for arm in branch['arms']:
             path = [branch['points'][0], *arm['records']]
-
             for a, b in zip(path, path[1:]):
                 if not compatible(a) or not compatible(b):
                     continue
@@ -323,23 +286,17 @@ def matching_branch(row, branches, dimensions, tolerance=.003):
                 start = np.array([a[k] for k in keys])
                 delta = np.array([b[k]-a[k] for k in keys])
                 norm = float(delta @ delta)
-
                 if norm < 1e-16 or norm > .03**2:
                     continue
 
                 fraction = float((uv-start) @ delta / norm)
-
                 if not 0 <= fraction <= 1:
                     continue
 
                 if np.linalg.norm(uv-start-fraction*delta) > 1e-5:
                     continue
 
-                expected = (
-                    (1-fraction)*orbit_signature(a)
-                    + fraction*orbit_signature(b)
-                )
-
+                expected = ((1-fraction)*orbit_signature(a) + fraction*orbit_signature(b))
                 if np.max(abs(signature-expected)) < tolerance:
                     return branch['id']
 
@@ -348,7 +305,6 @@ def matching_branch(row, branches, dimensions, tolerance=.003):
 
 def cached_equilibria(data, dimensions):
     """Collect distinct equilibria from existing continuation results."""
-
     cache = {}
 
     def add(row, uv):
@@ -382,12 +338,10 @@ def cached_equilibria(data, dimensions):
 
 def _hopf_seeds(data, dimensions, count):
     """Collect native Hopf events and samples along 2D Hopf curves."""
-
     found = [
         row for row in data.get('events', [])
         if row.get('kind') == 'hopf' and row['community'] == 'MSP'
     ]
-
     for curve in data.get('curves', []):
         if not curve or curve[0]['kind'] != 'hopf':
             continue
@@ -395,10 +349,7 @@ def _hopf_seeds(data, dimensions, count):
         if curve[0]['community'] != 'MSP':
             continue
 
-        indices = np.unique(np.linspace(
-            0, len(curve)-1, min(count, len(curve)), dtype=int
-        ))
-
+        indices = np.unique(np.linspace(0, len(curve)-1, min(count, len(curve)), dtype=int))
         for i in indices:
             row = dict(curve[i])
 
@@ -412,11 +363,9 @@ def _hopf_seeds(data, dimensions, count):
             found.append(row)
 
     unique = {}
-
     for row in found:
         uv = _key([row[k] for k in 'uv'[:dimensions]])
         entries = unique.setdefault(uv, [])
-
         if not any(
             np.allclose(
                 [row[c] for c in 'MSP'],
@@ -432,19 +381,12 @@ def _hopf_seeds(data, dimensions, count):
 
 def export_periodic(data, folder, depth):
     """Save verified periodic points and search diagnostics."""
-
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
-
     payload = data['periodic_analysis']
     path = folder / f'periodic_H{depth:g}.json'
     temporary = path.with_suffix('.tmp')
-
-    temporary.write_text(
-        json.dumps(payload, indent=2, allow_nan=False),
-        encoding='utf-8',
-    )
-
+    temporary.write_text(json.dumps(payload, indent=2, allow_nan=False), encoding='utf-8',)
     for attempt in range(5):
         try:
             os.replace(temporary, path)
@@ -459,24 +401,17 @@ def export_periodic(data, folder, depth):
         for branch in payload['branches']
         for i, row in enumerate(branch['points'])
     ]
-
     data['oscillations'] = rows
-
     fields = [
         'branch', 'point', 'status', 'community', 'stability',
         'period', 'H', 'u', 'v', 'x', 'y',
     ]
-
-    fields += list(dict.fromkeys(
-        key for row in rows for key in row if key not in fields
-    ))
-
+    fields += list(dict.fromkeys(key for row in rows for key in row if key not in fields))
     with (folder/f'periodic_branches_H{depth:g}.csv').open(
         'w', newline='', encoding='utf-8'
     ) as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
-
         writer.writerows({
             k: json.dumps(v) if isinstance(v, (list, dict)) else v
             for k, v in row.items()
@@ -485,7 +420,6 @@ def export_periodic(data, folder, depth):
 
 def analyze_periodic(data, base, axes, values, checkpoint, folder):
     """Search without a global runtime, location or attempt budget."""
-
     options = periodic_options(values)
     dimensions = len(axes)
 
@@ -494,10 +428,8 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
         options['periodic_max_steps'],
         8 * max(axis.resolution for axis in axes),
     )
-
     cache = cached_equilibria(data, dimensions)
     started = time.monotonic()
-
     payload = dict(
         method='Native PyOOMPH periodic boundary-value problems',
         settings=options,
@@ -510,35 +442,27 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
         coverage={},
         status='running',
     )
-
     data['periodic_analysis'] = payload
     data['oscillations'] = []
-
     if options['periodic_analysis'] == 'off':
         payload['status'] = 'disabled'
         export_periodic(data, folder, base.H)
         return
 
     samples = options['periodic_samples']
-
     hopf = _hopf_seeds(data, dimensions, samples)
 
     # Hopf points are already verified equilibrium seeds.
     for uv, roots in hopf.items():
         cache.setdefault(uv, []).extend(roots)
 
-    grid = [
-        _key(uv) for uv in itertools.product(
-            np.linspace(0, 1, samples), repeat=dimensions
-        )
-    ]
+    grid = [_key(uv) for uv in itertools.product(np.linspace(0, 1, samples), repeat=dimensions)]
 
     # Reuse spatially distributed equilibrium locations.
     reused = [
         uv for uv, roots in sorted(cache.items())
         if any(row['community'] == 'MSP' for row in roots)
     ]
-
     if reused:
         indices = np.unique(np.linspace(
             0, len(reused)-1,
@@ -550,12 +474,10 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
     queue = list(dict.fromkeys([*hopf, *reused, *grid]))
     scheduled = set(queue)
     completed = set()
-
     locations = {}
     evidence_cache = {}
     bank = []
     pending_traces = []
-
     counter = 0
 
     def save():
@@ -569,7 +491,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                 'approached_verified_hopf' 
             )
         ]
-
         payload['coverage'].update(
             scheduled_locations=len(scheduled),
             checked_locations=len(locations),
@@ -590,28 +511,18 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                 scheduled-completed or pending_traces or incomplete_arms
             ),
         )
-
         export_periodic(data, folder, base.H)
 
     def attempt(task, on_event=lambda _: None):
         nonlocal counter
         counter += 1
-
-        directory = (
-            Path(folder)
-            / f'periodic_workers_H{base.H:g}'
-            / f'{counter:06d}'
-        )
+        directory = (Path(folder) / f'periodic_workers_H{base.H:g}' / f'{counter:06d}')
 
         def report(message):
             checkpoint(f'{message} · native attempt {counter}')
 
         report(f'Periodic {task["kind"]}')
-
-        result = run_isolated(
-            task, base, axes, options, directory, report, on_event
-        )
-
+        result = run_isolated(task, base, axes, options, directory, report, on_event)
         payload['attempts'].append(dict(
             task=counter,
             kind=task['kind'],
@@ -632,17 +543,13 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                 if e['type'] == 'failure'
             ],
         ))
-
         return result
 
     def get_location(uv, round_index=0):
         if uv in locations:
             return locations[uv], evidence_cache[uv]
 
-        evidence = equilibrium_evidence(
-            parameters_at(base, axes, uv), cache.get(uv)
-        )
-
+        evidence = equilibrium_evidence(parameters_at(base, axes, uv), cache.get(uv))
         location = dict(
             uv=list(uv),
             **{
@@ -656,11 +563,9 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
             branches=[],
             status='search_pending',
         )
-
         locations[uv] = location
         evidence_cache[uv] = evidence
         payload['locations'].append(location)
-
         if evidence['status'] == 'msp_absent_certified':
             location['status'] = 'excluded_no_msp'
             completed.add(uv)
@@ -669,25 +574,14 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
 
     def accept(item, origin):
         row, seed = item['row'], item['seed']
-
-        duplicate = matching_branch(
-            row, payload['branches'], dimensions
-        )
-
+        duplicate = matching_branch(row, payload['branches'], dimensions)
         if duplicate is not None:
             return duplicate
 
-        branch = dict(
-            id=len(payload['branches'])+1,
-            origin=origin,
-            points=[row],
-            arms=[],
-        )
-
+        branch = dict(id=len(payload['branches'])+1, origin=origin, points=[row], arms=[],)
         payload['branches'].append(branch)
         bank.append(dict(row=row, seed=seed, branch=branch['id']))
         pending_traces.append((branch, seed))
-
         return branch['id']
 
     def process_events(result, location):
@@ -697,7 +591,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
 
             elif item['type'] == 'orbit':
                 ident = accept(item, location['uv'])
-
                 if ident not in location['branches']:
                     location['branches'].append(ident)
 
@@ -707,23 +600,18 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
 
     def trace_pending():
         """Trace every discovered branch in both directions."""
-
         while pending_traces:
             branch, seed = pending_traces[0]
-
             for axis in range(dimensions):
                 for direction in (-1, 1):
                     arm = []
-
                     arm_info = dict(
                         axis=axis,
                         direction=direction,
                         records=arm,
                         termination='running',
                     )
-
                     branch['arms'].append(arm_info)
-
                     last_trace_save = 0.
 
                     def on_event(event):
@@ -732,7 +620,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                             return
 
                         row = event['row']
-
                         old = matching_branch(
                             row,
                             [
@@ -741,20 +628,13 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                             ],
                             dimensions,
                         )
-
                         if old is not None:
                             arm_info['joins_branch'] = old
                             return False
 
                         arm.append(row)
                         branch['points'].append(row)
-
-                        bank.append(dict(
-                            row=row,
-                            seed=event['seed'],
-                            branch=branch['id'],
-                        ))
-
+                        bank.append(dict(row=row, seed=event['seed'], branch=branch['id'],))
                         now = time.monotonic()
 
                         # Avoid rewriting the growing JSON and CSV
@@ -776,9 +656,7 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                         axis=axis,
                         direction=direction,
                     ), on_event)
-
                     termination = result['reason']
-
                     if termination == 'completed':
                         termination = next((
                             e['reason']
@@ -793,7 +671,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                             if e['type'] in ('termination', 'failure')
                         ],
                     )
-
                     save()
 
             pending_traces.pop(0)
@@ -801,7 +678,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
 
     def discover_at(uv, round_index):
         location, evidence = get_location(uv, round_index)
-
         if uv in completed:
             return location
 
@@ -809,15 +685,8 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
         tasks = []
 
         # Reuse the closest verified orbit from each nearby branch.
-        nearby = sorted(
-            bank,
-            key=lambda b: np.linalg.norm(
-                np.asarray(b['seed']['uv'])-uv
-            ),
-        )
-
+        nearby = sorted(bank, key=lambda b: np.linalg.norm(np.asarray(b['seed']['uv'])-uv),)
         used = set()
-
         for entry in nearby:
             if entry['branch'] in used:
                 continue
@@ -826,12 +695,7 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                 continue
 
             used.add(entry['branch'])
-
-            tasks.append(dict(
-                kind='reuse',
-                seed=entry['seed'],
-                uv=list(uv),
-            ))
+            tasks.append(dict(kind='reuse', seed=entry['seed'], uv=list(uv),))
 
         # Search every known admissible MSP root, regardless of stability.
         for root in evidence['msp']:
@@ -849,20 +713,16 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
         # Avoid identical guesses generated by clipped period estimates
         # or duplicate equilibrium records.
         seen = set()
-
         for task in tasks:
             task['uv'] = list(uv)
             signature = json.dumps(task, sort_keys=True)
-
             if signature in seen:
                 continue
             seen.add(signature)
-
             process_events(attempt(task), location)
 
         completed.add(uv)
         save()
-
         return location
 
     try:
@@ -870,14 +730,9 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
 
         # Stage 1: start periodic branches from known Hopf points.
         hopf_items = list(hopf.items())
-
         for index, (uv, roots) in enumerate(hopf_items, 1):
-            checkpoint(
-                f'Periodic Hopf seeds {index}/{len(hopf_items)}'
-            )
-
+            checkpoint(f'Periodic Hopf seeds {index}/{len(hopf_items)}')
             location, evidence = get_location(uv)
-
             if evidence['status'] == 'msp_absent_certified':
                 continue
 
@@ -888,7 +743,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                     axis=int(row.get('solved_axis', 0)),
                     uv=list(uv),
                 )
-
                 process_events(attempt(task), location)
 
         # Stage 2: continue the emerging periodic branches.
@@ -896,13 +750,10 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
 
         # Stage 3: search for additional, disconnected branches.
         rounds = options['periodic_refinement_rounds']
-
         for round_index in range(rounds+1):
             this_round = []
-
             for index, uv in enumerate(queue, 1):
                 uv = _key(uv)
-
                 if uv in completed:
                     continue
 
@@ -910,10 +761,8 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                     f'Periodic discovery {index}/{len(queue)} '
                     f'· round {round_index+1}/{rounds+1}'
                 )
-
                 location = discover_at(uv, round_index)
                 this_round.append(location)
-
                 trace_pending()
 
             if round_index == rounds:
@@ -922,7 +771,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
             # Refine around possible coexistence and verified cycles.
             step = 1/(samples-1)/2**(round_index+1)
             refinement = []
-
             for location in this_round:
                 if location['status'] == 'excluded_no_msp':
                     continue
@@ -932,7 +780,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                         uv = list(location['uv'])
                         uv[axis] += sign*step
                         key = _key(uv)
-
                         if 0 <= uv[axis] <= 1 and key not in completed:
                             refinement.append(key)
 
@@ -944,7 +791,6 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
             and location['status'] != 'verified_periodic'
             for location in payload['locations']
         )
-
         failed = any(
             result['reason'] in (
                 'worker_timeout',
@@ -954,9 +800,7 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
             )
             for result in payload['attempts']
         )
-
         save()
-
         payload['status'] = (
             'completed_with_unresolved_searches'
             if unresolved or failed or payload['coverage']['limit_reached']

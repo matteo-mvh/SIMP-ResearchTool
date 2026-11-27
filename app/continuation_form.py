@@ -6,11 +6,7 @@ from app.parameter_inspection import seed_parameters
 from model.shared_eqn import Parameters
 from model.parameter_metadata import GROUPS
 from model.continuation_config import parse_job
-from app.core.job_eta import (
-    bind_creation_estimate,
-    continuation_values,
-)
-
+from app.core.job_eta import (bind_creation_estimate, continuation_values,)
 
 # Short display labels only; backend keys and validation remain unchanged.
 CONTINUATION_LABELS = {
@@ -145,7 +141,6 @@ class ContinuationForm(tk.Frame):
         self.controls['depth_count'].trace_add('write',self.depth_layout)
         self.update_disabled()
         if seed_id:self.seed.set(seed_id);self.load_seed()
-
         bind_creation_estimate(
             self,
             app.repo,

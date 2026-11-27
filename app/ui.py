@@ -17,10 +17,7 @@ from app.core.dpi import get_dpi_for_window
 
 from app.core.discovery import discover, validate
 from app.core.storage import Repository
-from app.core.job_eta import (
-    bind_creation_estimate,
-    queue_columns,
-)
+from app.core.job_eta import (bind_creation_estimate, queue_columns,)
 from app.core.worker import request, start_worker, worker_is_alive
 from app.core.paths import ROOT, DATA_ROOT, RESULTS, STATE, ASSETS
 
@@ -38,7 +35,6 @@ GUI_SCALE = 1.0
 
 def px(n):
     return max(1, round(n * GUI_SCALE))
-
 
 
 def human_date(iso):
@@ -120,7 +116,6 @@ class Application(tk.Tk):
                 self.iconbitmap(str(assets/'simp_icon.ico'))
         except (OSError,tk.TclError):
             pass
-
 
     def _resize_page(self, event=None):
         """Keep content full-width, but make it scroll if its natural height overflows."""
@@ -425,7 +420,6 @@ class Application(tk.Tk):
         self.extra_seed_caption.pack(anchor='w',pady=(5,5))
         self.extra_seed_fields=tk.Frame(self.seed_extra_section,bg=C['card'])
         self.extra_seed_fields.pack(fill='x')
-
         bottom=card(self.body);bottom.pack(fill='x',pady=(12,0))
         label(bottom,'Run name',11,True).pack(side='left',padx=(17,8),pady=16)
         self.job_name_var=tk.StringVar(value=spec.name+' test')
@@ -434,9 +428,7 @@ class Application(tk.Tk):
         draft_button.pack(side='right',padx=(7,15))
         queue_button = button(bottom,'Create & queue',lambda:self.save_job(True),primary=True)
         queue_button.pack(side='right')
-
         if seed_id:self.apply_seed_id(seed_id)
-
         bind_creation_estimate(
             bottom,
             self.repo,

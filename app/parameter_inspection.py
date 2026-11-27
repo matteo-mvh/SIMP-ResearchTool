@@ -7,7 +7,6 @@ from tkinter import ttk, messagebox
 
 from model.shared_eqn import Parameters, solve_equilibria, per_capita
 
-
 from model.parameter_metadata import GROUPS
 
 

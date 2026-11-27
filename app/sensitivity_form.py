@@ -7,10 +7,7 @@ from model.shared_eqn import Parameters
 from model.parameter_metadata import GROUPS
 from model.sensitivity_config import default_ranges,parse_job
 from app.continuation_form import ContinuationForm
-from app.core.job_eta import (
-    bind_creation_estimate,
-    sensitivity_values,
-)
+from app.core.job_eta import (bind_creation_estimate, sensitivity_values,)
 
 
 class SensitivityForm(tk.Frame):
@@ -88,7 +85,6 @@ class SensitivityForm(tk.Frame):
         help_label=label(tasks,'Uniform, independent LHS sampling.\nStarting ranges are 50–150% of model defaults; these are editable suggestions, not thesis uncertainty bounds.\n\nBistability means at least two strictly stable equilibria. ΔS is the largest seagrass difference between them (mmol N/m²).\n\nStandard / Thorough: 257 / 513 root-grid points with refinement. Finite root searches can miss narrow branches.\n\nAll samples become seeds. Figures: PNG + PDF.',9,muted=True,wraplength=px(300),justify='left',anchor='w')
         help_label.pack(fill='x',padx=px(12),pady=px(15))
         tasks.bind('<Configure>',lambda e:help_label.configure(wraplength=max(1,e.width-px(24))),add='+')
-
         bind_creation_estimate(
             self,
             app.repo,

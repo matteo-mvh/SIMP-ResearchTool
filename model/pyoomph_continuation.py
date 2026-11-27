@@ -120,7 +120,6 @@ class NativeProblem(Problem):
                                                    eigenvector=vectors[index].real)
         self.solve(newton_solver_tolerance=1e-11)
 
-
 # A single-entry cache per depth/process: never retain multiple native Problems.
 # Reuse is opt-in until tested with the user's Windows pyoomph build.
 _session = None

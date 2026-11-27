@@ -98,8 +98,7 @@ def grazing(S, p: Parameters):
 
 def grazing_derivative(S, p: Parameters):
     x = S / p.K_G_S
-    return (p.g_M*(1+p.gamma)*p.beta*x**(p.beta-1)
-            / (2*p.K_G_S*(1+p.gamma*x**p.beta)**2))
+    return (p.g_M*(1+p.gamma)*p.beta*x**(p.beta-1) / (2*p.K_G_S*(1+p.gamma*x**p.beta)**2))
 
 
 def per_capita(y, p: Parameters):

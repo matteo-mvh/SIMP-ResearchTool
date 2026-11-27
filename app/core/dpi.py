@@ -25,7 +25,6 @@ def configure_process_dpi_awareness() -> str:
 
     import ctypes
     from ctypes import wintypes
-
     prefer_system = os.environ.get('SIMP_DPI_MODE', '').lower() == 'system'
     if not prefer_system:
         try:

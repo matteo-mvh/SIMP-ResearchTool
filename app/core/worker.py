@@ -1,4 +1,3 @@
-
 """Independent sequential scheduler. Designed to survive GUI shutdown."""
 from __future__ import annotations
 
@@ -19,37 +18,25 @@ from .debug_export import export_debug, UPDATE_INTERVAL
 
 def alive(pid):
     if pid <= 0: return False
-
     if sys.platform == 'win32':
         # os.kill(pid, 0) calls TerminateProcess on Windows;
         # never use it as a probe.
         import ctypes
         from ctypes import wintypes
-
         kernel = ctypes.WinDLL('kernel32', use_last_error=True)
-        kernel.OpenProcess.argtypes = [
-            wintypes.DWORD, wintypes.BOOL, wintypes.DWORD
-        ]
+        kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
         kernel.OpenProcess.restype = wintypes.HANDLE
-        kernel.GetExitCodeProcess.argtypes = [
-            wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)
-        ]
+        kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
         kernel.GetExitCodeProcess.restype = wintypes.BOOL
         kernel.CloseHandle.argtypes = [wintypes.HANDLE]
-
         handle = kernel.OpenProcess(0x1000, False, pid)
-
         if not handle:
             # Access denied is not proof of death.
             return ctypes.get_last_error() == 5
 
         try:
             code = wintypes.DWORD()
-            return bool(
-                kernel.GetExitCodeProcess(
-                    handle, ctypes.byref(code)
-                )
-            ) and code.value == 259
+            return bool(kernel.GetExitCodeProcess(handle, ctypes.byref(code))) and code.value == 259
         finally:
             kernel.CloseHandle(handle)
 
@@ -64,7 +51,6 @@ def worker_python():
     """Console Python provides real log streams,
     while CREATE_NO_WINDOW hides it."""
     executable = Path(sys.executable)
-
     if sys.platform == 'win32' and executable.name.lower() == 'pythonw.exe':
         console = executable.with_name('python.exe')
         if console.is_file():
@@ -75,13 +61,7 @@ def worker_python():
 
 def heartbeat():
     try:
-        dump_json(
-            STATE / 'worker_heartbeat.json',
-            {
-                'pid': os.getpid(),
-                'updated': time.time(),
-            },
-        )
+        dump_json(STATE / 'worker_heartbeat.json', {'pid': os.getpid(), 'updated': time.time(),},)
     except OSError:
         # A transient file-sharing lock must not orphan
         # a running computation.
@@ -91,12 +71,7 @@ def heartbeat():
 def acquire_lock(path: Path):
     for _ in range(2):
         try:
-            fd = os.open(
-                path,
-                os.O_WRONLY | os.O_CREAT | os.O_EXCL,
-                0o600,
-            )
-
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600,)
             with os.fdopen(fd, 'w') as fp:
                 fp.write(str(os.getpid()))
 
@@ -105,7 +80,6 @@ def acquire_lock(path: Path):
         except FileExistsError:
             try:
                 oldpid = int(path.read_text().strip())
-
                 if oldpid != os.getpid() and alive(oldpid):
                     return False
 
@@ -119,14 +93,10 @@ def acquire_lock(path: Path):
 
 def request(ident, kind):
     job = Repository().get_job(ident)
-
-    if not job or job['status'] not in (
-        'running', 'paused', 'queued', 'draft'
-    ):
+    if not job or job['status'] not in ('running', 'paused', 'queued', 'draft'):
         return False
 
     folder = Path(job['output_dir'])
-
     if kind == 'pause' and job['status'] in ('running', 'paused'):
         (folder / 'pause.request').write_text('', encoding='utf-8')
 
@@ -184,21 +154,15 @@ def force_terminate(proc):
 
 def _run_job(repo, job):
     """Execute one queued analysis and update its runtime state."""
-
     ident = job['id']
     out = Path(job['output_dir'])
     out.mkdir(parents=True, exist_ok=True)
 
     # Remove control flags left from previous executions.
-    for flag in (
-        'pause.request',
-        'stop.request',
-        'force_stop.request',
-    ):
+    for flag in ('pause.request', 'stop.request', 'force_stop.request',):
         (out / flag).unlink(missing_ok=True)
 
     spec = discover().get(job['analysis_id'])
-
     if not spec:
         repo.update_job(
             ident,
@@ -211,11 +175,7 @@ def _run_job(repo, job):
 
     # Configure the analysis subprocess.
     env = os.environ.copy()
-
-    env['PYTHONPATH'] = (
-        str(ROOT) + os.pathsep + env.get('PYTHONPATH', '')
-    )
-
+    env['PYTHONPATH'] = (str(ROOT) + os.pathsep + env.get('PYTHONPATH', ''))
     env['OMP_NUM_THREADS'] = '1'
     env['OPENBLAS_NUM_THREADS'] = '1'
     env['MKL_NUM_THREADS'] = '1'
@@ -223,14 +183,12 @@ def _run_job(repo, job):
     # Capture additional Python tracebacks during native crashes.
     # Inherited by continuation and periodic-orbit subprocesses.
     env['PYTHONFAULTHANDLER'] = '1'
-
     flags = (
         subprocess.CREATE_NEW_PROCESS_GROUP
         | subprocess.CREATE_NO_WINDOW
         if sys.platform == 'win32'
         else 0
     )
-
     cmd = [
         worker_python(),
         '-u',
@@ -240,7 +198,6 @@ def _run_job(repo, job):
         '--output',
         str(out),
     ]
-
     dump_json(
         out / 'metadata.json',
         {
@@ -262,7 +219,6 @@ def _run_job(repo, job):
         (out / 'stdout.log').open('a', encoding='utf-8') as stdout,
         (out / 'stderr.log').open('a', encoding='utf-8') as stderr,
     ):
-
         try:
             proc = subprocess.Popen(
                 cmd,
@@ -285,12 +241,7 @@ def _run_job(repo, job):
             )
             return
 
-        repo.update_job(
-            ident,
-            pid=proc.pid,
-            phase='Running',
-        )
-
+        repo.update_job(ident, pid=proc.pid, phase='Running',)
         last_db_update = 0
         forced = False
         last_progress = 0.0
@@ -298,7 +249,6 @@ def _run_job(repo, job):
 
         # Schedule periodic debugging snapshots.
         next_debug_export = time.monotonic() + UPDATE_INTERVAL
-
         while proc.poll() is None:
             heartbeat()
 
@@ -313,25 +263,10 @@ def _run_job(repo, job):
             # Read analysis progress and update the job database.
             if t - last_db_update >= 0.5:
                 try:
-                    info = json.loads(
-                        (out / 'progress.json').read_text(
-                            encoding='utf-8'
-                        )
-                    )
-
-                    last_progress = float(
-                        info.get('progress', 0.0)
-                    )
-
-                    last_phase = str(
-                        info.get('phase', 'Running')
-                    )
-
-                    repo.update_job(
-                        ident,
-                        progress=last_progress,
-                        phase=last_phase,
-                    )
+                    info = json.loads((out / 'progress.json').read_text(encoding='utf-8'))
+                    last_progress = float(info.get('progress', 0.0))
+                    last_phase = str(info.get('phase', 'Running'))
+                    repo.update_job(ident, progress=last_progress, phase=last_phase,)
 
                 except (OSError, ValueError, TypeError):
                     pass
@@ -342,50 +277,23 @@ def _run_job(repo, job):
             # The full simulation output remains in results/.
             if t >= next_debug_export:
                 export_debug(repo, job)
-
-                next_debug_export = (
-                    time.monotonic() + UPDATE_INTERVAL
-                )
+                next_debug_export = (time.monotonic() + UPDATE_INTERVAL)
 
             time.sleep(0.15)
 
         code = proc.wait()
 
     # Determine the final analysis status.
-    stopped = (
-        forced
-        or (out / 'stop.request').exists()
-        or code == 130
-    )
-
-    status = (
-        'stopped'
-        if stopped
-        else ('completed' if code == 0 else 'failed')
-    )
-
-    err = (
-        ''
-        if status != 'failed'
-        else f'Exit code {code}; see stderr.log'
-    )
-
+    stopped = (forced or (out / 'stop.request').exists() or code == 130)
+    status = ('stopped' if stopped else ('completed' if code == 0 else 'failed'))
+    err = ('' if status != 'failed' else f'Exit code {code}; see stderr.log')
     registered = 0
 
     # Register generated parameter seeds.
     if status == 'completed' and (out / 'seeds.csv').exists():
-
-        repo.update_job(
-            ident,
-            phase='Indexing generated Seed-IDs',
-            progress=98,
-        )
-
+        repo.update_job(ident, phase='Indexing generated Seed-IDs', progress=98,)
         try:
-            registered = repo.register_seeds(
-                ident,
-                out / 'seeds.csv',
-            )
+            registered = repo.register_seeds(ident, out / 'seeds.csv',)
 
         except (OSError, ValueError, TypeError) as exc:
             status = 'failed'
@@ -402,33 +310,23 @@ def _run_job(repo, job):
         phase=status.capitalize(),
         error=err,
     )
-
     if status == 'completed':
         repo.learn_completed_runtimes()
-
         try:
             repo.register_run_seed(ident)
 
         except (ValueError, TypeError, OSError) as exc:
-            repo.update_job(
-                ident,
-                phase='Completed; could not index run seed',
-                error=str(exc),
-            )
+            repo.update_job(ident, phase='Completed; could not index run seed', error=str(exc),)
 
     # Update persistent run metadata.
     try:
-        meta = json.loads(
-            (out / 'metadata.json').read_text(encoding='utf-8')
-        )
-
+        meta = json.loads((out / 'metadata.json').read_text(encoding='utf-8'))
         meta.update({
             'status': status,
             'ended_at': now(),
             'exit_code': code,
             'registered_seeds': registered,
         })
-
         dump_json(out / 'metadata.json', meta)
 
     except (OSError, ValueError):
@@ -441,12 +339,10 @@ def run_job(repo, job):
     The final export is attempted even when an unexpected exception
     occurs inside the worker.
     """
-
     failure = None
 
     # Initial snapshot, including the original job configuration.
     export_debug(repo, job)
-
     try:
         return _run_job(repo, job)
 
@@ -456,20 +352,13 @@ def run_job(repo, job):
 
     finally:
         # Export final status, logs and numerical diagnostics.
-        export_debug(
-            repo,
-            job,
-            final=True,
-            failure=failure,
-        )
+        export_debug(repo, job, final=True, failure=failure,)
 
 
 def work_loop(once=False):
     """Sequential background scheduler."""
-
     repo = Repository()
     lock = STATE / 'worker.lock'
-
     if not acquire_lock(lock):
         print('Worker already running', file=sys.stderr)
         return 2
@@ -487,9 +376,7 @@ def work_loop(once=False):
 
         while True:
             heartbeat()
-
             job = repo.claim_next()
-
             if job:
                 run_job(repo, job)
 
@@ -514,16 +401,8 @@ def work_loop(once=False):
 
 def worker_is_alive():
     try:
-        data = json.loads(
-            (STATE / 'worker_heartbeat.json').read_text(
-                encoding='utf-8'
-            )
-        )
-
-        return (
-            time.time() - data['updated'] < 5
-            and alive(int(data['pid']))
-        )
+        data = json.loads((STATE / 'worker_heartbeat.json').read_text(encoding='utf-8'))
+        return (time.time() - data['updated'] < 5 and alive(int(data['pid'])))
 
     except (OSError, ValueError, KeyError):
         return False
@@ -531,7 +410,6 @@ def worker_is_alive():
 
 def start_worker():
     """Start the independent worker if it is not already running."""
-
     if worker_is_alive():
         return True
 
@@ -541,7 +419,6 @@ def start_worker():
         if sys.platform == 'win32'
         else 0
     )
-
     subprocess.Popen(
         [worker_python(), str(ROOT / 'start_worker.py')],
         cwd=ROOT,
@@ -553,5 +430,4 @@ def start_worker():
         close_fds=True,
         env=os.environ.copy(),
     )
-
     return True
