@@ -1,0 +1,37 @@
+# All settings here become editable fields automatically, without GUI code changes.
+# Scientific analyses may read p['mu_M'], p['mu_S'], etc. in run.py.
+# Extra demo controls do not imply that the placeholder implements SIMP.
+[parameters.mu_M]
+type = "float"
+default = 0.174
+min = 0.0
+max = 1.5
+category = "5. Example model coefficients"
+unit = "d^-1"
+description = "Macroalgae maximum growth (illustrative parameter for later SIMP integration)."
+
+[parameters.mu_S]
+type = "float"
+default = 0.06
+min = 0.0
+max = 1.0
+category = "5. Example model coefficients"
+unit = "d^-1"
+description = "Seagrass maximum growth; demonstration field."
+
+[parameters.mu_P]
+type = "float"
+default = 1.0
+min = 0.0
+max = 3.0
+category = "5. Example model coefficients"
+unit = "d^-1"
+description = "Phytoplankton maximum growth; demonstration field."
+
+[parameters.k_M]
+type = "float"
+default = 0.002
+min = 0.0
+max = 0.01
+category = "5. Example model coefficients"
+description = "Macroalgal light attenuation; demonstration field."

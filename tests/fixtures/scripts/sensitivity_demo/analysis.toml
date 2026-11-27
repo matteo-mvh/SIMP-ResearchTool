@@ -1,0 +1,44 @@
+id = "sensitivity_demo"
+name = "Sensitivity analysis"
+group = "Global analysis"
+description = "Creates a searchable library of parameter Seed-IDs (one per sample), CSV files and plots; demo results, not SIMP."
+entrypoint = "run.py"
+
+[parameters.sample_count]
+type = "integer"
+default = 80
+min = 5
+max = 200000
+category = "Control parameters"
+description = "How many parameter Seed-IDs to generate in this ONE run (e.g. 5000)"
+
+[parameters.random_seed]
+type = "integer"
+default = 42
+min = 0
+category = "Control parameters"
+description = "Random generator seed: repeat the SAME sweep; not a sampled Seed-ID"
+
+[parameters.kw]
+type = "float"
+default = 0.30
+min = 0
+max = 2
+category = "Environmental conditions"
+unit = "m^-1"
+
+[parameters.depth]
+type = "float"
+default = 4.0
+min = 0.25
+max = 30
+category = "Environmental conditions"
+unit = "m"
+
+[parameters.delay_ms]
+type = "integer"
+default = 0
+min = 0
+max = 2000
+category = "Demo settings"
+description = "Artificial time per sample (only for testing queue and pause)"

@@ -1,24 +1,53 @@
 
-# Ignore everything in the root folder
+# Ignore everything in the root directory
 /*
 
-# Only synchronize these folders
+# Core source code
 !/app/
 !/model/
 !/scripts/
+
+# Documentation and tests
+!/docs/
+!/tests/
+!/README.md
+
+# Dependencies
+!/requirements.txt
+
+# Application and worker startup
+!/start_app.py
+!/start_worker.py
+!/Start_SIMPCenter.bat
+!/Start_Worker_Console.bat
+
+# Debugging information
+!/debug/
+
+# Git configuration
 !/.gitignore
 
-# Exclude generated files within those folders
+# Python-generated files
 __pycache__/
 *.pyc
 *.pyo
 .ipynb_checkpoints/
 .venv/
-.env
-.env.*
+.pytest_cache/
+
+# Runtime and temporary files
 *.sqlite
 *.sqlite3
-*.log
+*.sqlite-wal
+*.sqlite-shm
 *.lock
+*.log
+
+# Allow debug logs
+!/debug/**/*.log
+
+# Credentials
+.env
+.env.*
 *.pem
 *.key

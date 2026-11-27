@@ -1,0 +1,69 @@
+id = "continuation_2d_demo"
+name = "2D continuation"
+group = "Continuation"
+description = "Demo two-parameter state map and candidate boundary. Optional Seed-ID support."
+entrypoint = "run.py"
+
+[parameters.seed_id]
+type = "seed"
+default = ""
+category = "Seed selection"
+
+[parameters.nwc_min]
+type = "float"
+default = 20
+min = 0
+category = "Control parameters"
+
+[parameters.nwc_max]
+type = "float"
+default = 1000
+min = 0
+category = "Control parameters"
+
+[parameters.kw_min]
+type = "float"
+default = 0.1
+min = 0
+category = "Control parameters"
+
+[parameters.kw_max]
+type = "float"
+default = 1.0
+min = 0
+category = "Control parameters"
+
+[parameters.resolution]
+type = "integer"
+default = 32
+min = 5
+max = 300
+category = "Control parameters"
+
+[parameters.depth]
+type = "float"
+default = 4
+min = 0.25
+max = 30
+category = "Environmental conditions"
+
+[parameters.g_M]
+type = "float"
+default = 0.05
+min = 0
+max = 0.2
+category = "Biological parameters"
+
+[parameters.m_SM]
+type = "float"
+default = 0.00003
+min = 0
+max = 0.001
+category = "Biological parameters"
+
+[parameters.delay_ms]
+type = "integer"
+default = 2
+min = 0
+max = 2000
+category = "Demo settings"

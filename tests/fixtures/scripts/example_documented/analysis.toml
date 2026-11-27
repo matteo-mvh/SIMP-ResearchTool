@@ -1,0 +1,49 @@
+# Every subfolder under scripts/ with a valid analysis.toml appears in Create job.
+# The GUI reads this file only; it does NOT import or edit run.py.
+id = "example_documented"
+name = "Tutorial: coastal response"
+group = "Examples / documentation"
+description = "Fully commented example: input controls, progress, CSV and plot output, optional saved Seed-ID. Synthetic data only."
+entrypoint = "run.py"
+parameter_file = "model_parameters.toml"
+
+# category is a visible heading in the GUI. Start with useful control values.
+[parameters.seed_id]
+type = "seed"
+default = ""
+category = "1. Reuse an existing seed (optional)"
+description = "Pick a parameter set saved by ANY completed analysis or a sensitivity sample. You can edit every field afterwards."
+
+[parameters.depth]
+type = "float"
+default = 4.0
+min = 0.25
+max = 30.0
+unit = "m"
+category = "2. Environmental control parameters"
+description = "Illustrative water depth; use your real scientific parameter in a proper analysis."
+
+[parameters.kw]
+type = "float"
+default = 0.3
+min = 0.0
+max = 2.0
+unit = "m^-1"
+category = "2. Environmental control parameters"
+description = "Background attenuation. May be copied from a chosen sensitivity seed."
+
+[parameters.points]
+type = "integer"
+default = 80
+min = 5
+max = 3000
+category = "3. Resolution"
+description = "Number of points in the synthetic example trajectory."
+
+[parameters.amplitude]
+type = "float"
+default = 1.2
+min = 0.0
+max = 10.0
+category = "4. Demonstration"
+description = "Synthetic signal amplitude, does not represent SIMP biomass."

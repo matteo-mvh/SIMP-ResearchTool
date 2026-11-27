@@ -1,0 +1,32 @@
+id = "timeseries_demo"
+name = "Time-series simulation"
+group = "Exploration"
+description = "Demo ecological time series with a progress indicator. Outputs CSV and PNG."
+entrypoint = "run.py"
+
+[parameters.days]
+type = "integer"
+default = 180
+min = 5
+max = 5000
+category = "Control parameters"
+
+[parameters.nwc]
+type = "float"
+default = 100
+min = 0
+category = "Environmental conditions"
+
+[parameters.kw]
+type = "float"
+default = 0.3
+min = 0
+max = 2
+category = "Environmental conditions"
+
+[parameters.delay_ms]
+type = "integer"
+default = 10
+min = 0
+max = 2000
+category = "Demo settings"

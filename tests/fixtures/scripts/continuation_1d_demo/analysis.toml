@@ -1,0 +1,71 @@
+id = "continuation_1d_demo"
+name = "1D continuation"
+group = "Continuation"
+description = "Demo equilibrium branch versus a control parameter. Accepts optional Seed-ID from any completed run or generated sample."
+entrypoint = "run.py"
+
+[parameters.seed_id]
+type = "seed"
+default = ""
+category = "Seed selection"
+description = "Optional saved Seed-ID; choosing one fills matching parameters"
+
+[parameters.parameter]
+type = "choice"
+options = ["Nwc", "kw", "depth"]
+default = "Nwc"
+category = "Control parameters"
+
+[parameters.start]
+type = "float"
+default = 20
+category = "Control parameters"
+
+[parameters.end]
+type = "float"
+default = 1000
+category = "Control parameters"
+
+[parameters.points]
+type = "integer"
+default = 100
+min = 5
+max = 10000
+category = "Control parameters"
+
+[parameters.depth]
+type = "float"
+default = 4
+min = 0.25
+max = 30
+category = "Environmental conditions"
+unit = "m"
+
+[parameters.kw]
+type = "float"
+default = 0.30
+min = 0
+max = 2
+category = "Environmental conditions"
+unit = "m^-1"
+
+[parameters.g_M]
+type = "float"
+default = 0.05
+min = 0
+max = 0.2
+category = "Biological parameters"
+
+[parameters.m_SM]
+type = "float"
+default = 0.00003
+min = 0
+max = 0.001
+category = "Biological parameters"
+
+[parameters.delay_ms]
+type = "integer"
+default = 15
+min = 0
+max = 2000
+category = "Demo settings"
