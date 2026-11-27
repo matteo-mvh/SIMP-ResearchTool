@@ -162,11 +162,13 @@ def init_worker(p, targets, duration):
     _CONTEXT = p,eq,cycles,duration
 
 
-def classify_seed(item):
+def classify_seed(item, *, keep_path=True, field=None, solver=None):
     p,eq,cycles,max_days = _CONTEXT
     y0,k,j = item
     start = area(y0,p.H)
     z = np.log(y0)
+    field = field or (lambda t,z:growth(z,p))
+    solver = solver or solve_ivp
     chunks, elapsed, label, reason = [],0.,-1,'integration horizon reached'
     # Sample three successive periods to distinguish recurrence from a
     # transient passage near a cycle. No label from extrema or a single endpoint.
@@ -174,14 +176,14 @@ def classify_seed(item):
     try:
         while elapsed < max_days:
             dt = min(interval,max_days-elapsed)
-            sol = solve_ivp(lambda t,z:growth(z,p),(0.,dt),z,method='LSODA',
+            sol = solver(field,(0.,dt),z,method='LSODA',
                             rtol=2e-8,atol=2e-10,dense_output=True)
             if not sol.success or not physical(np.exp(sol.y),p):
                 reason = 'integration failed or left physical domain'
                 break
             z = sol.y[:,-1]
             elapsed += dt
-            chunks.append(area(np.exp(sol.sol(np.linspace(0,dt,100))).T,p.H))
+            if keep_path:chunks.append(area(np.exp(sol.sol(np.linspace(0,dt,100))).T,p.H))
             found = []
             tail = area(np.exp(sol.sol(np.linspace(max(0.,dt-min(250.,dt)),dt,8))).T,p.H)
             for i,point,scale in eq:

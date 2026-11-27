@@ -18,6 +18,9 @@ from app.core.control import load_args, StopRequested
 from model.shared_eqn import Parameters, solve_equilibria, seagrass_biomass
 from scripts.phase_space import make_targets, orbit_samples, init_worker, classify_seed
 
+from scripts.basin_fast import BasinPool
+from scripts.basin_adaptive import adaptive_samples, weighted_fractions, to_state
+
 UNRESOLVED = '#a6a6a6'
 
 
@@ -142,7 +145,7 @@ def export_rows(path, rows):
         writer.writerows(rows)
 
 
-def plots(folder, p, upper_s, states, labels, targets, rows):
+def plots(folder, p, upper_s, states, labels, targets, rows, adaptive=False):
     from scripts.continuation_plots import plt, save
     from matplotlib.lines import Line2D
     from matplotlib.ticker import PercentFormatter
@@ -163,7 +166,7 @@ def plots(folder, p, upper_s, states, labels, targets, rows):
            title=f'Basin fractions · H={p.H:g} m · N_wc={p.N_wc:g} · n={len(labels)}')
     ax.xaxis.set_major_formatter(PercentFormatter(1)); ax.invert_yaxis(); ax.grid(axis='x', alpha=.2)
     ax.set_axisbelow(True)
-    fig.supxlabel('95% marginal Wilson intervals for observed assignments; unresolved mass is not redistributed.', fontsize=8)
+    fig.supxlabel(('95% marginal Hoeffding bounds (weighted audit)' if adaptive else '95% marginal Wilson intervals') + '; unresolved mass is not redistributed.', fontsize=8)
     save(fig, folder, 'basin_volume_fractions')
     # A sampled cloud, not a reconstructed separatrix. All axes are areal.
     fig = plt.figure(figsize=(9,7)); ax=fig.add_subplot(111, projection='3d')
@@ -208,31 +211,65 @@ def run(values, ctx):
     if not math.isfinite(upper_s) or upper_s<=0: raise ValueError('S_max must be positive and finite')
     ctx.checkpoint(1,'Discovering stable attractors',force=True)
     enabled=values.get('basin_cycles',True) in (True,'true','True',1,'1')
+    target_start=time.monotonic()
     targets, discovery=discover_targets(p,eq,enabled,lambda msg:ctx.checkpoint(2,'Cycle discovery · '+msg))
+    target_seconds=time.monotonic()-target_start
     (ctx.folder/'basin_targets.json').write_text(json.dumps(dict(targets=targets,cycle_discovery=discovery),indent=2,allow_nan=False),encoding='utf-8')
-    states=sample_initial(p,upper_s,n,seed)
-    results={}
-    def checkpoint(done,total,seconds):
-        ctx.checkpoint(5+85*done/total,f'Basin integrations {done}/{total} · {seconds:.0f} s')
-    def store(i,row):
-        results[i]=row
-    calculate(p,targets,states,days,workers,checkpoint,store)
-    labels=np.array([results[i]['label'] for i in range(n)])
-    area_states=states*np.array([1.,1.,p.H])
-    volume=.5*p.N_wc**2*upper_s
-    rows=fractions(labels,targets,volume)
+    adaptive=str(values.get('basin_sampling_mode','adaptive'))=='adaptive'
+    mode=str(values.get('basin_backend','fast'))
+    budget=int(values.get('basin_boundary_budget',128)); depth=int(values.get('basin_boundary_depth',5))
+    compare=values.get('basin_compare_reference',False) in (True,'true','True',1,'1')
+    if mode not in ('fast','reference') or budget<18 or depth<1:raise ValueError('Invalid basin backend or refinement settings')
+    maximum_work=n+(budget if adaptive else 0)+(n if compare else 0)
+    done_before=0; sample_start=time.monotonic()
+    def checkpoint(done,stage,seconds):
+        ctx.checkpoint(5+85*min(1.,(done_before+done)/maximum_work),f'{stage} · {done_before+done} integrations · {seconds:.0f} s')
+    sampling={}; ids=np.full(n,-1,int)
+    with BasinPool(p,targets,days,workers,mode,checkpoint) as pool:
+        if adaptive:
+            states,result_rows,weights,ids,sampling=adaptive_samples(p,upper_s,n,budget,depth,seed,pool.evaluate)
+        else:
+            states=sample_initial(p,upper_s,n,seed)
+            result_rows=pool.evaluate(states,'Uniform basin integrations')
+            weights=np.full(n,1./n)
+        done_before=pool.done
+    sampling_seconds=time.monotonic()-sample_start
+    results=dict(enumerate(result_rows));labels=np.array([r['label'] for r in result_rows])
+    area_states=states*np.array([1.,1.,p.H]); volume=.5*p.N_wc**2*upper_s
+    rows=weighted_fractions(labels,targets,volume,weights) if adaptive else fractions(labels,targets,volume)
+    comparison={}
+    if compare:
+        ref_start=time.monotonic()
+        with BasinPool(p,targets,days,workers,'reference',checkpoint) as pool:
+            reference=pool.evaluate(states,'Reference verification')
+        ref_seconds=time.monotonic()-ref_start
+        ref_labels=np.array([r['label'] for r in reference]); different=labels!=ref_labels
+        comparison=dict(reference_seconds=ref_seconds,disagreement_count=int(different.sum()),
+                        disagreement_weight=float(weights[different].sum()),
+                        resolved_label_conflicts=int(((labels>=0)&(ref_labels>=0)&different).sum()))
+        export_rows(ctx.folder/'basin_comparison.csv',[dict(index=i,fast_label=int(labels[i]),reference_label=int(ref_labels[i]),
+            agree=bool(not different[i]),weight=float(weights[i]),fast_days=result_rows[i]['days'],reference_days=reference[i]['days']) for i in range(n)])
+        # Benchmark only measures audit time directly in uniform mode; pilot work is extra.
+        if not adaptive:comparison['audit_speedup']=ref_seconds/max(sampling_seconds,1e-9)
+    if adaptive:
+        (ctx.folder/'basin_sampling.json').write_text(json.dumps(sampling,indent=2,allow_nan=False),encoding='utf-8')
     export_rows(ctx.folder/'basin_fractions.csv',rows)
     export_rows(ctx.folder/'basin_samples.csv',[dict(index=i,M0=float(a[0]),S0=float(a[1]),P0_area=float(a[2]),
         attractor_index=int(labels[i]),attractor=targets[labels[i]]['id'] if labels[i]>=0 else 'Unresolved',
-        days=results[i]['days'],reason=results[i]['reason']) for i,a in enumerate(area_states)])
+        days=results[i]['days'],reason=results[i]['reason'],weight=float(weights[i]),cell=int(ids[i]),backend=results[i]['backend']) for i,a in enumerate(area_states)])
     summary=dict(seconds=time.monotonic()-started,N_wc=p.N_wc,H=p.H,S_max=upper_s,samples=n,seed=seed,workers=workers,
                  max_days=days,domain_volume_areal=volume,distribution='uniform on M>=0, HP>=0, M+HP<=N_wc, 0<=S<=S_max',
                  cycle_discovery=discovery['status'],fractions=rows,
+                 sampling_mode='adaptive' if adaptive else 'uniform',pilot_count=sampling.get('pilot_count',0),
+                 leaf_count=sampling.get('leaf_count',0),target_discovery_seconds=target_seconds,sampling_seconds=sampling_seconds,
+                 backends=dict(Counter(r['backend'] for r in result_rows)),reference_comparison=comparison,
+                 confidence_method='conditional weighted Hoeffding' if adaptive else 'Wilson',
                  convergence_days_median=float(np.median([r['days'] for r in results.values()])),
                  limitations='Finite-time numerical classification; intervals describe sampling uncertainty, not missed attractors or numerical error. At most one stable interior cycle is searched for; unresolved samples remain in denominator.')
     (ctx.folder/'summary.json').write_text(json.dumps(summary,indent=2,allow_nan=False),encoding='utf-8')
     ctx.checkpoint(92,'Plotting basin fractions',force=True)
-    plots(ctx.folder/'figures',p,upper_s,area_states,labels,targets,rows)
+    plots(ctx.folder/'figures',p,upper_s,area_states,labels,targets,rows,adaptive=adaptive)
+    if adaptive:boundary_plot(ctx.folder/'figures',p,upper_s,area_states,labels,ids,sampling,rows)
     ctx.checkpoint(100,'Completed basin analysis',force=True)
 
 
@@ -241,3 +278,20 @@ def main():
     try: run(values,ctx)
     except StopRequested: return 130
     return 0
+
+
+def boundary_plot(folder,p,upper_s,states,labels,ids,sampling,rows):
+    """Plot only tested points in candidate interface cells; no invented surface."""
+    from scripts.continuation_plots import plt,save
+    fig=plt.figure(figsize=(9,7));ax=fig.add_subplot(111,projection='3d')
+    candidates={c['id'] for c in sampling['cells'] if c['possible_boundary']}
+    mask=np.isin(ids,list(candidates))
+    for row in rows:
+        q=states[mask&(labels==row['index'])]
+        if len(q):ax.scatter(*q.T,color=row['color'],s=17,alpha=.8,label=row['attractor'],depthshade=False)
+    ax.set(xlabel='M₀ [mmol N/m²]',ylabel='S₀ [mmol N/m²]',zlabel='HP₀ [mmol N/m²]',
+           xlim=(0,p.N_wc),ylim=(0,upper_s),zlim=(0,p.N_wc),
+           title='Sampled candidate basin interfaces — not a reconstructed separatrix')
+    if mask.any():ax.legend(fontsize=8)
+    else:ax.text2D(.04,.92,'No interface detected by this finite search',transform=ax.transAxes)
+    fig.tight_layout();save(fig,folder,'basin_boundary_candidates')
