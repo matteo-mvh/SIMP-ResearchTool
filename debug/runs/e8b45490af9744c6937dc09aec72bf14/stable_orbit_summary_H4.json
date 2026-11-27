@@ -1,0 +1,31 @@
+{
+  "method": "Adaptive ODE integration and shooting",
+  "algorithm": "SIMP Poincare return-first search",
+  "locations": 49,
+  "analytical_exclusions": 1,
+  "stable_periodic_locations": 17,
+  "coexistence_locations": 0,
+  "classifications": {
+    "stable_cycle_no_stable_equilibrium_found": 17,
+    "unresolved": 1,
+    "stable_equilibrium_cycle_not_confirmed": 31
+  },
+  "attempt_types": {
+    "hopf_normal_form": 8,
+    "manual": 166,
+    "poincare_shooting_hopf_normal_form": 3,
+    "reuse": 22,
+    "poincare_shooting_reuse": 20,
+    "poincare_shooting_manual": 21,
+    "analytical_exclusion": 1
+  },
+  "refinement_rounds": 3,
+  "attempts": 241,
+  "timing": {
+    "guess_seconds": 431.4020901003387,
+    "correction_seconds": 293.04780209984165,
+    "verification_seconds": 84.2515718000941
+  },
+  "seconds": 860.1131588999415,
+  "limitations": "Analytical exclusions apply to strictly positive MSP periodic orbits. Other unsuccessful searches are inconclusive. Coarse sampling can miss narrow disconnected periodic-attractor regions. Unstable cycles and exact periodic folds are not traced."
+}

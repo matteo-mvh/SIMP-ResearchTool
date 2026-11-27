@@ -582,7 +582,149 @@ def duplicate_event(row, events):
     return False
 
 
-def audit_1d(branches, events, base, axis):
+def merge_classified_events(events, added):
+    """Prefer verified classification over an unresolved duplicate."""
+    merged = []
+    for row in [*events, *added]:
+        matches = [i for i, old in enumerate(merged) if duplicate_event(row, [old])]
+        if not matches:
+            merged.append(row)
+        elif row.get('classification_status') == 'verified':
+            if not any(merged[i].get('classification_status') == 'verified' for i in matches):
+                merged[matches[0]] = row
+    return merged
+
+
+def audit_msp_hopf(branches, events, base, axis, details=None):
+    """Independently bracket Re(lambda_complex)=0 on physical MSP roots.
+
+    Native branch brackets supplement a regular reduced-equilibrium grid.
+    The original normal-form classifier still decides whether a corrected
+    crossing is a generic Hopf. Root matching and finite sampling are not
+    a global completeness proof.
+    """
+    from scipy.optimize import brentq
+    from model.shared_eqn import solve_equilibria
+    details = {} if details is None else details
+    details.update(grid=[], brackets=[], equilibrium_errors=[])
+    cache, added, failures, brackets = {}, [], [], []
+
+    def mode(y, u):
+        eig = np.linalg.eigvals(jacobian(y, parameters_at(base, [axis], [u])))
+        pair = [v for v in eig if v.imag > FREQ_TOL]
+        return (float(pair[0].real), float(pair[0].imag)) if len(pair) == 1 else (None, None)
+
+    def roots(u):
+        u = float(u)
+        if u not in cache:
+            try:
+                eq = solve_equilibria(parameters_at(base, [axis], [u]))
+                cache[u] = [np.asarray(e.biomass, float) for e in eq if e.community == 'MSP']
+            except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError) as exc:
+                details['equilibrium_errors'].append(dict(u=u, reason=str(exc)))
+                cache[u] = []
+        return cache[u]
+
+    def distance(y, z):
+        return float(np.max(abs(np.log(y)-np.log(z))))
+
+    def bracket(u, y, v, z, source):
+        if abs(u-v) < 1e-12 or min(np.min(y), np.min(z)) <= 1e-8:
+            return
+        a, b = mode(y, u)[0], mode(z, v)[0]
+        if a is None or b is None or a*b > 0 or (a == b == 0):
+            return
+        if u > v:
+            u, v, y, z, a, b = v, u, z, y, b, a
+        brackets.append((u, v, y, z, a, b, source))
+
+    groups = {}
+    for row in branches:
+        if row['community'] == 'MSP':
+            groups.setdefault(row['branch'], []).append(row)
+    for path in groups.values():
+        path.sort(key=lambda r: int(r['point']))
+        for a, b in zip(path, path[1:]):
+            u, v = float(a['u']), float(b['u'])
+            if 0 <= u <= 1 and 0 <= v <= 1:
+                try:
+                    bracket(u, state_of(a), v, state_of(b), 'native_branch')
+                except (ValueError, ArithmeticError, np.linalg.LinAlgError):
+                    continue
+
+    # A second, independent grid can find crossings on branches the native
+    # event detector or its polynomial correction did not resolve.
+    previous = None
+    for u in np.linspace(0., 1., max(17, int(axis.resolution)+1)):
+        u = float(u)
+        ys = roots(u)
+        samples = []
+        for y in ys:
+            alpha, omega = mode(y, u)
+            samples.append(dict(state=y.tolist(), real=alpha, omega=omega))
+        details['grid'].append(dict(u=u, x=float(axis.physical(u)), roots=samples))
+        if previous is not None and ys and previous[1]:
+            v, zs = previous
+            for z in zs:
+                y = min(ys, key=lambda a: distance(a, z))
+                if min(zs, key=lambda a: distance(a, y)) is z:
+                    bracket(v, z, u, y, 'reduced_grid')
+        previous = (u, ys)
+
+    for lo, hi, yl, yh, a, b, source in brackets:
+        note = dict(source=source, u_before=lo, u_after=hi, real_before=a, real_after=b)
+        details['brackets'].append(note)
+        try:
+            def selected(u):
+                fraction = (u-lo)/(hi-lo)
+                target = np.exp((1-fraction)*np.log(yl)+fraction*np.log(yh))
+                candidates = roots(u)
+                if not candidates:
+                    raise ValueError('No physical MSP equilibrium in bracket')
+                y = min(candidates, key=lambda z: distance(z, target))
+                if distance(y, target) > .7:
+                    raise ValueError('Ambiguous MSP branch match')
+                alpha, omega = mode(y, u)
+                if alpha is None:
+                    raise ValueError('Complex eigenvalue pair disappeared in bracket')
+                return y, alpha, omega
+
+            f = lambda u: selected(u)[1]
+            fa, fb = f(lo), f(hi)
+            note.update(corrected_real_before=fa, corrected_real_after=fb)
+            if fa*fb > 0:
+                raise ValueError('Reduced equilibria do not reproduce the sign bracket')
+            u = float(brentq(f, lo, hi, xtol=1e-13, rtol=1e-13))
+            y, alpha, omega = selected(u)
+            p = parameters_at(base, [axis], [u])
+            _, N = resources(y, p)
+            if abs(alpha) > EIG_TOL or np.max(abs(per_capita(y, p))) > 1e-7:
+                raise ValueError('Corrected eigenvalue or equilibrium residual too large')
+            candidate = dict(H=p.H, u=u, x=float(axis.physical(u)), community='MSP',
+                             kind='hopf', invader='', source='independent_eigenvalue_bracket',
+                             M=float(y[0]), S=float(y[1]), P=float(y[2]), N=float(N),
+                             P_area=float(p.H*y[2]), N_area=float(p.H*N))
+            note.update(u=u, x=candidate['x'], real=alpha, omega=omega)
+            verified = [r for r in [*events, *added] if r.get('classification_status') == 'verified']
+            if duplicate_event(candidate, verified):
+                note['status'] = 'already_verified'
+                continue
+            result = classify_event(candidate, base, [axis])
+            note.update(status=result['classification_status'], classification=result['classification'],
+                        reason=result.get('classification_reason', ''))
+            if result['classification_status'] == 'verified' or not duplicate_event(result, [*events, *added]):
+                added.append(result)
+            if result['classification_status'] != 'verified':
+                failures.append(dict(community='MSP', kind='hopf', invader='', **note))
+        except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError) as exc:
+            note.update(status='unresolved', reason=str(exc))
+            failures.append(dict(community='MSP', kind='hopf', invader='', **note))
+    details['verified_new'] = sum(r.get('classification_status') == 'verified' for r in added)
+    details['bracket_count'] = len(brackets)
+    return added, failures
+
+
+def audit_1d(branches, events, base, axis, hopf_diagnostics=None):
     """Look for additional bifurcations along computed 1D branches."""
     groups = {}
     for row in branches:
@@ -640,7 +782,8 @@ def audit_1d(branches, events, base, axis):
                         reason=str(exc),
                     ))
 
-    return added, failures
+    extra, extra_failures = audit_msp_hopf(branches, events+added, base, axis, hopf_diagnostics)
+    return merge_classified_events(added, extra), failures+extra_failures
 
 # ==============================================================
 # CSV output and classification figures
@@ -817,7 +960,7 @@ def classify_output(folder, dimensions=None, report=print, reuse_preflight=False
         added, failures = [], []
         if dimensions == 1:
             added, failures = audit_1d(branches, events, p, axes[0])
-            events.extend(added)
+            events = merge_classified_events(events, added)
             events.sort(key=lambda row: float(row['u']))
 
         write_csv(folder/f'bifurcations_{suffix}.csv', events,)

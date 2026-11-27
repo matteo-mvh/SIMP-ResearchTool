@@ -49,26 +49,60 @@ def segments(path):
     yield path[start:],path[-1]['stability']
 
 
-def draw_branches(ax,dataset,component,community_colors=False,zero_strip=False):
-    positions={'0':0,'M':1,'P':2,'MP':3}
-    if not zero_strip:draw_periodic_envelopes(ax,dataset,component,community_colors)
+def event_marker(event):
+    """Use verified normal-form categories; preserve unclassified previews."""
+    from scripts.bifurcation_classification import COLORS, MARKERS, LABELS
+    category = event.get('classification')
+    if category is not None:
+        if event.get('classification_status') != 'verified' or category not in MARKERS:
+            category = 'unresolved'
+        return MARKERS[category], COLORS[category], LABELS[category], category != 'unresolved'
+    kind = event['kind']
+    return {'fold':'^', 'hopf':'D', 'invasion':'o'}[kind], EVENT_STYLES[kind][2], EVENT_STYLES[kind][3], False
+
+
+def event_handles(datasets):
+    """One legend entry for each category that appears in the data."""
+    entries = {}
+    for data in datasets:
+        for event in data.get('events', []):
+            marker, color, label, verified = event_marker(event)
+            entries[label] = Line2D([], [], marker=marker, ls='', color=color,
+                                    markerfacecolor=color if verified else 'none', label=label)
+    return list(entries.values())
+
+
+def draw_branches(ax, dataset, component, community_colors=False, zero_strip=False):
+    positions = {'0':0, 'M':1, 'P':2, 'MP':3}
+    if not zero_strip:
+        draw_periodic_envelopes(ax, dataset, component, community_colors)
     for path in dataset['paths']:
-        if not path:continue
-        community=path[0]['community']
-        if zero_strip and community not in positions:continue
-        if community_colors and not zero_strip and 'S' not in community:continue
-        for rows,stability in segments(path):
-            color=STATE_COLORS[community] if community_colors else VARIABLE_COLORS[component]
-            ys=[positions[community]]*len(rows) if zero_strip else [r[component] for r in rows]
-            ax.plot([r['x'] for r in rows],ys,color=color,lw=2.1,ls=STYLES[stability],
-                    marker='.' if len(rows)==1 else None,markersize=3)
-    for event in dataset.get('events',[]):
-        if zero_strip and event['community'] not in positions:continue
-        if community_colors and not zero_strip and 'S' not in event['community']:continue
-        marker={'fold':'^','hopf':'D','invasion':'o'}[event['kind']]
-        value=positions[event['community']] if zero_strip else event[component]
-        ax.scatter(event['x'],value,s=35,marker=marker,facecolors='white',
-                   edgecolors=EVENT_STYLES[event['kind']][2],zorder=8)
+        if not path:
+            continue
+        community = path[0]['community']
+        if zero_strip and community not in positions:
+            continue
+        if community_colors and not zero_strip and 'S' not in community:
+            continue
+        for rows, stability in segments(path):
+            color = STATE_COLORS[community] if community_colors else VARIABLE_COLORS[component]
+            ys = [positions[community]]*len(rows) if zero_strip else [r[component] for r in rows]
+            ax.plot([r['x'] for r in rows], ys, color=color, lw=2.1, ls=STYLES[stability],
+                    marker='.' if len(rows)==1 else None, markersize=3)
+    for event in dataset.get('events', []):
+        community = event['community']
+        if zero_strip and community not in positions:
+            continue
+        # The invasion of S begins at S=0; show that classified threshold
+        # on the main seagrass axis as well as its resident-community strip.
+        if community_colors and not zero_strip and 'S' not in community:
+            if not (event['kind'] == 'invasion' and event.get('invader') == 'S'):
+                continue
+        marker, color, _, verified = event_marker(event)
+        value = positions[community] if zero_strip else event[component]
+        style = dict(color=color) if marker == 'x' else dict(facecolors=color if verified else 'white', edgecolors=color)
+        ax.scatter(event['x'], value, s=42, marker=marker, zorder=8, linewidths=1.1,
+                   clip_on=False, **style)
     ax.grid(alpha=.13)
 
 # Colors describe attractor combinations, not species communities.
@@ -543,182 +577,74 @@ def depth_axes(count):
     return fig,axes
 
 
+def plot_seagrass(datasets, axis, folder, with_attractors=False):
+    """Keep the original absent-seagrass community strip in both versions."""
+    count = len(datasets)
+    nrow, ncol = {1:(1,1), 2:(1,2), 4:(2,2)}[count]
+    height = (7.2 if count < 4 else 11.) if with_attractors else (6.5 if count < 4 else 10.)
+    fig = plt.figure(figsize=(12, height))
+    outer = fig.add_gridspec(nrow, ncol, left=.08, right=.73, top=.94,
+                             bottom=.13 if with_attractors else .10, hspace=.40, wspace=.30)
+    for i, data in enumerate(datasets):
+        cell = outer[i//ncol, i%ncol]
+        ratios = [7,.8,.55] if with_attractors else [7,.8]
+        sub = cell.subgridspec(len(ratios), 1, height_ratios=ratios, hspace=.08)
+        upper = fig.add_subplot(sub[0])
+        lower = fig.add_subplot(sub[1], sharex=upper)
+        draw_branches(upper, data, 'S', True)
+        draw_branches(lower, data, 'S', True, True)
+        upper.set_title(f'H = {data["H"]:g} m')
+        upper.set_ylabel('Seagrass S [mmol N m$^{-2}$]')
+        upper.tick_params(axis='x', labelbottom=False)
+        upper.set_ylim(bottom=0)
+        lower.set_yticks([0,1,2,3], ['0','M','P','MP'])
+        lower.set_ylim(-.6,3.6)
+        lower.set_xlim(axis.low,axis.high)
+        if with_attractors:
+            lower.tick_params(axis='x', labelbottom=False)
+            strip = fig.add_subplot(sub[2], sharex=upper)
+            draw_attractor_strip(strip, data, axis)
+            strip.set_xlabel(axis_label(axis))
+        else:
+            lower.set_xlabel(axis_label(axis))
+    used = {path[0]['community'] for data in datasets for path in data['paths'] if path}
+    handles = [Line2D([],[],color=STATE_COLORS[c],lw=2,label=c) for c in STATE_COLORS if c in used]
+    handles += [Line2D([],[],color='black',ls=STYLES[s],label=s.title()) for s in STYLES]
+    handles += periodic_handles(datasets)+event_handles(datasets)
+    if with_attractors:
+        handles += attractor_handles(datasets)
+    fig.legend(handles=handles, loc='center left', bbox_to_anchor=(.75,.53), frameon=False, fontsize=8)
+    if with_attractors:
+        fig.text(.08,.025,'Attractor strip: tested locations; shading is a visual guide. '
+                 'An unsuccessful cycle search does not establish absence.', fontsize=8, va='bottom')
+    suffix = '_with_attractors' if with_attractors else ''
+    save(fig, folder, f'equilibrium_seagrass_states_{axis.name}{suffix}')
+
+
 def plot_1d(datasets, axis, folder):
-    """Original SIMP overview with sampled periodic envelopes."""
-    has_attractor_scan = any(
-        is_sampled_analysis(data)
-        and data.get(
-            'periodic_analysis', {}
-        ).get('locations')
-        for data in datasets
-    )
-    with plt.rc_context({'pdf.fonttype': 42, 'ps.fonttype': 42, 'font.size': 9,}):
-
-        # ------------------------------------------------------
-        # Four-component biomass overview
-        # ------------------------------------------------------
+    """Original biomass panels and both requested seagrass layouts."""
+    with plt.rc_context({'pdf.fonttype':42,'ps.fonttype':42,'font.size':9}):
         for data in datasets:
-            fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True, layout='constrained',)
-            titles = ('Macroalgae', 'Seagrass', 'Phytoplankton', 'Dissolved nitrogen',)
-            for ax, component, title in zip(axes.flat, VARIABLE_COLORS, titles,):
-                draw_branches(ax, data, component)
+            fig, axes = plt.subplots(2,2,figsize=(12,8),sharex=True,layout='constrained')
+            titles = ('Macroalgae','Seagrass','Phytoplankton','Dissolved nitrogen')
+            for ax, component, title in zip(axes.flat, VARIABLE_COLORS, titles):
+                draw_branches(ax,data,component)
                 ax.set_title(title)
-                ax.set_ylabel(component.replace('_area', '') + ' [mmol N m$^{-2}$]')
-                ax.set_xlim(axis.low, axis.high)
+                ax.set_ylabel(component.replace('_area','')+' [mmol N m$^{-2}$]')
+                ax.set_xlim(axis.low,axis.high)
                 ax.set_ylim(bottom=0)
-
             for ax in axes[-1]:
                 ax.set_xlabel(axis_label(axis))
-
-            fig.suptitle(f'SIMP equilibria and periodic orbits' f' · H = {data["H"]:g} m')
-            handles = [
-                Line2D(
-                    [], [],
-                    color='black',
-                    ls=STYLES[status],
-                    label=status.title(),
-                )
-                for status in (
-                    'stable',
-                    'unstable',
-                    'nonhyperbolic',
-                )
-            ]
-            handles += periodic_handles([data])
-            fig.legend(handles=handles, loc='outside lower center', ncol=3, frameon=False,)
-            if is_sampled_analysis(data):
-                if data.get('oscillations'):
-                    fig.supxlabel(
-                        'Shaded periodic ranges interpolate '
-                        'between compatible verified samples.',
-                        fontsize=8,
-                    )
-
-            save(fig, folder, f'equilibrium_biomass_' f'{axis.name}_H{data["H"]:g}',)
-
-        # ------------------------------------------------------
-        # Original seagrass-focused comparison
-        # ------------------------------------------------------
-        count = len(datasets)
-        nrow, ncol = {1: (1, 1), 2: (1, 2), 4: (2, 2),}[count]
-        height = (7.2 if count < 4 else 11.) if has_attractor_scan else (6.5 if count < 4 else 10.)
-        fig = plt.figure(figsize=(12, height))
-        outer = fig.add_gridspec(
-            nrow,
-            ncol,
-            left=.08,
-            right=.73 if has_attractor_scan else .77,
-            top=.94,
-            bottom=.12 if has_attractor_scan else .10,
-            hspace=.40,
-            wspace=.30,
-        )
-        for index, data in enumerate(datasets):
-            cell = outer[index//ncol, index%ncol,]
-            if has_attractor_scan:
-                sub = cell.subgridspec(3, 1, height_ratios=[7, .8, .55], hspace=.08,)
-
-            else:
-                sub = cell.subgridspec(2, 1, height_ratios=[7, .8], hspace=.04,)
-
-            upper = fig.add_subplot(sub[0])
-            lower = fig.add_subplot(sub[1], sharex=upper,)
-
-            # Original seagrass branches and periodic envelopes.
-            draw_branches(upper, data, 'S', True,)
-
-            # Original strip showing communities without seagrass.
-            draw_branches(lower, data, 'S', True, True,)
-            upper.set_title(f'H = {data["H"]:g} m')
-            upper.set_ylabel('Seagrass S [mmol N m$^{-2}$]')
-            upper.tick_params(axis='x', labelbottom=False,)
-            upper.set_ylim(bottom=0)
-            lower.set_yticks([0, 1, 2, 3], ['0', 'M', 'P', 'MP'],)
-            lower.set_ylim(-.6, 3.6)
-            lower.set_xlim(axis.low, axis.high,)
-            if has_attractor_scan:
-                lower.tick_params(axis='x', labelbottom=False,)
-                attractors = fig.add_subplot(sub[2], sharex=upper,)
-                draw_attractor_strip(attractors, data, axis,)
-                attractors.set_xlabel(axis_label(axis))
-
-            else:
-                lower.set_xlabel(axis_label(axis))
-
-        # ------------------------------------------------------
-        # Existing community and stability legend
-        # ------------------------------------------------------
-        used_communities = {
-            path[0]['community']
-            for data in datasets
-            for path in data['paths']
-            if path
-        }
-        handles = [
-            Line2D(
-                [], [],
-                color=STATE_COLORS[community],
-                lw=2,
-                label=community,
-            )
-            for community in STATE_COLORS
-            if community in used_communities
-        ]
-        handles += [
-            Line2D(
-                [], [],
-                color='black',
-                ls=STYLES[status],
-                label=status.title(),
-            )
-            for status in (
-                'stable',
-                'unstable',
-                'nonhyperbolic',
-            )
-        ]
-        handles += periodic_handles(datasets)
-        kinds = {event['kind'] for data in datasets for event in data.get('events', [])}
-        markers = {'fold': '^', 'hopf': 'D', 'invasion': 'o',}
-        for kind in EVENT_STYLES:
-            if kind not in kinds:
-                continue
-
-            handles.append(
-                Line2D(
-                    [], [],
-                    marker=markers[kind],
-                    ls='',
-                    color=EVENT_STYLES[kind][2],
-                    label=EVENT_STYLES[kind][3],
-                )
-            )
-
-        if has_attractor_scan:
-            handles += attractor_handles(datasets)
-
-        fig.legend(
-            handles=handles,
-            loc='center left',
-            bbox_to_anchor=(
-                .75 if has_attractor_scan else .79,
-                .53,
-            ),
-            frameon=False,
-            fontsize=8 if has_attractor_scan else 9,
-        )
-        if has_attractor_scan:
-            fig.text(
-                .08,
-                .025,
-                'Attractor strip: sampled classifications. '
-                'Shading between samples is a visual guide. '
-                'An unsuccessful cycle search does not establish absence.',
-                fontsize=8,
-                va='bottom',
-            )
-
-        save(fig, folder, f'equilibrium_seagrass_states_{axis.name}',)
+            fig.suptitle(f'SIMP equilibria and periodic orbits · H = {data["H"]:g} m')
+            handles = [Line2D([],[],color='black',ls=STYLES[s],label=s.title()) for s in STYLES]
+            handles += periodic_handles([data])+event_handles([data])
+            fig.legend(handles=handles,loc='outside lower center',ncol=3,frameon=False,fontsize=8)
+            if is_sampled_analysis(data) and data.get('oscillations'):
+                fig.supxlabel('Shaded periodic ranges interpolate between compatible verified samples.',fontsize=8)
+            save(fig,folder,f'equilibrium_biomass_{axis.name}_H{data["H"]:g}')
+        plot_seagrass(datasets,axis,folder)
+        if any(is_sampled_analysis(d) and d.get('periodic_analysis',{}).get('locations') for d in datasets):
+            plot_seagrass(datasets,axis,folder,with_attractors=True)
 
 
 def polygon_patch(poly,axes,**kwargs):

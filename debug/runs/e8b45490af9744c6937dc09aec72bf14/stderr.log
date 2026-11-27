@@ -1,0 +1,4 @@
+C:\Users\Mmm\OneDrive\Master Studies\Master Thesis\code\SIMP_Control_Center\scripts\continuation_runner.py:1483: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  fig.savefig(Path(str(name)+'.png'), dpi=270, bbox_inches='tight',)
+C:\Users\Mmm\OneDrive\Master Studies\Master Thesis\code\SIMP_Control_Center\scripts\continuation_runner.py:1484: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
+  fig.savefig(Path(str(name)+'.pdf'), bbox_inches='tight',)

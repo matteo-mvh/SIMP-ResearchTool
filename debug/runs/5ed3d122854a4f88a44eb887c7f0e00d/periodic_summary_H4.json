@@ -36,6 +36,10 @@
     "periodic_hopf_offset": 0.0004,
     "periodic_timeout": 180.0
   },
+  "algorithm": null,
+  "timing": null,
+  "active_attempt": null,
+  "slowest_searches": [],
   "coverage": {
     "checked_locations": 81,
     "max_locations": 150,

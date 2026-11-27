@@ -1,0 +1,2313 @@
+{
+  "status": "completed_with_unresolved_searches",
+  "settings": {
+    "scan_points": 49,
+    "coarse_points": 37,
+    "scan_resolution": 100,
+    "analytical_screening": true,
+    "analytical_shooting_jacobian": false,
+    "return_first": true,
+    "poincare_shooting": true,
+    "hopf_normal_form_initialization": true,
+    "adaptive_sampling": true,
+    "generic_seeds": 2,
+    "initial_cycles": 6,
+    "max_initial_days": 20000.0,
+    "rtol": 1e-07,
+    "atol": 1e-09,
+    "verification_rtol": 1e-09,
+    "verification_atol": 1e-11,
+    "floquet_tolerance": 0.0001
+  },
+  "algorithm": "SIMP Poincare return-first search",
+  "timing": {
+    "guess_seconds": 431.4020901003387,
+    "correction_seconds": 293.04780209984165,
+    "verification_seconds": 84.2515718000941
+  },
+  "active_attempt": null,
+  "slowest_searches": [
+    {
+      "kind": "poincare_shooting_reuse",
+      "uv": [
+        0.3871728973
+      ],
+      "guess_seconds": 0.0,
+      "correction_seconds": 19.61375619994942,
+      "verification_seconds": 5.493587000062689,
+      "shooting_evaluations": 28,
+      "ivp_totals": {
+        "return_map": {
+          "seconds": 19.552392399753444,
+          "rhs_calls": 42267,
+          "rhs_seconds": 10.795353395631537,
+          "nfev": 42267,
+          "njev": 804,
+          "nlu": 804,
+          "steps": 22031,
+          "solves": 56
+        },
+        "floquet": {
+          "seconds": 5.436337799998,
+          "rhs_calls": 3798,
+          "rhs_seconds": 4.725001201964915,
+          "nfev": 3798,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 1886,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "floquet",
+        "requested_days": 456.30725756603397,
+        "dimension": 12,
+        "method": "LSODA",
+        "seconds": 5.436337799998,
+        "rhs_calls": 3798,
+        "rhs_seconds": 4.725001201964915,
+        "integrated_days": 456.30725756603397,
+        "nfev": 3798,
+        "njev": 0,
+        "nlu": 0,
+        "steps": 1886,
+        "success": true,
+        "min_step": 7.656875292219016e-08,
+        "max_step": 0.832766214315086,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "floquet",
+          "requested_days": 456.30725756603397,
+          "dimension": 12,
+          "method": "LSODA",
+          "seconds": 5.436337799998,
+          "rhs_calls": 3798,
+          "rhs_seconds": 4.725001201964915,
+          "integrated_days": 456.30725756603397,
+          "nfev": 3798,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 1886,
+          "success": true,
+          "min_step": 7.656875292219016e-08,
+          "max_step": 0.832766214315086,
+          "message": "The solver successfully reached the end of the integration interval."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 731.892536654244,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.6368779999902472,
+          "rhs_calls": 2713,
+          "rhs_seconds": 0.8895498004276305,
+          "nfev": 2713,
+          "njev": 21,
+          "nlu": 21,
+          "steps": 1388,
+          "success": true,
+          "integrated_days": 457.56715820642273,
+          "min_step": 0.0057781808711441784,
+          "max_step": 3.3028464875160353,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 731.892536654244,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.417810900020413,
+          "rhs_calls": 2683,
+          "rhs_seconds": 0.7778270987328142,
+          "nfev": 2683,
+          "njev": 19,
+          "nlu": 19,
+          "steps": 1370,
+          "success": true,
+          "integrated_days": 457.5437307275781,
+          "min_step": 0.001926160584972858,
+          "max_step": 4.299509513598764,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 731.892536654244,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.3816956999944523,
+          "rhs_calls": 2732,
+          "rhs_seconds": 0.7762656018603593,
+          "nfev": 2732,
+          "njev": 28,
+          "nlu": 28,
+          "steps": 1389,
+          "success": true,
+          "integrated_days": 456.2072934103913,
+          "min_step": 0.005776476897570673,
+          "max_step": 4.774090315056185,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 731.892536654244,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.3014757999917492,
+          "rhs_calls": 2796,
+          "rhs_seconds": 0.7230833957437426,
+          "nfev": 2796,
+          "njev": 33,
+          "nlu": 33,
+          "steps": 1416,
+          "success": true,
+          "integrated_days": 456.2073106786943,
+          "min_step": 0.005923812739581896,
+          "max_step": 3.8790889244840514,
+          "message": "A termination event occurred."
+        }
+      ],
+      "last_return_residual": 2.240666985287021e-08,
+      "root_success": true,
+      "root_status": 1,
+      "root_message": "The solution converged.",
+      "final_return_residual": 1.2719468367450304e-08,
+      "return_condition": 74.35911075404907,
+      "correction_reason": "corrected",
+      "variational_jacobian_seconds": 3.274934900458902,
+      "verified_closure": 1.737317933958593e-08,
+      "floquet_check": {
+        "floquet": [
+          [
+            0.99999994404836,
+            0.0
+          ],
+          [
+            0.7290561173932155,
+            0.0
+          ],
+          [
+            2.6496739012823584e-17,
+            0.0
+          ]
+        ],
+        "stability": "stable",
+        "trivial_index": 0,
+        "trivial_error": 5.595163998783903e-08,
+        "spectral_radius": 0.7290561173932155
+      },
+      "contraction_scaled_closure": 5.251633646207894e-08,
+      "verification_reason": "verified_stable_cycle",
+      "reason": "verified_stable_cycle",
+      "seconds": 25.16979309997987
+    },
+    {
+      "kind": "poincare_shooting_reuse",
+      "uv": [
+        0.3970141161
+      ],
+      "guess_seconds": 0.0,
+      "correction_seconds": 15.171573200030252,
+      "verification_seconds": 6.550665899994783,
+      "shooting_evaluations": 26,
+      "ivp_totals": {
+        "return_map": {
+          "seconds": 15.116940599866211,
+          "rhs_calls": 31620,
+          "rhs_seconds": 8.242138499277644,
+          "nfev": 31620,
+          "njev": 691,
+          "nlu": 691,
+          "steps": 16923,
+          "solves": 52
+        },
+        "floquet": {
+          "seconds": 6.479771499987692,
+          "rhs_calls": 3788,
+          "rhs_seconds": 5.502235200954601,
+          "nfev": 3788,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 1879,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "floquet",
+        "requested_days": 455.79705408795786,
+        "dimension": 12,
+        "method": "LSODA",
+        "seconds": 6.479771499987692,
+        "rhs_calls": 3788,
+        "rhs_seconds": 5.502235200954601,
+        "integrated_days": 455.79705408795786,
+        "nfev": 3788,
+        "njev": 0,
+        "nlu": 0,
+        "steps": 1879,
+        "success": true,
+        "min_step": 7.377528362859185e-08,
+        "max_step": 0.9556215825079164,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "floquet",
+          "requested_days": 455.79705408795786,
+          "dimension": 12,
+          "method": "LSODA",
+          "seconds": 6.479771499987692,
+          "rhs_calls": 3788,
+          "rhs_seconds": 5.502235200954601,
+          "integrated_days": 455.79705408795786,
+          "nfev": 3788,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 1879,
+          "success": true,
+          "min_step": 7.377528362859185e-08,
+          "max_step": 0.9556215825079164,
+          "message": "The solver successfully reached the end of the integration interval."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 731.2142062683627,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.8357894000364468,
+          "rhs_calls": 1580,
+          "rhs_seconds": 0.45743029832374305,
+          "nfev": 1580,
+          "njev": 27,
+          "nlu": 27,
+          "steps": 830,
+          "success": true,
+          "integrated_days": 457.0752796453776,
+          "min_step": 0.002766051122763097,
+          "max_step": 3.9489620663670166,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 731.2142062683627,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.8286698999581859,
+          "rhs_calls": 1564,
+          "rhs_seconds": 0.4430598975159228,
+          "nfev": 1564,
+          "njev": 21,
+          "nlu": 21,
+          "steps": 811,
+          "success": true,
+          "integrated_days": 457.04632048547245,
+          "min_step": 0.0018898200653421626,
+          "max_step": 3.588329314869384,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 731.2142062683627,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.8023809000151232,
+          "rhs_calls": 1530,
+          "rhs_seconds": 0.44732689717784524,
+          "nfev": 1530,
+          "njev": 26,
+          "nlu": 26,
+          "steps": 817,
+          "success": true,
+          "integrated_days": 455.6970872909977,
+          "min_step": 0.005548866195979302,
+          "max_step": 3.6037573763570663,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 731.2142062683627,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.7824690999696031,
+          "rhs_calls": 1528,
+          "rhs_seconds": 0.42833429807797074,
+          "nfev": 1528,
+          "njev": 22,
+          "nlu": 22,
+          "steps": 799,
+          "success": true,
+          "integrated_days": 455.6970883032819,
+          "min_step": 0.005548995386491368,
+          "max_step": 4.455379102343841,
+          "message": "A termination event occurred."
+        }
+      ],
+      "last_return_residual": 1.5355663629534888e-08,
+      "root_success": false,
+      "root_status": 5,
+      "root_message": "The iteration is not making good progress, as measured by the \n improvement from the last ten iterations.",
+      "final_return_residual": 4.16137213576917e-09,
+      "return_condition": 500.49964473921244,
+      "correction_reason": "corrected",
+      "variational_jacobian_seconds": 3.809361601364799,
+      "verified_closure": 8.7709315366169e-09,
+      "floquet_check": {
+        "floquet": [
+          [
+            0.9999998721625463,
+            0.0
+          ],
+          [
+            0.6968389418825177,
+            0.0
+          ],
+          [
+            2.952955497507839e-17,
+            0.0
+          ]
+        ],
+        "stability": "stable",
+        "trivial_index": 0,
+        "trivial_error": 1.2783745373390332e-07,
+        "spectral_radius": 0.6968389418825177
+      },
+      "contraction_scaled_closure": 2.2011864461955618e-08,
+      "verification_reason": "verified_stable_cycle",
+      "reason": "verified_stable_cycle",
+      "seconds": 21.883547900011763
+    },
+    {
+      "kind": "poincare_shooting_reuse",
+      "uv": [
+        0.4560614291
+      ],
+      "guess_seconds": 0.0,
+      "correction_seconds": 16.40019229997415,
+      "verification_seconds": 5.157130799954757,
+      "shooting_evaluations": 32,
+      "ivp_totals": {
+        "return_map": {
+          "seconds": 16.335776400286704,
+          "rhs_calls": 35757,
+          "rhs_seconds": 8.934111502720043,
+          "nfev": 35757,
+          "njev": 1046,
+          "nlu": 1046,
+          "steps": 18992,
+          "solves": 64
+        },
+        "floquet": {
+          "seconds": 5.1052374000428244,
+          "rhs_calls": 3211,
+          "rhs_seconds": 4.367622596095316,
+          "nfev": 3211,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 1588,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "floquet",
+        "requested_days": 442.63828777566437,
+        "dimension": 12,
+        "method": "LSODA",
+        "seconds": 5.1052374000428244,
+        "rhs_calls": 3211,
+        "rhs_seconds": 4.367622596095316,
+        "integrated_days": 442.63828777566437,
+        "nfev": 3211,
+        "njev": 0,
+        "nlu": 0,
+        "steps": 1588,
+        "success": true,
+        "min_step": 5.282586301656046e-08,
+        "max_step": 0.8367056624836096,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "floquet",
+          "requested_days": 442.63828777566437,
+          "dimension": 12,
+          "method": "LSODA",
+          "seconds": 5.1052374000428244,
+          "rhs_calls": 3211,
+          "rhs_seconds": 4.367622596095316,
+          "integrated_days": 442.63828777566437,
+          "nfev": 3211,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 1588,
+          "success": true,
+          "min_step": 5.282586301656046e-08,
+          "max_step": 0.8367056624836096,
+          "message": "The solver successfully reached the end of the integration interval."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 713.0381929200979,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.8538300999207422,
+          "rhs_calls": 1399,
+          "rhs_seconds": 0.4723658016882837,
+          "nfev": 1399,
+          "njev": 56,
+          "nlu": 56,
+          "steps": 703,
+          "success": true,
+          "integrated_days": 442.5380329289144,
+          "min_step": 0.005069036731573301,
+          "max_step": 4.208683746998361,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 713.0381929200979,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.7309358000056818,
+          "rhs_calls": 1280,
+          "rhs_seconds": 0.4189635030925274,
+          "nfev": 1280,
+          "njev": 40,
+          "nlu": 40,
+          "steps": 656,
+          "success": true,
+          "integrated_days": 442.53828593652327,
+          "min_step": 0.004807980533515818,
+          "max_step": 2.976696737089185,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 713.0381929200979,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.6293707999866456,
+          "rhs_calls": 1240,
+          "rhs_seconds": 0.33518230030313134,
+          "nfev": 1240,
+          "njev": 34,
+          "nlu": 34,
+          "steps": 660,
+          "success": true,
+          "integrated_days": 442.5382925303887,
+          "min_step": 0.004808092022030336,
+          "max_step": 2.5000557650230917,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 713.0381929200979,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.6291904000099748,
+          "rhs_calls": 1179,
+          "rhs_seconds": 0.33808590041007847,
+          "nfev": 1179,
+          "njev": 27,
+          "nlu": 27,
+          "steps": 626,
+          "success": true,
+          "integrated_days": 442.5382909831213,
+          "min_step": 0.004808095540605364,
+          "max_step": 4.102318763035612,
+          "message": "A termination event occurred."
+        }
+      ],
+      "last_return_residual": 2.1163890639996907e-09,
+      "root_success": false,
+      "root_status": 2,
+      "root_message": "The number of calls to function has reached maxfev = 32.",
+      "final_return_residual": 1.3635921281007768e-09,
+      "return_condition": 1.6227404709898419,
+      "correction_reason": "corrected",
+      "variational_jacobian_seconds": 3.0358105001505464,
+      "verified_closure": 3.347636656769737e-08,
+      "floquet_check": {
+        "floquet": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.7745140816153254,
+            0.0
+          ],
+          [
+            1.000000969500932,
+            0.0
+          ]
+        ],
+        "stability": "stable",
+        "trivial_index": 2,
+        "trivial_error": 9.695009319798942e-07,
+        "spectral_radius": 0.7745140816153254
+      },
+      "contraction_scaled_closure": 1.2156532298139513e-07,
+      "verification_reason": "verified_stable_cycle",
+      "reason": "verified_stable_cycle",
+      "seconds": 21.67683970008511
+    },
+    {
+      "kind": "poincare_shooting_reuse",
+      "uv": [
+        0.4363789914
+      ],
+      "guess_seconds": 0.0,
+      "correction_seconds": 15.597769999993034,
+      "verification_seconds": 5.850342500023544,
+      "shooting_evaluations": 32,
+      "ivp_totals": {
+        "return_map": {
+          "seconds": 15.537791200331412,
+          "rhs_calls": 34860,
+          "rhs_seconds": 8.572660106699914,
+          "nfev": 34860,
+          "njev": 1060,
+          "nlu": 1060,
+          "steps": 18579,
+          "solves": 64
+        },
+        "floquet": {
+          "seconds": 5.7915496999630705,
+          "rhs_calls": 3482,
+          "rhs_seconds": 4.987322802306153,
+          "nfev": 3482,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 1721,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "floquet",
+        "requested_days": 449.54360857832154,
+        "dimension": 12,
+        "method": "LSODA",
+        "seconds": 5.7915496999630705,
+        "rhs_calls": 3482,
+        "rhs_seconds": 4.987322802306153,
+        "integrated_days": 449.54360857832154,
+        "nfev": 3482,
+        "njev": 0,
+        "nlu": 0,
+        "steps": 1721,
+        "success": true,
+        "min_step": 6.018774682269995e-08,
+        "max_step": 0.9160024584672897,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "floquet",
+          "requested_days": 449.54360857832154,
+          "dimension": 12,
+          "method": "LSODA",
+          "seconds": 5.7915496999630705,
+          "rhs_calls": 3482,
+          "rhs_seconds": 4.987322802306153,
+          "integrated_days": 449.54360857832154,
+          "nfev": 3482,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 1721,
+          "success": true,
+          "min_step": 6.018774682269995e-08,
+          "max_step": 0.9160024584672897,
+          "message": "The solver successfully reached the end of the integration interval."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 722.3053024004596,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.7819524999940768,
+          "rhs_calls": 1470,
+          "rhs_seconds": 0.43851480179000646,
+          "nfev": 1470,
+          "njev": 29,
+          "nlu": 29,
+          "steps": 768,
+          "success": true,
+          "integrated_days": 449.4436441819566,
+          "min_step": 0.004944128345870172,
+          "max_step": 2.9396709706887805,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 722.3053024004596,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.7591180000454187,
+          "rhs_calls": 1416,
+          "rhs_seconds": 0.4278391971020028,
+          "nfev": 1416,
+          "njev": 28,
+          "nlu": 28,
+          "steps": 751,
+          "success": true,
+          "integrated_days": 449.48845422701015,
+          "min_step": 0.005006037075106939,
+          "max_step": 3.687352819948387,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 722.3053024004596,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.7139327999902889,
+          "rhs_calls": 1440,
+          "rhs_seconds": 0.39243110409006476,
+          "nfev": 1440,
+          "njev": 30,
+          "nlu": 30,
+          "steps": 747,
+          "success": true,
+          "integrated_days": 449.4436421446617,
+          "min_step": 0.004944097290856542,
+          "max_step": 3.553283175685465,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 722.3053024004596,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.6892096000956371,
+          "rhs_calls": 1409,
+          "rhs_seconds": 0.38022800197359174,
+          "nfev": 1409,
+          "njev": 27,
+          "nlu": 27,
+          "steps": 744,
+          "success": true,
+          "integrated_days": 449.44364041438814,
+          "min_step": 0.004944078008694855,
+          "max_step": 3.7913040854168116,
+          "message": "A termination event occurred."
+        }
+      ],
+      "last_return_residual": 1.3516976427041527e-08,
+      "root_success": true,
+      "root_status": 1,
+      "root_message": "The solution converged.",
+      "final_return_residual": 1.2493650558553782e-10,
+      "return_condition": 1522.0786029555009,
+      "correction_reason": "corrected",
+      "variational_jacobian_seconds": 3.452481197891757,
+      "verified_closure": 3.2502899260933305e-08,
+      "floquet_check": {
+        "floquet": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.6961849649789955,
+            0.0
+          ],
+          [
+            0.9999997914974055,
+            0.0
+          ]
+        ],
+        "stability": "stable",
+        "trivial_index": 2,
+        "trivial_error": 2.0850259452309672e-07,
+        "spectral_radius": 0.6961849649789955
+      },
+      "contraction_scaled_closure": 7.686189176213168e-08,
+      "verification_reason": "verified_stable_cycle",
+      "reason": "verified_stable_cycle",
+      "seconds": 21.53662999998778
+    },
+    {
+      "kind": "poincare_shooting_reuse",
+      "uv": [
+        0.4166965538
+      ],
+      "guess_seconds": 0.0,
+      "correction_seconds": 18.11742760008201,
+      "verification_seconds": 2.618968900060281,
+      "shooting_evaluations": 32,
+      "ivp_totals": {
+        "return_map": {
+          "seconds": 18.056157700135373,
+          "rhs_calls": 38815,
+          "rhs_seconds": 9.955571099300869,
+          "nfev": 38815,
+          "njev": 998,
+          "nlu": 998,
+          "steps": 20518,
+          "solves": 64
+        },
+        "floquet": {
+          "seconds": 2.5692111999960616,
+          "rhs_calls": 1543,
+          "rhs_seconds": 2.170997498324141,
+          "nfev": 1543,
+          "njev": 28,
+          "nlu": 28,
+          "steps": 755,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "floquet",
+        "requested_days": 453.71771679117103,
+        "dimension": 12,
+        "method": "LSODA",
+        "seconds": 2.5692111999960616,
+        "rhs_calls": 1543,
+        "rhs_seconds": 2.170997498324141,
+        "integrated_days": 453.71771679117103,
+        "nfev": 1543,
+        "njev": 28,
+        "nlu": 28,
+        "steps": 755,
+        "success": true,
+        "min_step": 6.725750425014252e-08,
+        "max_step": 2.0349686622909644,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "floquet",
+          "requested_days": 453.71771679117103,
+          "dimension": 12,
+          "method": "LSODA",
+          "seconds": 2.5692111999960616,
+          "rhs_calls": 1543,
+          "rhs_seconds": 2.170997498324141,
+          "integrated_days": 453.71771679117103,
+          "nfev": 1543,
+          "njev": 28,
+          "nlu": 28,
+          "steps": 755,
+          "success": true,
+          "min_step": 6.725750425014252e-08,
+          "max_step": 2.0349686622909644,
+          "message": "The solver successfully reached the end of the integration interval."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 728.2191771472765,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.848494500038214,
+          "rhs_calls": 1575,
+          "rhs_seconds": 0.4754409989109263,
+          "nfev": 1575,
+          "njev": 33,
+          "nlu": 33,
+          "steps": 815,
+          "success": true,
+          "integrated_days": 453.6177520742307,
+          "min_step": 0.005197143177341157,
+          "max_step": 3.5106659360856725,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 728.2191771472765,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.8244294000323862,
+          "rhs_calls": 1522,
+          "rhs_seconds": 0.4479722979012877,
+          "nfev": 1522,
+          "njev": 28,
+          "nlu": 28,
+          "steps": 781,
+          "success": true,
+          "integrated_days": 453.61777555509775,
+          "min_step": 0.005300442883240317,
+          "max_step": 3.9531792392618286,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 728.2191771472765,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.7933224000735208,
+          "rhs_calls": 1589,
+          "rhs_seconds": 0.4378700981615111,
+          "nfev": 1589,
+          "njev": 35,
+          "nlu": 35,
+          "steps": 821,
+          "success": true,
+          "integrated_days": 453.63811042335135,
+          "min_step": 0.010108530111788014,
+          "max_step": 3.353679474781586,
+          "message": "A termination event occurred."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 728.2191771472765,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.7879195000277832,
+          "rhs_calls": 1563,
+          "rhs_seconds": 0.42760870163328946,
+          "nfev": 1563,
+          "njev": 32,
+          "nlu": 32,
+          "steps": 817,
+          "success": true,
+          "integrated_days": 453.61774955552596,
+          "min_step": 0.005197486385531858,
+          "max_step": 3.568037089203983,
+          "message": "A termination event occurred."
+        }
+      ],
+      "last_return_residual": 6.329670343419025e-09,
+      "root_success": false,
+      "root_status": 2,
+      "root_message": "The number of calls to function has reached maxfev = 32.",
+      "final_return_residual": 4.18713996808151e-09,
+      "return_condition": 294.4290178031569,
+      "correction_reason": "corrected",
+      "variational_jacobian_seconds": 1.4991453984985128,
+      "verified_closure": 7.520292832907671e-09,
+      "floquet_check": {
+        "floquet": [
+          [
+            0.9999998763775175,
+            0.0
+          ],
+          [
+            0.6717050045965619,
+            0.0
+          ],
+          [
+            7.661503056815559e-17,
+            0.0
+          ]
+        ],
+        "stability": "stable",
+        "trivial_index": 0,
+        "trivial_error": 1.236224824729959e-07,
+        "spectral_radius": 0.6717050045965619
+      },
+      "contraction_scaled_closure": 1.6233393895703517e-08,
+      "verification_reason": "verified_stable_cycle",
+      "reason": "verified_stable_cycle",
+      "seconds": 20.822647600085475
+    }
+  ],
+  "coverage": {
+    "scheduled_locations": 49,
+    "checked_locations": 49,
+    "completed_locations": 49,
+    "native_attempts": 0,
+    "search_attempts": 240,
+    "shooting_attempts": 44,
+    "direct_return_cycles": 0,
+    "analytical_exclusions": 1,
+    "refinement_rounds": 3,
+    "elapsed_seconds": 859.9928982999409,
+    "verified_periodic_locations": 17,
+    "pending_branches": [],
+    "incomplete_arms": [],
+    "limit_reached": false,
+    "unvisited_locations_count": 0,
+    "unvisited_locations_examples": [],
+    "incomplete_locations_count": 31,
+    "incomplete_locations_examples": [
+      [
+        0.3504306929
+      ],
+      [
+        0.3500306929
+      ],
+      [
+        0.347808022
+      ],
+      [
+        0.3454306929
+      ],
+      [
+        0.3125
+      ],
+      [
+        0.25
+      ],
+      [
+        0.4855850855
+      ],
+      [
+        0.5
+      ],
+      [
+        0.1875
+      ],
+      [
+        0.5625
+      ]
+    ]
+  },
+  "attempts": 241,
+  "attempt_types": {
+    "hopf_normal_form": 8,
+    "manual": 166,
+    "poincare_shooting_hopf_normal_form": 3,
+    "reuse": 22,
+    "poincare_shooting_reuse": 20,
+    "poincare_shooting_manual": 21,
+    "analytical_exclusion": 1
+  },
+  "attempt_outcomes": {
+    "approximate_return": 86,
+    "duplicate_return_candidate": 22,
+    "verified_stable_cycle": 17,
+    "return_residual_too_large": 4,
+    "no_transverse_return": 19,
+    "nonphysical_shooting_seed": 4,
+    "inconsistent_return_period": 15,
+    "insufficient_returns": 69,
+    "stationary_or_boundary_candidate": 3,
+    "f(a) and f(b) must have different signs": 1,
+    "P: maximum per-capita growth -0.15820462 d^-1 is negative": 1
+  },
+  "total_worker_seconds": 834.5990927997045,
+  "median_attempt_seconds": 2.464734600041993,
+  "location_statuses": {
+    "verified_periodic": 17,
+    "cycle_not_confirmed": 31,
+    "analytically_excluded": 1
+  },
+  "branches": [],
+  "hopf": [],
+  "recent_attempts": [
+    {
+      "kind": "poincare_shooting_manual",
+      "uv": [
+        0.546875
+      ],
+      "guess_seconds": 0.0,
+      "correction_seconds": 0.35478149994742125,
+      "verification_seconds": 0.0,
+      "shooting_evaluations": 1,
+      "ivp_totals": {
+        "return_map": {
+          "seconds": 0.3503555000061169,
+          "rhs_calls": 424,
+          "rhs_seconds": 0.1888227997114882,
+          "nfev": 424,
+          "njev": 21,
+          "nlu": 21,
+          "steps": 238,
+          "solves": 2
+        }
+      },
+      "last_ivp": {
+        "stage": "return_map",
+        "requested_days": 721.1631677867962,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.3365681000286713,
+        "rhs_calls": 414,
+        "rhs_seconds": 0.17847849987447262,
+        "nfev": 414,
+        "njev": 21,
+        "nlu": 21,
+        "steps": 232,
+        "success": true,
+        "integrated_days": 721.1631677867962,
+        "min_step": 0.009617527071597964,
+        "max_step": 6.066901875765097,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "return_map",
+          "requested_days": 721.1631677867962,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.3365681000286713,
+          "rhs_calls": 414,
+          "rhs_seconds": 0.17847849987447262,
+          "nfev": 414,
+          "njev": 21,
+          "nlu": 21,
+          "steps": 232,
+          "success": true,
+          "integrated_days": 721.1631677867962,
+          "min_step": 0.009617527071597964,
+          "max_step": 6.066901875765097,
+          "message": "The solver successfully reached the end of the integration interval."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 0.1,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.013787399977445602,
+          "rhs_calls": 10,
+          "rhs_seconds": 0.01034429983701557,
+          "nfev": 10,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 6,
+          "success": true,
+          "integrated_days": 0.1,
+          "min_step": 3.1622776601586176e-06,
+          "max_step": 0.031622776601586175,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "correction_reason": "no_transverse_return",
+      "reason": "no_transverse_return",
+      "seconds": 0.611731700017117
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.140625
+      ],
+      "guess_seconds": 1.0346305000130087,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.030591499991715,
+          "rhs_calls": 1590,
+          "rhs_seconds": 0.40720620087813586,
+          "nfev": 1590,
+          "njev": 37,
+          "nlu": 37,
+          "steps": 843,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.030591499991715,
+        "rhs_calls": 1590,
+        "rhs_seconds": 0.40720620087813586,
+        "nfev": 1590,
+        "njev": 37,
+        "nlu": 37,
+        "steps": 843,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 8.69971744278125e-06,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.030591499991715,
+          "rhs_calls": 1590,
+          "rhs_seconds": 0.40720620087813586,
+          "nfev": 1590,
+          "njev": 37,
+          "nlu": 37,
+          "steps": 843,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 8.69971744278125e-06,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 1,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.1496915000025183,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.140625
+      ],
+      "guess_seconds": 1.7064729999983683,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.7022446000482887,
+          "rhs_calls": 2805,
+          "rhs_seconds": 0.6861657984554768,
+          "nfev": 2805,
+          "njev": 19,
+          "nlu": 19,
+          "steps": 1445,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.7022446000482887,
+        "rhs_calls": 2805,
+        "rhs_seconds": 0.6861657984554768,
+        "nfev": 2805,
+        "njev": 19,
+        "nlu": 19,
+        "steps": 1445,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 3.3403498976808526e-05,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.7022446000482887,
+          "rhs_calls": 2805,
+          "rhs_seconds": 0.6861657984554768,
+          "nfev": 2805,
+          "njev": 19,
+          "nlu": 19,
+          "steps": 1445,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 3.3403498976808526e-05,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.8206031000008807,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.734375
+      ],
+      "guess_seconds": 0.5992372001055628,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.5935800999868661,
+          "rhs_calls": 968,
+          "rhs_seconds": 0.22506509826052934,
+          "nfev": 968,
+          "njev": 11,
+          "nlu": 11,
+          "steps": 531,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.5935800999868661,
+        "rhs_calls": 968,
+        "rhs_seconds": 0.22506509826052934,
+        "nfev": 968,
+        "njev": 11,
+        "nlu": 11,
+        "steps": 531,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 0.00014982311639805885,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.5935800999868661,
+          "rhs_calls": 968,
+          "rhs_seconds": 0.22506509826052934,
+          "nfev": 968,
+          "njev": 11,
+          "nlu": 11,
+          "steps": 531,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 0.00014982311639805885,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 0.6904792999848723,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.734375
+      ],
+      "guess_seconds": 0.738102599978447,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.7361374000320211,
+          "rhs_calls": 1076,
+          "rhs_seconds": 0.2904238987248391,
+          "nfev": 1076,
+          "njev": 10,
+          "nlu": 10,
+          "steps": 594,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.7361374000320211,
+        "rhs_calls": 1076,
+        "rhs_seconds": 0.2904238987248391,
+        "nfev": 1076,
+        "njev": 10,
+        "nlu": 10,
+        "steps": 594,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 0.00011125324791734877,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.7361374000320211,
+          "rhs_calls": 1076,
+          "rhs_seconds": 0.2904238987248391,
+          "nfev": 1076,
+          "njev": 10,
+          "nlu": 10,
+          "steps": 594,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 0.00011125324791734877,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 0.9902850999496877,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.015625
+      ],
+      "guess_seconds": 1.0810741999885067,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.077835200005211,
+          "rhs_calls": 1808,
+          "rhs_seconds": 0.43580289918463677,
+          "nfev": 1808,
+          "njev": 1,
+          "nlu": 1,
+          "steps": 902,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.077835200005211,
+        "rhs_calls": 1808,
+        "rhs_seconds": 0.43580289918463677,
+        "nfev": 1808,
+        "njev": 1,
+        "nlu": 1,
+        "steps": 902,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 0.000523310812592058,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.077835200005211,
+          "rhs_calls": 1808,
+          "rhs_seconds": 0.43580289918463677,
+          "nfev": 1808,
+          "njev": 1,
+          "nlu": 1,
+          "steps": 902,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 0.000523310812592058,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 1,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.1949774000095204,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.015625
+      ],
+      "guess_seconds": 0.9301727999700233,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.9273280000779778,
+          "rhs_calls": 1721,
+          "rhs_seconds": 0.3812562004895881,
+          "nfev": 1721,
+          "njev": 2,
+          "nlu": 2,
+          "steps": 859,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.9273280000779778,
+        "rhs_calls": 1721,
+        "rhs_seconds": 0.3812562004895881,
+        "nfev": 1721,
+        "njev": 2,
+        "nlu": 2,
+        "steps": 859,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 0.0019834037257741,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.9273280000779778,
+          "rhs_calls": 1721,
+          "rhs_seconds": 0.3812562004895881,
+          "nfev": 1721,
+          "njev": 2,
+          "nlu": 2,
+          "steps": 859,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 0.0019834037257741,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.049209599965252,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.5390625
+      ],
+      "guess_seconds": 1.9392776999156922,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.9120086000766605,
+          "rhs_calls": 3063,
+          "rhs_seconds": 0.7356293995399028,
+          "nfev": 3063,
+          "njev": 191,
+          "nlu": 191,
+          "steps": 1660,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2680.081698652568,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.9120086000766605,
+        "rhs_calls": 3063,
+        "rhs_seconds": 0.7356293995399028,
+        "nfev": 3063,
+        "njev": 191,
+        "nlu": 191,
+        "steps": 1660,
+        "success": true,
+        "integrated_days": 2680.081698652568,
+        "min_step": 8.863225815020212e-05,
+        "max_step": 5.87548161091172,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2680.081698652568,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.9120086000766605,
+          "rhs_calls": 3063,
+          "rhs_seconds": 0.7356293995399028,
+          "nfev": 3063,
+          "njev": 191,
+          "nlu": 191,
+          "steps": 1660,
+          "success": true,
+          "integrated_days": 2680.081698652568,
+          "min_step": 8.863225815020212e-05,
+          "max_step": 5.87548161091172,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 5,
+      "return_errors": [
+        0.12312135892298248,
+        0.07960558688426522,
+        0.05190472526777057
+      ],
+      "period_drift": 0.006327679117188234,
+      "candidate_period": 446.16865071667326,
+      "candidate_amplitude": 0.2777762052609341,
+      "trajectory_reason": "approximate_return",
+      "reason": "approximate_return",
+      "seconds": 2.028705000062473,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.5390625
+      ],
+      "guess_seconds": 1.521115200011991,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.516921800095588,
+          "rhs_calls": 2282,
+          "rhs_seconds": 0.5573485000059009,
+          "nfev": 2282,
+          "njev": 132,
+          "nlu": 132,
+          "steps": 1333,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2680.081698652568,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.516921800095588,
+        "rhs_calls": 2282,
+        "rhs_seconds": 0.5573485000059009,
+        "nfev": 2282,
+        "njev": 132,
+        "nlu": 132,
+        "steps": 1333,
+        "success": true,
+        "integrated_days": 2680.081698652568,
+        "min_step": 8.991834198202979e-05,
+        "max_step": 14.889342770292046,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2680.081698652568,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.516921800095588,
+          "rhs_calls": 2282,
+          "rhs_seconds": 0.5573485000059009,
+          "nfev": 2282,
+          "njev": 132,
+          "nlu": 132,
+          "steps": 1333,
+          "success": true,
+          "integrated_days": 2680.081698652568,
+          "min_step": 8.991834198202979e-05,
+          "max_step": 14.889342770292046,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 3,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.7605522000230849,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.5390625
+      ],
+      "guess_seconds": 1.14986229990609,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.146643300075084,
+          "rhs_calls": 1705,
+          "rhs_seconds": 0.41039929969701916,
+          "nfev": 1705,
+          "njev": 55,
+          "nlu": 55,
+          "steps": 1014,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2680.081698652568,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.146643300075084,
+        "rhs_calls": 1705,
+        "rhs_seconds": 0.41039929969701916,
+        "nfev": 1705,
+        "njev": 55,
+        "nlu": 55,
+        "steps": 1014,
+        "success": true,
+        "integrated_days": 2680.081698652568,
+        "min_step": 0.00012049312030154404,
+        "max_step": 14.88934277029216,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2680.081698652568,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.146643300075084,
+          "rhs_calls": 1705,
+          "rhs_seconds": 0.41039929969701916,
+          "nfev": 1705,
+          "njev": 55,
+          "nlu": 55,
+          "steps": 1014,
+          "success": true,
+          "integrated_days": 2680.081698652568,
+          "min_step": 0.00012049312030154404,
+          "max_step": 14.88934277029216,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 1,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.2703560000518337,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.5390625
+      ],
+      "guess_seconds": 1.5188102000392973,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.5146390000591055,
+          "rhs_calls": 2412,
+          "rhs_seconds": 0.5738896020920947,
+          "nfev": 2412,
+          "njev": 51,
+          "nlu": 51,
+          "steps": 1374,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2680.081698652568,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.5146390000591055,
+        "rhs_calls": 2412,
+        "rhs_seconds": 0.5738896020920947,
+        "nfev": 2412,
+        "njev": 51,
+        "nlu": 51,
+        "steps": 1374,
+        "success": true,
+        "integrated_days": 2680.081698652568,
+        "min_step": 8.516438920882122e-05,
+        "max_step": 14.88934277029216,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2680.081698652568,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.5146390000591055,
+          "rhs_calls": 2412,
+          "rhs_seconds": 0.5738896020920947,
+          "nfev": 2412,
+          "njev": 51,
+          "nlu": 51,
+          "steps": 1374,
+          "success": true,
+          "integrated_days": 2680.081698652568,
+          "min_step": 8.516438920882122e-05,
+          "max_step": 14.88934277029216,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 1,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.629773800028488,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "poincare_shooting_manual",
+      "uv": [
+        0.5390625
+      ],
+      "guess_seconds": 0.0,
+      "correction_seconds": 0.2757355000358075,
+      "verification_seconds": 0.0,
+      "shooting_evaluations": 1,
+      "ivp_totals": {
+        "return_map": {
+          "seconds": 0.27250600000843406,
+          "rhs_calls": 582,
+          "rhs_seconds": 0.15181160171050578,
+          "nfev": 582,
+          "njev": 29,
+          "nlu": 29,
+          "steps": 317,
+          "solves": 2
+        }
+      },
+      "last_ivp": {
+        "stage": "return_map",
+        "requested_days": 713.7698411466772,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.26742389996070415,
+        "rhs_calls": 572,
+        "rhs_seconds": 0.14865200174972415,
+        "nfev": 572,
+        "njev": 29,
+        "nlu": 29,
+        "steps": 311,
+        "success": true,
+        "integrated_days": 713.7698411466772,
+        "min_step": 0.00818455166596374,
+        "max_step": 6.314357307495413,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "return_map",
+          "requested_days": 713.7698411466772,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.26742389996070415,
+          "rhs_calls": 572,
+          "rhs_seconds": 0.14865200174972415,
+          "nfev": 572,
+          "njev": 29,
+          "nlu": 29,
+          "steps": 311,
+          "success": true,
+          "integrated_days": 713.7698411466772,
+          "min_step": 0.00818455166596374,
+          "max_step": 6.314357307495413,
+          "message": "The solver successfully reached the end of the integration interval."
+        },
+        {
+          "stage": "return_map",
+          "requested_days": 0.1,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.005082100047729909,
+          "rhs_calls": 10,
+          "rhs_seconds": 0.003159599960781634,
+          "nfev": 10,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 6,
+          "success": true,
+          "integrated_days": 0.1,
+          "min_step": 3.162277660144577e-06,
+          "max_step": 0.03162277660144577,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "correction_reason": "no_transverse_return",
+      "reason": "no_transverse_return",
+      "seconds": 0.40097999991849065
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.1484375
+      ],
+      "guess_seconds": 0.6777387000620365,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.6753195999190211,
+          "rhs_calls": 932,
+          "rhs_seconds": 0.2548279988113791,
+          "nfev": 932,
+          "njev": 35,
+          "nlu": 35,
+          "steps": 529,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.6753195999190211,
+        "rhs_calls": 932,
+        "rhs_seconds": 0.2548279988113791,
+        "nfev": 932,
+        "njev": 35,
+        "nlu": 35,
+        "steps": 529,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 0.0001594398446357802,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.6753195999190211,
+          "rhs_calls": 932,
+          "rhs_seconds": 0.2548279988113791,
+          "nfev": 932,
+          "njev": 35,
+          "nlu": 35,
+          "steps": 529,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 0.0001594398446357802,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 1,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 0.8470754000591114,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.1484375
+      ],
+      "guess_seconds": 0.5319177000783384,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.5295429000398144,
+          "rhs_calls": 748,
+          "rhs_seconds": 0.1943860003957525,
+          "nfev": 748,
+          "njev": 24,
+          "nlu": 24,
+          "steps": 437,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.5295429000398144,
+        "rhs_calls": 748,
+        "rhs_seconds": 0.1943860003957525,
+        "nfev": 748,
+        "njev": 24,
+        "nlu": 24,
+        "steps": 437,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 3.902815701081626e-05,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.5295429000398144,
+          "rhs_calls": 748,
+          "rhs_seconds": 0.1943860003957525,
+          "nfev": 748,
+          "njev": 24,
+          "nlu": 24,
+          "steps": 437,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 3.902815701081626e-05,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 1,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 0.6748866999987513,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.1484375
+      ],
+      "guess_seconds": 1.027020400040783,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.023601100081578,
+          "rhs_calls": 1759,
+          "rhs_seconds": 0.4121998983900994,
+          "nfev": 1759,
+          "njev": 47,
+          "nlu": 47,
+          "steps": 913,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.023601100081578,
+        "rhs_calls": 1759,
+        "rhs_seconds": 0.4121998983900994,
+        "nfev": 1759,
+        "njev": 47,
+        "nlu": 47,
+        "steps": 913,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 1.3442571355491047e-05,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.023601100081578,
+          "rhs_calls": 1759,
+          "rhs_seconds": 0.4121998983900994,
+          "nfev": 1759,
+          "njev": 47,
+          "nlu": 47,
+          "steps": 913,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 1.3442571355491047e-05,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 1,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.1542070999275893,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.1484375
+      ],
+      "guess_seconds": 1.7921543000265956,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 1.787082999944687,
+          "rhs_calls": 3272,
+          "rhs_seconds": 0.7156210989924148,
+          "nfev": 3272,
+          "njev": 21,
+          "nlu": 21,
+          "steps": 1675,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 1.787082999944687,
+        "rhs_calls": 3272,
+        "rhs_seconds": 0.7156210989924148,
+        "nfev": 3272,
+        "njev": 21,
+        "nlu": 21,
+        "steps": 1675,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 2.7752669485026307e-05,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 1.787082999944687,
+          "rhs_calls": 3272,
+          "rhs_seconds": 0.7156210989924148,
+          "nfev": 3272,
+          "njev": 21,
+          "nlu": 21,
+          "steps": 1675,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 2.7752669485026307e-05,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 1.9160511000081897,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.7265625
+      ],
+      "guess_seconds": 0.6993077000370249,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.6972617999417707,
+          "rhs_calls": 1033,
+          "rhs_seconds": 0.2744533997029066,
+          "nfev": 1033,
+          "njev": 10,
+          "nlu": 10,
+          "steps": 560,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.6972617999417707,
+        "rhs_calls": 1033,
+        "rhs_seconds": 0.2744533997029066,
+        "nfev": 1033,
+        "njev": 10,
+        "nlu": 10,
+        "steps": 560,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 0.0001487381170064974,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.6972617999417707,
+          "rhs_calls": 1033,
+          "rhs_seconds": 0.2744533997029066,
+          "nfev": 1033,
+          "njev": 10,
+          "nlu": 10,
+          "steps": 560,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 0.0001487381170064974,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 0.801063199993223,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.7265625
+      ],
+      "guess_seconds": 0.6364608999574557,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.6341879999963567,
+          "rhs_calls": 1109,
+          "rhs_seconds": 0.2440434960881248,
+          "nfev": 1109,
+          "njev": 11,
+          "nlu": 11,
+          "steps": 611,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.6341879999963567,
+        "rhs_calls": 1109,
+        "rhs_seconds": 0.2440434960881248,
+        "nfev": 1109,
+        "njev": 11,
+        "nlu": 11,
+        "steps": 611,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 0.00011032233501510391,
+        "max_step": 13.333333333333485,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.6341879999963567,
+          "rhs_calls": 1109,
+          "rhs_seconds": 0.2440434960881248,
+          "nfev": 1109,
+          "njev": 11,
+          "nlu": 11,
+          "steps": 611,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 0.00011032233501510391,
+          "max_step": 13.333333333333485,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 0.8086721999570727,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.0078125
+      ],
+      "guess_seconds": 0.4673682999564335,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.46532919991295785,
+          "rhs_calls": 629,
+          "rhs_seconds": 0.19106960168574005,
+          "nfev": 629,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 312,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.46532919991295785,
+        "rhs_calls": 629,
+        "rhs_seconds": 0.19106960168574005,
+        "nfev": 629,
+        "njev": 0,
+        "nlu": 0,
+        "steps": 312,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 0.0019199914020552999,
+        "max_step": 12.710071734910798,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.46532919991295785,
+          "rhs_calls": 629,
+          "rhs_seconds": 0.19106960168574005,
+          "nfev": 629,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 312,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 0.0019199914020552999,
+          "max_step": 12.710071734910798,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 0.5613333999644965,
+      "shooting_evaluations": 0
+    },
+    {
+      "kind": "manual",
+      "uv": [
+        0.0078125
+      ],
+      "guess_seconds": 0.5026500000385568,
+      "correction_seconds": 0.0,
+      "verification_seconds": 0.0,
+      "ivp_totals": {
+        "trajectory": {
+          "seconds": 0.5007856999291107,
+          "rhs_calls": 687,
+          "rhs_seconds": 0.20398520049639046,
+          "nfev": 687,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 338,
+          "solves": 1
+        }
+      },
+      "last_ivp": {
+        "stage": "trajectory",
+        "requested_days": 2400.0,
+        "dimension": 3,
+        "method": "LSODA",
+        "seconds": 0.5007856999291107,
+        "rhs_calls": 687,
+        "rhs_seconds": 0.20398520049639046,
+        "nfev": 687,
+        "njev": 0,
+        "nlu": 0,
+        "steps": 338,
+        "success": true,
+        "integrated_days": 2400.0,
+        "min_step": 6.537759620905131e-05,
+        "max_step": 12.709978788789613,
+        "message": "The solver successfully reached the end of the integration interval."
+      },
+      "slowest_ivps": [
+        {
+          "stage": "trajectory",
+          "requested_days": 2400.0,
+          "dimension": 3,
+          "method": "LSODA",
+          "seconds": 0.5007856999291107,
+          "rhs_calls": 687,
+          "rhs_seconds": 0.20398520049639046,
+          "nfev": 687,
+          "njev": 0,
+          "nlu": 0,
+          "steps": 338,
+          "success": true,
+          "integrated_days": 2400.0,
+          "min_step": 6.537759620905131e-05,
+          "max_step": 12.709978788789613,
+          "message": "The solver successfully reached the end of the integration interval."
+        }
+      ],
+      "peak_count": 0,
+      "trajectory_reason": "insufficient_returns",
+      "reason": "insufficient_returns",
+      "seconds": 0.6331776999868453,
+      "shooting_evaluations": 0
+    }
+  ]
+}

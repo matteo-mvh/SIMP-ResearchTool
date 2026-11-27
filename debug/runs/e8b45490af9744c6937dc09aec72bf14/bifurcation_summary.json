@@ -1,0 +1,15 @@
+{
+  "H4": {
+    "native_event_candidates": 8,
+    "independent_candidates": 0,
+    "classified_curve_points": 0,
+    "event_classifications": {
+      "transcritical_forward": 6,
+      "hopf_supercritical": 1,
+      "transcritical_backward": 1
+    },
+    "curve_classifications": {},
+    "audit_correction_failures": 1,
+    "verified_events": 8
+  }
+}

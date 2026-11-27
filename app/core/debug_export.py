@@ -40,6 +40,8 @@ DIAGNOSTIC_PATTERNS = (
     "bifurcations_*.csv",
     "bifurcation_summary*.json",
     "bifurcation_audit_failures_*.csv",
+    "hopf_audit_H*.json",
+    "stable_orbit_summary_H*.json",
     "periodic_error_*.txt",
     "equilibrium_preview_error_*.txt",
 )

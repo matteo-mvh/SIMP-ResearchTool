@@ -1,0 +1,157 @@
+{
+  "engine": "pyoomph native pseudo-arclength",
+  "periodic_engine": "adaptive_ode_shooting",
+  "dimensions": 1,
+  "depths": [
+    4.0
+  ],
+  "axes": [
+    {
+      "name": "N_wc",
+      "low": 1.0,
+      "high": 200.0,
+      "resolution": 100
+    }
+  ],
+  "seconds": 1108.5701258999761,
+  "equation_source": "model/shared_eqn.py",
+  "limitations": "1D periodic results are confirmed attracting cycles at independently sampled parameter locations. Finite initial conditions and parameter sampling cannot establish global absence of cycles. Unstable periodic branches and exact periodic folds are not traced in 1D. 2D native periodic results remain individual verified locations and transects.",
+  "diagnostics": 17,
+  "depth_workers": 1,
+  "performance": {
+    "4.0": {
+      "native_initialisations": 29,
+      "native_reuses": 0,
+      "reuse_failures": 0,
+      "native_setup_seconds": 22.079331800108775,
+      "native_total_seconds": 52.70876830013003,
+      "prepared_seeds": 8,
+      "covered_seeds": 0,
+      "native_corrections": 8,
+      "adaptive_steps": 0,
+      "adaptive_fallbacks": 0,
+      "equilibrium_seconds": 133.34400500007905,
+      "oscillation_seconds": 938.8305004000431,
+      "elapsed_seconds": 1072.1745976000093
+    }
+  },
+  "periodic": {
+    "4.0": {
+      "verified_points": 17,
+      "coexistence_points": 0,
+      "status": "completed_with_unresolved_searches",
+      "coverage": {
+        "scheduled_locations": 49,
+        "checked_locations": 49,
+        "completed_locations": 49,
+        "native_attempts": 0,
+        "search_attempts": 240,
+        "shooting_attempts": 44,
+        "direct_return_cycles": 0,
+        "analytical_exclusions": 1,
+        "refinement_rounds": 3,
+        "elapsed_seconds": 859.9928982999409,
+        "verified_periodic_locations": 17,
+        "unvisited_locations": [],
+        "incomplete_locations": [
+          [
+            0.3504306929
+          ],
+          [
+            0.3500306929
+          ],
+          [
+            0.347808022
+          ],
+          [
+            0.3454306929
+          ],
+          [
+            0.3125
+          ],
+          [
+            0.25
+          ],
+          [
+            0.4855850855
+          ],
+          [
+            0.5
+          ],
+          [
+            0.1875
+          ],
+          [
+            0.5625
+          ],
+          [
+            0.125
+          ],
+          [
+            0.625
+          ],
+          [
+            0.0625
+          ],
+          [
+            0.6875
+          ],
+          [
+            0.75
+          ],
+          [
+            0.8125
+          ],
+          [
+            0.875
+          ],
+          [
+            0.9375
+          ],
+          [
+            1.0
+          ],
+          [
+            0.53125
+          ],
+          [
+            0.15625
+          ],
+          [
+            0.71875
+          ],
+          [
+            0.03125
+          ],
+          [
+            0.546875
+          ],
+          [
+            0.140625
+          ],
+          [
+            0.734375
+          ],
+          [
+            0.015625
+          ],
+          [
+            0.5390625
+          ],
+          [
+            0.1484375
+          ],
+          [
+            0.7265625
+          ],
+          [
+            0.0078125
+          ]
+        ],
+        "pending_branches": [],
+        "incomplete_arms": [],
+        "limit_reached": false
+      }
+    }
+  }
+}

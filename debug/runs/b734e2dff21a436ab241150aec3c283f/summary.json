@@ -1,0 +1,19 @@
+{
+  "engine": "pyoomph native pseudo-arclength",
+  "dimensions": 1,
+  "depths": [
+    5.814775437336836
+  ],
+  "axes": [
+    {
+      "name": "N_wc",
+      "low": 1.0,
+      "high": 2000.0,
+      "resolution": 100
+    }
+  ],
+  "seconds": 105.69732449995354,
+  "equation_source": "model/shared_eqn.py",
+  "limitations": "Finite discovery does not guarantee all branches/events. Review diagnostics; grey 2D regions are unresolved. No periodic-orbit continuation is performed.",
+  "diagnostics": 10
+}

@@ -1,0 +1,131 @@
+[
+  {
+    "community": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 125
+  },
+  {
+    "community": "M",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 55
+  },
+  {
+    "community": "MS",
+    "direction": -1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 353
+  },
+  {
+    "community": "MS",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 55
+  },
+  {
+    "community": "MSP",
+    "direction": -1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 286
+  },
+  {
+    "community": "MSP",
+    "direction": 1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 236
+  },
+  {
+    "community": "P",
+    "direction": -1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 455
+  },
+  {
+    "community": "P",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 54
+  },
+  {
+    "community": "S",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 53
+  },
+  {
+    "community": "S",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 53
+  },
+  {
+    "community": "MP",
+    "direction": -1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 284
+  },
+  {
+    "community": "MP",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 66
+  },
+  {
+    "community": "SP",
+    "direction": -1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 318
+  },
+  {
+    "community": "SP",
+    "direction": 1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 302
+  },
+  {
+    "kind": "hopf",
+    "community": "MSP",
+    "invader": "",
+    "solved_axis": 0,
+    "seed_coordinates": [
+      0.3562155790246801
+    ],
+    "seed_biomass": [
+      51.87546265748466,
+      84.4031189868991,
+      4.424011898041138
+    ],
+    "reason": "Numerical event preconditioner did not converge"
+  },
+  {
+    "kind": "hopf",
+    "community": "MSP",
+    "invader": "",
+    "solved_axis": 0,
+    "seed_coordinates": [
+      0.48558508553172797
+    ],
+    "seed_biomass": [
+      83.89503421624599,
+      90.87991130234009,
+      2.8750231158144417
+    ],
+    "reason": "Numerical event preconditioner did not converge"
+  },
+  {
+    "kind": "hopf",
+    "community": "MSP",
+    "invader": "",
+    "solved_axis": 0,
+    "seed_coordinates": [
+      0.477076958885709
+    ],
+    "seed_biomass": [
+      81.78820667688916,
+      90.44734261185647,
+      2.9772306686518775
+    ],
+    "reason": "Numerical event preconditioner did not converge"
+  }
+]

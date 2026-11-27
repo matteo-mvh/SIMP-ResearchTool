@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 
 from scripts.bifurcation_classification import (
     classify_event,
-    audit_1d,
+    audit_1d, merge_classified_events,
     write_csv,
     plot_classification,
 )
@@ -44,16 +44,17 @@ def prepare_equilibrium_results(data, base, axes, folder):
     added = []
     failures = []
     if dimensions == 1:
-        added, failures = audit_1d(branch_rows, native_events, base, axes[0],)
+        hopf_audit = {}
+        added, failures = audit_1d(branch_rows, native_events, base, axes[0], hopf_audit)
+        (folder/f'hopf_audit_{suffix}.json').write_text(json.dumps(hopf_audit, indent=2), encoding='utf-8')
 
-    classified_events = native_events+added
+    classified_events = merge_classified_events(native_events, added)
 
     # Preserve existing native events, but introduce independently
     # discovered events only after successful classification.
-    data['events'] = native_events+[
-        row for row in added
-        if row['classification_status'] == 'verified'
-    ]
+    data['events'] = merge_classified_events(native_events, [
+        row for row in added if row['classification_status'] == 'verified'
+    ])
     if dimensions == 2:
         data['curves'] = curves
 
