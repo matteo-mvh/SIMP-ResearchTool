@@ -1011,6 +1011,11 @@ def search_location(
                         p, corrected
                     )
 
+            direct_reuse = (
+                kind == 'reuse'
+                and found is not None
+            )
+
             # If direct warm-start shooting fails, use forward
             # integration from the previous periodic solution.
             if (
@@ -1055,6 +1060,22 @@ def search_location(
         ))
 
         if found is not None:
+
+            found['row']['cycle_parent_u'] = (
+                float(seed['source_u'])
+                if (
+                    direct_reuse
+                    and 'source_u' in seed
+                )
+                else None
+            )
+
+            found['row']['cycle_search_method'] = (
+                'direct_warm_start'
+                if direct_reuse
+                else 'trajectory_initialized_shooting'
+            )
+
             return found
 
     return None
@@ -1091,6 +1112,7 @@ def analyze_stable_attractors(
         status='running',
         settings=dict(
             scan_points=len(coordinates),
+            scan_resolution=int(axis.resolution),
             generic_seeds=GENERIC_SEEDS,
             initial_cycles=INITIAL_CYCLES,
             max_initial_days=MAX_INITIAL_DAYS,
@@ -1101,6 +1123,9 @@ def analyze_stable_attractors(
             floquet_tolerance=FLOQUET_TOL,
         ),
         locations=results,
+        sampling_coordinates=[
+            float(u) for u in coordinates
+        ],
         attempts=attempts,
 
         # No periodic branches are claimed: these are independent
@@ -1161,8 +1186,18 @@ def analyze_stable_attractors(
 
         data['stable_orbits'] = [
             row for row in ordered
-            if row['stable_cycle_found']
+            if (
+                row.get('stable_cycle_found')
+                and row.get('status') == 'verified_periodic'
+                and row.get('stability') == 'stable'
+            )
         ]
+
+        # Existing continuation plots and external consumers
+        # use this common periodic-results interface.
+        data['oscillations'] = list(
+            data['stable_orbits']
+        )
 
     save()
 
@@ -1233,7 +1268,10 @@ def analyze_stable_attractors(
                     3/axis.resolution,
                 ):
 
-                    warm_seed = nearest['seed']
+                    warm_seed = dict(
+                        nearest['seed'],
+                        source_u=float(nearest['u']),
+                    )
 
             before = time.monotonic()
 

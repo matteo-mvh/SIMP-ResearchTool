@@ -72,29 +72,702 @@ def draw_branches(ax,dataset,component,community_colors=False,zero_strip=False):
     ax.grid(alpha=.13)
 
 
-def draw_periodic_envelopes(ax,data,component,community_colors=False):
-    color=STATE_COLORS['MSP'] if community_colors else VARIABLE_COLORS[component]
-    for branch in data.get('periodic_analysis',{}).get('branches',[]):
-        first=branch['points'][0]
-        ax.vlines(first['x'],first[component+'_min'],first[component+'_max'],color=color,alpha=.5,lw=.8)
-        for arm in branch['arms']:
-            path=[first,*arm['records']]
-            # Use continuation order, not parameter sorting: preserve folds and
-            # never connect independent branches or bridge rejected solutions.
-            for a,b in zip(path,path[1:]):
-                stable=a['stability']==b['stability']=='stable'
-                x=[a['x'],b['x']];lo=[r[component+'_min'] for r in (a,b)];hi=[r[component+'_max'] for r in (a,b)]
-                if stable:ax.fill_between(x,lo,hi,color=color,alpha=.3,lw=0,zorder=1)
+
+
+# Colors describe attractor combinations, not species communities.
+ATTRACTOR_COLORS = {
+    'stable_equilibrium_cycle_not_confirmed': '#278360',
+    'stable_cycle_no_stable_equilibrium_found': '#df8531',
+    'coexistence': '#8055b5',
+    'stable_cycle_equilibria_unresolved': '#b69c68',
+    'unresolved': '#999999',
+}
+
+ATTRACTOR_LABELS = {
+    'stable_equilibrium_cycle_not_confirmed':
+        'Equilibrium; cycle not confirmed',
+
+    'stable_cycle_no_stable_equilibrium_found':
+        'Cycle; no stable equilibrium found',
+
+    'coexistence':
+        'Equilibrium + periodic attractor',
+
+    'stable_cycle_equilibria_unresolved':
+        'Cycle; equilibrium search unresolved',
+
+    'unresolved':
+        'Unresolved',
+}
+
+
+def is_sampled_analysis(data):
+    """Distinguish shooting results from native periodic branches."""
+
+    payload = data.get('periodic_analysis', {})
+
+    return (
+        payload.get('method')
+        == 'Adaptive ODE integration and shooting'
+        or 'sampling_coordinates' in payload
+    )
+
+
+def sampled_locations(data):
+    """Return the complete planned grid, including unvisited points.
+
+    Keeping unsuccessful and unvisited locations in the sequence
+    prevents the plotting code from bridging missing results.
+    """
+
+    payload = data.get('periodic_analysis', {})
+
+    locations = {}
+
+    for row in payload.get('locations', []):
+
+        if 'u' not in row:
+            continue
+
+        u = round(float(row['u']), 10)
+
+        locations[u] = row
+
+    coordinates = set(locations)
+
+    for value in payload.get('sampling_coordinates', []):
+
+        coordinates.add(
+            round(float(value), 10)
+        )
+
+    # Compatibility with previously saved shooting calculations.
+    for value in payload.get(
+        'coverage', {}
+    ).get('unvisited_locations', []):
+
+        if isinstance(value, (list, tuple)) and value:
+
+            coordinates.add(
+                round(float(value[0]), 10)
+            )
+
+    return [
+        (u, locations.get(u))
+        for u in sorted(coordinates)
+    ]
+
+
+def verified_sample(row):
+    """Only accept numerically verified stable shooting solutions."""
+
+    if row is None:
+        return False
+
+    if not row.get('stable_cycle_found', False):
+        return False
+
+    if row.get('status') != 'verified_periodic':
+        return False
+
+    if row.get('stability') != 'stable':
+        return False
+
+    required = ['period', 'x']
+
+    for component in VARIABLE_COLORS:
+
+        required.extend([
+            component+'_min',
+            component+'_max',
+            component+'_mean',
+        ])
+
+    try:
+
+        if not all(
+            np.isfinite(float(row[key]))
+            for key in required
+        ):
+            return False
+
+        if float(row['period']) <= 0:
+            return False
+
+        for component in VARIABLE_COLORS:
+
+            lo = float(row[component+'_min'])
+            hi = float(row[component+'_max'])
+
+            if lo > hi:
+                return False
+
+    except (KeyError, TypeError, ValueError):
+
+        return False
+
+    return True
+
+
+def sampled_neighbors(a, b, data):
+    """Check that two samples are sufficiently close in parameter space."""
+
+    if a is None or b is None:
+        return False
+
+    gap = abs(
+        float(a['u'])-float(b['u'])
+    )
+
+    resolution = data.get(
+        'periodic_analysis', {}
+    ).get(
+        'settings', {}
+    ).get('scan_resolution')
+
+    if resolution is None:
+
+        # Conservative fallback for older shooting results.
+        return gap <= .01+1e-9
+
+    resolution = max(1, int(resolution))
+
+    return (
+        0 < gap <= 1/resolution+1e-9
+    )
+
+
+def compatible_sampled_cycles(a, b, data):
+    """Determine whether visual interpolation is appropriate.
+
+    This is NOT a mathematical proof of periodic-branch connectivity.
+
+    Requirements:
+        Both cycles are independently verified and stable.
+        The parameter locations are adjacent and sufficiently close.
+        One solution was initialized directly from the other.
+        Their periods and biomass ranges are reasonably similar.
+    """
+
+    if not verified_sample(a):
+        return False
+
+    if not verified_sample(b):
+        return False
+
+    if not sampled_neighbors(a, b, data):
+        return False
+
+    ua = float(a['u'])
+    ub = float(b['u'])
+
+    parent_a = a.get('cycle_parent_u')
+    parent_b = b.get('cycle_parent_u')
+
+    linked = (
+        parent_a is not None
+        and abs(float(parent_a)-ub) <= 1e-9
+    ) or (
+        parent_b is not None
+        and abs(float(parent_b)-ua) <= 1e-9
+    )
+
+    if not linked:
+        return False
+
+    # Avoid visually connecting substantially different periods.
+    period_change = abs(
+        np.log(float(a['period'])/float(b['period']))
+    )
+
+    if period_change > .30:
+        return False
+
+    # Compare the full biomass envelopes, including nutrients.
+    # Logarithmic scaling prevents large biomass components from
+    # dominating the similarity check.
+    for component in VARIABLE_COLORS:
+
+        for bound in ('min', 'max', 'mean'):
+
+            key = component+'_'+bound
+
+            va = max(0., float(a[key]))
+            vb = max(0., float(b[key]))
+
+            difference = abs(
+                np.log1p(va)-np.log1p(vb)
+            )
+
+            if difference > .40:
+                return False
+
+    return True
+
+
+def draw_sampled_envelopes(
+    ax, data, component, community_colors=False
+):
+    """Draw independently verified periodic biomass ranges."""
+
+    color = (
+        STATE_COLORS['MSP']
+        if community_colors
+        else VARIABLE_COLORS[component]
+    )
+
+    locations = sampled_locations(data)
+
+    # Draw shaded envelopes only between adjacent, compatible cycles.
+    for (_, a), (_, b) in zip(
+        locations, locations[1:]
+    ):
+
+        if not compatible_sampled_cycles(a, b, data):
+            continue
+
+        x = [
+            float(a['x']),
+            float(b['x']),
+        ]
+
+        minima = [
+            float(a[component+'_min']),
+            float(b[component+'_min']),
+        ]
+
+        maxima = [
+            float(a[component+'_max']),
+            float(b[component+'_max']),
+        ]
+
+        ax.fill_between(
+            x,
+            minima,
+            maxima,
+            color=color,
+            alpha=.25,
+            lw=0,
+            zorder=1,
+        )
+
+        # Subtle boundaries make the periodic range readable.
+        ax.plot(
+            x,
+            minima,
+            color=color,
+            lw=.75,
+            alpha=.65,
+            zorder=2,
+        )
+
+        ax.plot(
+            x,
+            maxima,
+            color=color,
+            lw=.75,
+            alpha=.65,
+            zorder=2,
+        )
+
+    # Every verified solution remains visible, including isolated
+    # solutions that could not safely be connected to a neighbor.
+    for _, row in locations:
+
+        if not verified_sample(row):
+            continue
+
+        x = float(row['x'])
+
+        ax.vlines(
+            x,
+            float(row[component+'_min']),
+            float(row[component+'_max']),
+            color=color,
+            alpha=.65,
+            lw=1.,
+            zorder=3,
+        )
+
+        # Small mean marker identifies the actual sampled location.
+        ax.scatter(
+            x,
+            float(row[component+'_mean']),
+            color=color,
+            s=5,
+            alpha=.65,
+            zorder=3,
+        )
+
+
+def attractor_category(row):
+    """Return a defensible attractor classification for the plot."""
+
+    if row is None:
+        return 'unresolved'
+
+    stable_cycle = verified_sample(row)
+
+    stable_equilibrium = (
+        int(row.get('stable_equilibrium_count', 0)) > 0
+        or bool(row.get('stable_equilibria', ''))
+    )
+
+    equilibrium_error = bool(
+        row.get('equilibrium_search_error', '')
+    )
+
+    if stable_cycle and stable_equilibrium:
+
+        return 'coexistence'
+
+    if stable_cycle and equilibrium_error:
+
+        return 'stable_cycle_equilibria_unresolved'
+
+    if stable_cycle:
+
+        return 'stable_cycle_no_stable_equilibrium_found'
+
+    if stable_equilibrium:
+
+        return 'stable_equilibrium_cycle_not_confirmed'
+
+    return 'unresolved'
+
+
+def draw_attractor_strip(ax, data, axis):
+    """Show the attractor classification at tested parameter values.
+
+    Colors between adjacent samples are visual interpolation only.
+    Missing or unsuccessful searches are not interpreted as proven
+    absence of oscillatory attractors.
+    """
+
+    locations = sampled_locations(data)
+
+    for (ua, a), (ub, b) in zip(
+        locations, locations[1:]
+    ):
+
+        if a is None or b is None:
+            continue
+
+        if not sampled_neighbors(a, b, data):
+            continue
+
+        category_a = attractor_category(a)
+        category_b = attractor_category(b)
+
+        if category_a != category_b:
+            continue
+
+        if category_a == 'unresolved':
+            continue
+
+        if category_a in (
+            'coexistence',
+            'stable_cycle_no_stable_equilibrium_found',
+            'stable_cycle_equilibria_unresolved',
+        ):
+
+            if not compatible_sampled_cycles(a, b, data):
+                continue
+
+        elif category_a == (
+            'stable_equilibrium_cycle_not_confirmed'
+        ):
+
+            # Avoid joining different equilibrium communities.
+            communities_a = set(
+                a.get('stable_equilibria', '').split('+')
+            )-{''}
+
+            communities_b = set(
+                b.get('stable_equilibria', '').split('+')
+            )-{''}
+
+            if not communities_a.intersection(communities_b):
+                continue
+
+        ax.axvspan(
+            axis.physical(ua),
+            axis.physical(ub),
+            facecolor=ATTRACTOR_COLORS[category_a],
+            alpha=.45,
+            edgecolor='none',
+            zorder=1,
+        )
+
+    # Mark actual completed tests. Unvisited locations remain blank.
+    for u, row in locations:
+
+        if row is None:
+            continue
+
+        category = attractor_category(row)
+
+        ax.scatter(
+            axis.physical(u),
+            .5,
+            marker='s',
+            s=10,
+            color=ATTRACTOR_COLORS[category],
+            edgecolors='none',
+            zorder=3,
+        )
+
+    ax.set_xlim(axis.low, axis.high)
+    ax.set_ylim(0., 1.)
+
+    ax.set_yticks([])
+    ax.set_ylabel(
+        'Attractors',
+        fontsize=8,
+    )
+
+    ax.grid(False)
+
+    for side in ('top', 'right'):
+        ax.spines[side].set_visible(False)
+
+
+def attractor_handles(datasets):
+    """Conditional legend: only show classifications actually present."""
+
+    used = {
+        attractor_category(row)
+        for data in datasets
+        if is_sampled_analysis(data)
+        for _, row in sampled_locations(data)
+        if row is not None
+    }
+
+    return [
+        Patch(
+            facecolor=ATTRACTOR_COLORS[key],
+            alpha=.65,
+            label=ATTRACTOR_LABELS[key],
+        )
+        for key in ATTRACTOR_COLORS
+        if key in used
+    ]
+
+
+
+def draw_periodic_envelopes(
+    ax, data, component, community_colors=False
+):
+    """Draw either sampled stable cycles or native periodic branches."""
+
+    if is_sampled_analysis(data):
+
+        draw_sampled_envelopes(
+            ax,
+            data,
+            component,
+            community_colors,
+        )
+
+        return
+
+    # Original native continuation visualization.
+    color = (
+        STATE_COLORS['MSP']
+        if community_colors
+        else VARIABLE_COLORS[component]
+    )
+
+    branches = data.get(
+        'periodic_analysis', {}
+    ).get('branches', [])
+
+    for branch in branches:
+
+        points = branch.get('points', [])
+
+        if not points:
+            continue
+
+        first = points[0]
+
+        ax.vlines(
+            first['x'],
+            first[component+'_min'],
+            first[component+'_max'],
+            color=color,
+            alpha=.5,
+            lw=.8,
+        )
+
+        for arm in branch.get('arms', []):
+
+            path = [
+                first,
+                *arm.get('records', []),
+            ]
+
+            # Preserve actual continuation order, including folds.
+            for a, b in zip(path, path[1:]):
+
+                stable = (
+                    a['stability']
+                    == b['stability']
+                    == 'stable'
+                )
+
+                x = [a['x'], b['x']]
+
+                lo = [
+                    r[component+'_min']
+                    for r in (a, b)
+                ]
+
+                hi = [
+                    r[component+'_max']
+                    for r in (a, b)
+                ]
+
+                if stable:
+
+                    ax.fill_between(
+                        x,
+                        lo,
+                        hi,
+                        color=color,
+                        alpha=.3,
+                        lw=0,
+                        zorder=1,
+                    )
+
                 else:
-                    style='--' if 'unstable' in (a['stability'],b['stability']) else ':'
-                    ax.plot(x,lo,color=color,ls=style,lw=1);ax.plot(x,hi,color=color,ls=style,lw=1)
-                if b.get('event')=='cycle_fold_bracket':ax.scatter(b['x'],b[component+'_mean'],marker='s',s=20,color=color,zorder=7)
+
+                    style = (
+                        '--'
+                        if 'unstable' in (
+                            a['stability'],
+                            b['stability'],
+                        )
+                        else ':'
+                    )
+
+                    ax.plot(
+                        x, lo,
+                        color=color,
+                        ls=style,
+                        lw=1,
+                    )
+
+                    ax.plot(
+                        x, hi,
+                        color=color,
+                        ls=style,
+                        lw=1,
+                    )
+
+                if b.get('event') == 'cycle_fold_bracket':
+
+                    ax.scatter(
+                        b['x'],
+                        b[component+'_mean'],
+                        marker='s',
+                        s=20,
+                        color=color,
+                        zorder=7,
+                    )
 
 
-def periodic_handles():
-    return [Patch(facecolor=STATE_COLORS['MSP'],alpha=.3,label='Stable periodic envelope'),
-            Line2D([],[],color=STATE_COLORS['MSP'],ls='--',label='Unstable periodic envelope'),
-            Line2D([],[],color=STATE_COLORS['MSP'],ls=':',label='Periodic stability unresolved')]
+def periodic_handles(datasets=None):
+    """Show only the relevant periodic-orbit legend entries."""
+
+    if datasets is None:
+
+        # Backward compatibility with other callers.
+        return [
+            Patch(
+                facecolor=STATE_COLORS['MSP'],
+                alpha=.3,
+                label='Stable periodic envelope',
+            ),
+            Line2D(
+                [], [],
+                color=STATE_COLORS['MSP'],
+                ls='--',
+                label='Unstable periodic envelope',
+            ),
+            Line2D(
+                [], [],
+                color=STATE_COLORS['MSP'],
+                ls=':',
+                label='Periodic stability unresolved',
+            ),
+        ]
+
+    handles = []
+
+    sampled_present = any(
+        verified_sample(row)
+        for data in datasets
+        if is_sampled_analysis(data)
+        for _, row in sampled_locations(data)
+    )
+
+    if sampled_present:
+
+        handles.append(
+            Patch(
+                facecolor=STATE_COLORS['MSP'],
+                alpha=.25,
+                label='Sampled stable periodic range',
+            )
+        )
+
+    native_stability = {
+        row.get('stability')
+        for data in datasets
+        if not is_sampled_analysis(data)
+        for branch in data.get(
+            'periodic_analysis', {}
+        ).get('branches', [])
+        for row in branch.get('points', [])
+    }
+
+    if 'stable' in native_stability:
+
+        handles.append(
+            Patch(
+                facecolor=STATE_COLORS['MSP'],
+                alpha=.3,
+                label='Stable periodic envelope',
+            )
+        )
+
+    if 'unstable' in native_stability:
+
+        handles.append(
+            Line2D(
+                [], [],
+                color=STATE_COLORS['MSP'],
+                ls='--',
+                label='Unstable periodic envelope',
+            )
+        )
+
+    if native_stability.intersection({
+        'nonhyperbolic',
+        'unresolved',
+    }):
+
+        handles.append(
+            Line2D(
+                [], [],
+                color=STATE_COLORS['MSP'],
+                ls=':',
+                label='Periodic stability unresolved',
+            )
+        )
+
+    return handles
 
 
 def depth_axes(count):
@@ -106,41 +779,354 @@ def depth_axes(count):
     return fig,axes
 
 
-def plot_1d(datasets,axis,folder):
-    with plt.rc_context({'pdf.fonttype':42,'ps.fonttype':42,'font.size':9}):
+def plot_1d(datasets, axis, folder):
+    """Original SIMP overview with sampled periodic envelopes."""
+
+    has_attractor_scan = any(
+        is_sampled_analysis(data)
+        and data.get(
+            'periodic_analysis', {}
+        ).get('locations')
+        for data in datasets
+    )
+
+    with plt.rc_context({
+        'pdf.fonttype': 42,
+        'ps.fonttype': 42,
+        'font.size': 9,
+    }):
+
+        # ------------------------------------------------------
+        # Four-component biomass overview
+        # ------------------------------------------------------
+
         for data in datasets:
-            fig,axes=plt.subplots(2,2,figsize=(12,8),sharex=True,layout='constrained')
-            for ax,c,title in zip(axes.flat,VARIABLE_COLORS,('Macroalgae','Seagrass','Phytoplankton','Dissolved nitrogen')):
-                draw_branches(ax,data,c)
-                ax.set_title(title);ax.set_ylabel(c.replace('_area','')+' [mmol N m$^{-2}$]')
-                ax.set_xlim(axis.low,axis.high);ax.set_ylim(bottom=0)
-            for ax in axes[-1]:ax.set_xlabel(axis_label(axis))
-            fig.suptitle(f'SIMP equilibria and periodic orbits · H = {data["H"]:g} m')
-            fig.legend(handles=[Line2D([],[],color='black',ls=STYLES[s],label=s.title())
-                               for s in ('stable','unstable','nonhyperbolic')]+
-                               (periodic_handles() if data.get('oscillations') else []),loc='outside lower center',ncol=3,frameon=False)
-            save(fig,folder,f'equilibrium_biomass_{axis.name}_H{data["H"]:g}')
-        # Seagrass-focused comparison retains the original zero-species strip for each depth.
-        count=len(datasets);nrow,ncol={1:(1,1),2:(1,2),4:(2,2)}[count]
-        fig=plt.figure(figsize=(12,6.5 if count<4 else 10))
-        outer=fig.add_gridspec(nrow,ncol,left=.08,right=.77,top=.94,bottom=.10,hspace=.35,wspace=.30)
-        for index,data in enumerate(datasets):
-            sub=outer[index//ncol,index%ncol].subgridspec(2,1,height_ratios=[7,.8],hspace=.04)
-            upper=fig.add_subplot(sub[0]);lower=fig.add_subplot(sub[1],sharex=upper)
-            draw_branches(upper,data,'S',True);draw_branches(lower,data,'S',True,True)
-            upper.set_title(f'H = {data["H"]:g} m');upper.set_ylabel('Seagrass S [mmol N m$^{-2}$]')
-            upper.tick_params(axis='x',labelbottom=False);upper.set_ylim(bottom=0)
-            lower.set_yticks([0,1,2,3],['0','M','P','MP']);lower.set_ylim(-.6,3.6)
-            lower.set_xlabel(axis_label(axis));lower.set_xlim(axis.low,axis.high)
-        used={p[0]['community'] for d in datasets for p in d['paths'] if p}
-        handles=[Line2D([],[],color=STATE_COLORS[c],lw=2,label=c) for c in STATE_COLORS if c in used]
-        handles += [Line2D([],[],color='black',ls=STYLES[s],label=s.title()) for s in ('stable','unstable')]
-        if any(d.get('oscillations') for d in datasets):handles+=periodic_handles()
-        kinds={e['kind'] for d in datasets for e in d.get('events',[])}
-        handles += [Line2D([],[],marker={'fold':'^','hopf':'D','invasion':'o'}[k],ls='',
-                           color=EVENT_STYLES[k][2],label=EVENT_STYLES[k][3]) for k in kinds]
-        fig.legend(handles=handles,loc='center left',bbox_to_anchor=(.79,.5),frameon=False)
-        save(fig,folder,f'equilibrium_seagrass_states_{axis.name}')
+
+            fig, axes = plt.subplots(
+                2,
+                2,
+                figsize=(12, 8),
+                sharex=True,
+                layout='constrained',
+            )
+
+            titles = (
+                'Macroalgae',
+                'Seagrass',
+                'Phytoplankton',
+                'Dissolved nitrogen',
+            )
+
+            for ax, component, title in zip(
+                axes.flat,
+                VARIABLE_COLORS,
+                titles,
+            ):
+
+                draw_branches(
+                    ax, data, component
+                )
+
+                ax.set_title(title)
+
+                ax.set_ylabel(
+                    component.replace('_area', '')
+                    + ' [mmol N m$^{-2}$]'
+                )
+
+                ax.set_xlim(
+                    axis.low, axis.high
+                )
+
+                ax.set_ylim(bottom=0)
+
+            for ax in axes[-1]:
+
+                ax.set_xlabel(
+                    axis_label(axis)
+                )
+
+            fig.suptitle(
+                f'SIMP equilibria and periodic orbits'
+                f' · H = {data["H"]:g} m'
+            )
+
+            handles = [
+                Line2D(
+                    [], [],
+                    color='black',
+                    ls=STYLES[status],
+                    label=status.title(),
+                )
+                for status in (
+                    'stable',
+                    'unstable',
+                    'nonhyperbolic',
+                )
+            ]
+
+            handles += periodic_handles([data])
+
+            fig.legend(
+                handles=handles,
+                loc='outside lower center',
+                ncol=3,
+                frameon=False,
+            )
+
+            if is_sampled_analysis(data):
+
+                if data.get('oscillations'):
+
+                    fig.supxlabel(
+                        'Shaded periodic ranges interpolate '
+                        'between compatible verified samples.',
+                        fontsize=8,
+                    )
+
+            save(
+                fig,
+                folder,
+                f'equilibrium_biomass_'
+                f'{axis.name}_H{data["H"]:g}',
+            )
+
+        # ------------------------------------------------------
+        # Original seagrass-focused comparison
+        # ------------------------------------------------------
+
+        count = len(datasets)
+
+        nrow, ncol = {
+            1: (1, 1),
+            2: (1, 2),
+            4: (2, 2),
+        }[count]
+
+        height = (
+            7.2 if count < 4 else 11.
+        ) if has_attractor_scan else (
+            6.5 if count < 4 else 10.
+        )
+
+        fig = plt.figure(
+            figsize=(12, height)
+        )
+
+        outer = fig.add_gridspec(
+            nrow,
+            ncol,
+            left=.08,
+            right=.73 if has_attractor_scan else .77,
+            top=.94,
+            bottom=.12 if has_attractor_scan else .10,
+            hspace=.40,
+            wspace=.30,
+        )
+
+        for index, data in enumerate(datasets):
+
+            cell = outer[
+                index//ncol,
+                index%ncol,
+            ]
+
+            if has_attractor_scan:
+
+                sub = cell.subgridspec(
+                    3,
+                    1,
+                    height_ratios=[7, .8, .55],
+                    hspace=.08,
+                )
+
+            else:
+
+                sub = cell.subgridspec(
+                    2,
+                    1,
+                    height_ratios=[7, .8],
+                    hspace=.04,
+                )
+
+            upper = fig.add_subplot(sub[0])
+
+            lower = fig.add_subplot(
+                sub[1],
+                sharex=upper,
+            )
+
+            # Original seagrass branches and periodic envelopes.
+            draw_branches(
+                upper,
+                data,
+                'S',
+                True,
+            )
+
+            # Original strip showing communities without seagrass.
+            draw_branches(
+                lower,
+                data,
+                'S',
+                True,
+                True,
+            )
+
+            upper.set_title(
+                f'H = {data["H"]:g} m'
+            )
+
+            upper.set_ylabel(
+                'Seagrass S [mmol N m$^{-2}$]'
+            )
+
+            upper.tick_params(
+                axis='x',
+                labelbottom=False,
+            )
+
+            upper.set_ylim(bottom=0)
+
+            lower.set_yticks(
+                [0, 1, 2, 3],
+                ['0', 'M', 'P', 'MP'],
+            )
+
+            lower.set_ylim(-.6, 3.6)
+
+            lower.set_xlim(
+                axis.low,
+                axis.high,
+            )
+
+            if has_attractor_scan:
+
+                lower.tick_params(
+                    axis='x',
+                    labelbottom=False,
+                )
+
+                attractors = fig.add_subplot(
+                    sub[2],
+                    sharex=upper,
+                )
+
+                draw_attractor_strip(
+                    attractors,
+                    data,
+                    axis,
+                )
+
+                attractors.set_xlabel(
+                    axis_label(axis)
+                )
+
+            else:
+
+                lower.set_xlabel(
+                    axis_label(axis)
+                )
+
+        # ------------------------------------------------------
+        # Existing community and stability legend
+        # ------------------------------------------------------
+
+        used_communities = {
+            path[0]['community']
+            for data in datasets
+            for path in data['paths']
+            if path
+        }
+
+        handles = [
+            Line2D(
+                [], [],
+                color=STATE_COLORS[community],
+                lw=2,
+                label=community,
+            )
+            for community in STATE_COLORS
+            if community in used_communities
+        ]
+
+        handles += [
+            Line2D(
+                [], [],
+                color='black',
+                ls=STYLES[status],
+                label=status.title(),
+            )
+            for status in (
+                'stable',
+                'unstable',
+                'nonhyperbolic',
+            )
+        ]
+
+        handles += periodic_handles(datasets)
+
+        kinds = {
+            event['kind']
+            for data in datasets
+            for event in data.get('events', [])
+        }
+
+        markers = {
+            'fold': '^',
+            'hopf': 'D',
+            'invasion': 'o',
+        }
+
+        for kind in EVENT_STYLES:
+
+            if kind not in kinds:
+                continue
+
+            handles.append(
+                Line2D(
+                    [], [],
+                    marker=markers[kind],
+                    ls='',
+                    color=EVENT_STYLES[kind][2],
+                    label=EVENT_STYLES[kind][3],
+                )
+            )
+
+        if has_attractor_scan:
+
+            handles += attractor_handles(
+                datasets
+            )
+
+        fig.legend(
+            handles=handles,
+            loc='center left',
+            bbox_to_anchor=(
+                .75 if has_attractor_scan else .79,
+                .53,
+            ),
+            frameon=False,
+            fontsize=8 if has_attractor_scan else 9,
+        )
+
+        if has_attractor_scan:
+
+            fig.text(
+                .08,
+                .025,
+                'Attractor strip: sampled classifications. '
+                'Shading between samples is a visual guide. '
+                'An unsuccessful cycle search does not establish absence.',
+                fontsize=8,
+                va='bottom',
+            )
+
+        save(
+            fig,
+            folder,
+            f'equilibrium_seagrass_states_{axis.name}',
+        )
 
 
 def polygon_patch(poly,axes,**kwargs):
