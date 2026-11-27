@@ -459,23 +459,409 @@ def trajectory_guess(p, state, equilibria):
 # Fixed-parameter shooting
 # ==============================================================
 
-def correct_cycle(p, guess):
-    """Solve Phi_T(z0)-z0=0 together with a phase condition.
+def analytical_cycle_exclusion(p):
+    """Sufficient conditions excluding strictly positive MSP cycles.
 
-    Unknowns:
-        Three initial logarithmic biomasses and the log-period.
+    A positive periodic biomass requires the mean per-capita
+    growth rate over one period to be zero.
 
-    This is a four-dimensional root problem, irrespective of the
-    temporal integration resolution.
+    If a species has strictly negative growth everywhere in
+    the physical domain, an MSP periodic orbit is impossible.
+
+    An empty result means inconclusive, NOT that a cycle exists.
     """
 
+    if p.N_wc <= 0:
+        return 'Zero available nitrogen inventory'
+
+    Nmax = p.N_wc / p.H
+
+    # Maximum available light, attained without biological shading.
+    I_bottom = p.I_0 * np.exp(-p.kw * p.H)
+    I_water = p.I_0 * np.exp(-p.kw * p.H / 2)
+
+    # Upper bounds on per-capita growth.
+    # Grazing and interspecific mortality are nonnegative and
+    # can therefore be omitted when constructing upper bounds.
+    F_M_max = (
+        p.mu_M
+        * I_bottom / (p.K_I_M + I_bottom)
+        * Nmax / (p.K_N_M + Nmax)
+        - p.m_M
+    )
+
+    F_S_max = (
+        p.mu_S
+        * I_bottom / (p.K_I_S + I_bottom)
+        - p.m_S
+    )
+
+    F_P_max = (
+        p.mu_P
+        * I_water / (p.K_I_P + I_water)
+        * Nmax / (p.K_N_P + Nmax)
+        - p.m_P - p.g_P
+    )
+
+    bounds = {
+        'M': F_M_max,
+        'S': F_S_max,
+        'P': F_P_max,
+    }
+
+    # Keep a conservative numerical margin.
+    for species, upper in bounds.items():
+
+        if upper < -1e-10:
+
+            return (
+                f'{species}: maximum per-capita growth '
+                f'{upper:.8g} d^-1 is negative'
+            )
+
+    return None
+
+
+def hopf_initial_guesses(data, base, axis, u, equilibria):
+    """Generate initial shooting guesses from verified Hopf points.
+
+    The classifier uses scaled biomass coordinates and
+    Kuznetsov's first Lyapunov coefficient:
+
+        l1 = Re(G21) / (2*omega)
+
+    Consequently, the leading radial normal form is
+
+        dr/dt = alpha*r + omega*l1*r**3.
+
+    The leading cycle amplitude is therefore
+
+        r = sqrt(-alpha / (omega*l1)).
+
+    These are initial guesses only. Every accepted orbit must
+    still pass shooting correction and independent verification.
+    """
+
+    from model.shared_eqn import jacobian
+    from scripts.bifurcation_classification import (
+        critical_eigenvectors,
+    )
+
+    candidates = [
+        e for e in equilibria
+        if e.community == 'MSP'
+    ]
+
+    if not candidates:
+        return []
+
+    p = parameters_at(base, [axis], [u])
+
+    guesses = []
+
+    events = sorted(
+        [
+            event
+            for event in data.get('events', [])
+            if (
+                event.get('kind') == 'hopf'
+                and event.get('community') == 'MSP'
+                and event.get('classification_status') == 'verified'
+                and event.get('classification') == 'hopf_supercritical'
+            )
+        ],
+        key=lambda event: abs(float(event['u'])-u),
+    )
+
+    for event in events:
+
+        try:
+
+            uh = float(event['u'])
+            du = u - uh
+
+            # The normal form is a local approximation.
+            if abs(du) > max(.002, 2/axis.resolution):
+                continue
+
+            omega = float(event['omega'])
+            l1 = float(event['first_lyapunov_coefficient'])
+
+            crossing = float(
+                event.get(
+                    'unfolding_u',
+                    event['parameter_coefficient'],
+                )
+            )
+
+            if (
+                omega <= 0
+                or l1 >= 0
+                or crossing*du <= 0
+            ):
+                continue
+
+            if int(
+                event.get(
+                    'noncritical_unstable_directions', 0
+                )
+            ) != 0:
+                continue
+
+            yh = state_of(event)
+
+            # Reproduce the classifier's state normalization.
+            scale = np.maximum(np.abs(yh), 1.)
+
+            ph = parameters_at(
+                base, [axis], [uh]
+            )
+
+            A = (
+                jacobian(yh, ph)
+                * scale[None, :]
+                / scale[:, None]
+            )
+
+            q, _ = critical_eigenvectors(
+                A, 1j*omega
+            )
+
+            # Use the actual neighboring equilibrium rather
+            # than assuming its biomass remains fixed.
+            equilibrium = min(
+                candidates,
+                key=lambda e: np.linalg.norm(
+                    (np.asarray(e.biomass)-yh)/scale
+                ),
+            )
+
+            y = np.asarray(
+                equilibrium.biomass,
+                dtype=float,
+            )
+
+            if np.max(
+                abs(y-yh)/scale
+            ) > .5:
+                continue
+
+            eigenvalues = np.asarray(
+                equilibrium.stability.eigenvalues
+            )
+
+            pair = [
+                value
+                for value in eigenvalues
+                if value.imag > 1e-8
+            ]
+
+            if not pair:
+                continue
+
+            critical = min(
+                pair,
+                key=lambda value: abs(
+                    value.imag-omega
+                ),
+            )
+
+            alpha = float(critical.real)
+
+            if alpha <= 0:
+                continue
+
+            r_squared = -alpha/(omega*l1)
+
+            if r_squared <= 0:
+                continue
+
+            r = np.sqrt(r_squared)
+
+            period = float(
+                2*np.pi/critical.imag
+            )
+
+            if not MIN_PERIOD <= period <= MAX_PERIOD:
+                continue
+
+            # Reject guesses outside the local neighborhood.
+            relative_size = np.max(
+                2*r*scale*np.abs(q)
+                / np.maximum(y, 1e-8)
+            )
+
+            if relative_size > .55:
+                continue
+
+            # Different phases represent the same leading
+            # periodic orbit. Select feasible initial states.
+            for phase in (0., np.pi/2):
+
+                displacement = (
+                    2*r*scale
+                    * np.real(
+                        q*np.exp(1j*phase)
+                    )
+                )
+
+                state = y + displacement
+
+                if np.min(state) <= 0:
+                    continue
+
+                if not physical_trajectory(
+                    state[:, None], p
+                ):
+                    continue
+
+                guesses.append(dict(
+                    log_state=np.log(state),
+                    period=period,
+                    hopf_u=uh,
+                    predicted_radius=float(r),
+                    predicted_relative_amplitude=float(
+                        relative_size
+                    ),
+                ))
+
+        except (
+            KeyError,
+            TypeError,
+            ValueError,
+            ArithmeticError,
+            np.linalg.LinAlgError,
+        ):
+
+            continue
+
+    return guesses
+
+
+def shooting_system(values, reference, tangent, p):
+    """Shooting residual and its analytical Jacobian.
+
+    Unknown vector:
+
+        v = (log(M0), log(S0), log(P0), log(T))
+
+    Residual:
+
+        R = (Phi_T(z0)-z0, phase_condition)
+
+    Integrating the variational equations supplies
+
+        dR/dz0 = Psi(T)-I
+        dR/dlog(T) = T*F(z(T)).
+
+    One augmented IVP therefore provides both the residual
+    and the Newton matrix.
+    """
+
+    values = np.asarray(
+        values, dtype=float
+    )
+
+    if not np.all(np.isfinite(values)):
+        raise ValueError('Nonfinite shooting unknowns')
+
+    z0 = values[:3]
+
+    if not (
+        np.log(MIN_PERIOD)
+        <= values[3]
+        <= np.log(MAX_PERIOD)
+    ):
+        raise ValueError('Invalid shooting period')
+
+    T = float(np.exp(values[3]))
+
+    if np.max(
+        abs(z0-reference)
+    ) > 5.:
+
+        raise ValueError(
+            'Shooting left initial-state neighborhood'
+        )
+
+    initial = np.r_[
+        z0,
+        np.eye(3).ravel(),
+    ]
+
+    def augmented_rhs(t, state):
+
+        z = state[:3]
+        Psi = state[3:].reshape(3, 3)
+
+        return np.r_[
+            log_rhs(t, z, p),
+            (
+                log_jacobian(z, p) @ Psi
+            ).ravel(),
+        ]
+
+    solution = solve_ivp(
+        augmented_rhs,
+        (0., T),
+        initial,
+        method='LSODA',
+        rtol=RTOL,
+        atol=ATOL,
+    )
+
+    if not solution.success:
+        raise RuntimeError(solution.message)
+
+    if not np.all(np.isfinite(solution.y)):
+        raise ValueError(
+            'Nonfinite shooting trajectory'
+        )
+
+    if not physical_trajectory(
+        np.exp(solution.y[:3]), p
+    ):
+        raise ValueError(
+            'Shooting trajectory left physical domain'
+        )
+
+    zT = solution.y[:3, -1]
+
+    PsiT = solution.y[
+        3:, -1
+    ].reshape(3, 3)
+
+    residual = np.r_[
+        zT-z0,
+        np.dot(z0-reference, tangent),
+    ]
+
+    J = np.zeros((4, 4))
+
+    J[:3, :3] = PsiT-np.eye(3)
+
+    J[:3, 3] = (
+        T*log_rhs(T, zT, p)
+    )
+
+    J[3, :3] = tangent
+
+    return residual, J
+
+
+def correct_cycle(p, guess):
+    """Correct a periodic guess using analytical shooting derivatives."""
+
     reference = np.asarray(
-        guess['log_state'], dtype=float
+        guess['log_state'],
+        dtype=float,
     )
 
     period = float(guess['period'])
 
-    tangent = log_rhs(0., reference, p)
+    tangent = log_rhs(
+        0., reference, p
+    )
 
     norm = np.linalg.norm(tangent)
 
@@ -484,41 +870,48 @@ def correct_cycle(p, guess):
 
     tangent /= norm
 
-    def residual(values):
-
-        z0 = np.asarray(values[:3])
-        T = float(np.exp(values[3]))
-
-        if not MIN_PERIOD <= T <= MAX_PERIOD:
-            raise ValueError('Invalid shooting period')
-
-        if np.max(np.abs(z0-reference)) > 5.:
-            raise ValueError(
-                'Shooting left initial-state neighborhood'
-            )
-
-        solution = integrate_log(z0, T, p)
-
-        recurrence = (
-            solution.y[:, -1]-z0
-        )
-
-        phase = float(
-            np.dot(z0-reference, tangent)
-        )
-
-        return np.r_[recurrence, phase]
-
     initial = np.r_[
         reference,
         np.log(period),
     ]
 
+    # Cache the latest evaluation to avoid integrating the
+    # identical initial-value problem more than once.
+    cache = {
+        'values': None,
+        'result': None,
+    }
+
+    def evaluate(values):
+
+        if (
+            cache['values'] is None
+            or not np.array_equal(
+                cache['values'], values
+            )
+        ):
+
+            cache['values'] = np.array(
+                values, copy=True
+            )
+
+            cache['result'] = shooting_system(
+                values,
+                reference,
+                tangent,
+                p,
+            )
+
+        return cache['result']
+
     try:
 
+        # jac=True tells SciPy that evaluate returns both
+        # the residual vector and its Jacobian matrix.
         result = root(
-            residual,
+            evaluate,
             initial,
+            jac=True,
             method='hybr',
             options=dict(
                 xtol=1e-8,
@@ -526,17 +919,26 @@ def correct_cycle(p, guess):
             ),
         )
 
-        error = float(np.max(
-            np.abs(residual(result.x))
-        ))
+        residual, _ = evaluate(
+            result.x
+        )
+
+        error = float(
+            np.max(abs(residual))
+        )
 
         if error > SHOOTING_TOL:
             return None
 
         return dict(
             log_state=result.x[:3],
-            period=float(np.exp(result.x[3])),
+            period=float(
+                np.exp(result.x[3])
+            ),
             shooting_residual=error,
+            shooting_evaluations=int(
+                result.nfev
+            ),
         )
 
     except (
@@ -806,18 +1208,36 @@ def initial_states(p, equilibria):
 # Search parameter locations
 # ==============================================================
 
-def scan_coordinates(data, base, axis):
-    """Select a regular grid and enrich oscillatory-unstable intervals."""
+def scan_coordinates(
+    data, base, axis, discovery_points=17
+):
+    """Construct a coarse global grid with dense promising intervals.
+
+    The ordinary discovery resolution is used across the full
+    parameter domain. The requested continuation resolution
+    determines sampling density in oscillatory-unstable regions.
+
+    Subsequent refinement is based on actual attractor results.
+    """
 
     from model.shared_eqn import jacobian
 
+    resolution = int(axis.resolution)
+
+    discovery_points = max(
+        3, int(discovery_points)
+    )
+
     coordinates = list(
         np.linspace(
-            0., 1., axis.resolution+1
+            0., 1.,
+            discovery_points,
         )
     )
 
-    unstable_intervals = []
+    intervals = []
+    centers = []
+    priority = []
 
     for path in data.get('paths', []):
 
@@ -827,23 +1247,27 @@ def scan_coordinates(data, base, axis):
         if path[0]['community'] != 'MSP':
             continue
 
-        current = []
+        active = []
+
+        previous_u = None
 
         for row in path:
 
-            try:
+            u = float(row['u'])
 
-                u = float(row['u'])
+            try:
 
                 p = parameters_at(
                     base, [axis], [u]
                 )
 
                 eigenvalues = np.linalg.eigvals(
-                    jacobian(state_of(row), p)
+                    jacobian(
+                        state_of(row), p
+                    )
                 )
 
-                oscillatory_unstable = any(
+                unstable_complex = any(
                     value.real > 1e-8
                     and abs(value.imag) > 1e-8
                     for value in eigenvalues
@@ -855,41 +1279,64 @@ def scan_coordinates(data, base, axis):
                 np.linalg.LinAlgError,
             ):
 
-                oscillatory_unstable = False
+                unstable_complex = False
 
-            if oscillatory_unstable:
+            if unstable_complex:
 
-                current.append(u)
+                if (
+                    not active
+                    and previous_u is not None
+                ):
+                    active.append(previous_u)
 
-            elif current:
+                active.append(u)
 
-                unstable_intervals.append(
-                    (min(current), max(current))
+            elif active:
+
+                active.append(u)
+
+                intervals.append((
+                    min(active),
+                    max(active),
+                ))
+
+                active = []
+
+            previous_u = u
+
+        if active:
+
+            intervals.append((
+                min(active),
+                max(active),
+            ))
+
+    # Densely sample promising intervals, regardless of their
+    # width relative to the total continuation domain.
+    for a, b in intervals:
+
+        a = max(0., a)
+        b = min(1., b)
+
+        if b < a:
+            continue
+
+        count = max(
+            EXTRA_OSCILLATORY_POINTS,
+            int(
+                np.ceil(
+                    (b-a)*resolution
                 )
-
-                current = []
-
-        if current:
-
-            unstable_intervals.append(
-                (min(current), max(current))
-            )
-
-    centers = []
-
-    for a, b in unstable_intervals:
+            )+1,
+        )
 
         coordinates.extend(
-            np.linspace(
-                a,
-                b,
-                EXTRA_OSCILLATORY_POINTS,
-            )
+            np.linspace(a, b, count)
         )
 
         centers.append(.5*(a+b))
 
-    # Include verified Hopf locations and points just beside them.
+    # Include locations on both sides of classified Hopf points.
     for event in data.get('events', []):
 
         if event.get('kind') != 'hopf':
@@ -898,33 +1345,154 @@ def scan_coordinates(data, base, axis):
         if event.get('community') != 'MSP':
             continue
 
-        u = float(event['u'])
+        uh = float(event['u'])
+
+        offset = min(
+            .0004,
+            .1/resolution,
+        )
 
         coordinates.extend((
-            u,
-            u-.1/axis.resolution,
-            u+.1/axis.resolution,
+            uh,
+            uh-offset,
+            uh+offset,
+            uh-.5/resolution,
+            uh+.5/resolution,
         ))
 
-    unique = sorted({
-        round(float(u), 10)
-        for u in coordinates
-        if 0 <= u <= 1
-    })
+        if (
+            event.get('classification_status') == 'verified'
+            and event.get('classification') == 'hopf_supercritical'
+        ):
 
-    # Start within promising intervals, then extend outward.
-    # This provides warm starts before examining stable-equilibrium
-    # regions where disconnected stable cycles might coexist.
-    if centers:
+            crossing = float(
+                event.get(
+                    'parameter_coefficient', 0.
+                )
+            )
 
-        unique.sort(
+            if crossing != 0:
+
+                # Search first on the side where a stable
+                # small-amplitude cycle is predicted to exist.
+                direction = np.sign(crossing)
+
+                priority.extend((
+                    uh+direction*offset,
+                    uh+direction*.5/resolution,
+                ))
+
+    def valid_unique(values):
+
+        return list(dict.fromkeys(
+            round(float(u), 10)
+            for u in values
+            if 0 <= u <= 1
+        ))
+
+    coordinates = valid_unique(coordinates)
+    priority = valid_unique(priority)
+
+    targets = priority or centers
+
+    if targets:
+
+        coordinates.sort(
             key=lambda u: min(
                 abs(u-center)
-                for center in centers
+                for center in targets
             )
         )
 
-    return unique
+    else:
+
+        coordinates.sort()
+
+    # Hopf-derived guesses are attempted first.
+    return valid_unique(
+        priority+coordinates
+    )
+
+
+def adaptive_refinement_coordinates(results, axis):
+    """Refine detected cycle regions and classification transitions.
+
+    Negative searches alone are not absence certificates.
+
+    Refinement terminates at the selected continuation resolution,
+    rather than at an arbitrary global number of attempts.
+    """
+
+    ordered = sorted(
+        results,
+        key=lambda row: row['u'],
+    )
+
+    new = []
+
+    nominal_step = 1/max(
+        1, axis.resolution
+    )
+
+    def signature(row):
+
+        return (
+            bool(row['stable_cycle_found']),
+            row.get('stable_equilibria', ''),
+            int(row.get('stable_equilibrium_count', 0)),
+            bool(row.get('oscillatory_instability')),
+            bool(row.get('analytical_exclusion')),
+            bool(row.get('equilibrium_search_error')),
+        )
+
+    for a, b in zip(
+        ordered, ordered[1:]
+    ):
+
+        ua = float(a['u'])
+        ub = float(b['u'])
+
+        gap = ub-ua
+
+        if gap <= nominal_step+1e-9:
+            continue
+
+        either_cycle = (
+            a['stable_cycle_found']
+            or b['stable_cycle_found']
+        )
+
+        either_oscillatory = (
+            a['oscillatory_instability']
+            or b['oscillatory_instability']
+        )
+
+        transition = (
+            signature(a) != signature(b)
+        )
+
+        # No need to refine a cycle search interval if both
+        # sampled endpoints have analytical exclusions and
+        # no other classification difference.
+        both_excluded = (
+            a.get('analytical_exclusion')
+            and b.get('analytical_exclusion')
+        )
+
+        if both_excluded and not transition:
+            continue
+
+        if (
+            either_cycle
+            or either_oscillatory
+            or transition
+        ):
+
+            new.append(
+                round(.5*(ua+ub), 10)
+            )
+
+    return list(dict.fromkeys(new))
 
 
 # ==============================================================
@@ -938,7 +1506,16 @@ def search_location(
     warm_seed,
     checkpoint,
     record_attempt,
+    hopf_guesses=None,
 ):
+    """Search using increasingly expensive initialization methods.
+
+    Priority:
+        1. Direct shooting from a neighboring verified cycle.
+        2. Direct shooting from a Hopf normal-form approximation.
+        3. Forward integration from a neighboring cycle.
+        4. Forward integration from deterministic initial states.
+    """
 
     tasks = []
 
@@ -949,19 +1526,31 @@ def search_location(
             warm_seed,
         ))
 
-    for state in initial_states(
-        p, equilibria
-    ):
+    for guess in hopf_guesses or []:
 
         tasks.append((
-            'manual',
-            state,
+            'hopf_normal_form',
+            guess,
         ))
+
+    if warm_seed is not None:
+
+        tasks.append((
+            'reuse_trajectory',
+            warm_seed,
+        ))
+
+    tasks.extend(
+        ('manual', state)
+        for state in initial_states(
+            p, equilibria
+        )
+    )
 
     for kind, seed in tasks:
 
         checkpoint(
-            f'Periodic {kind} · u={u:.5f}'
+            f'{kind} · u={u:.6f}'
         )
 
         started = time.monotonic()
@@ -969,18 +1558,34 @@ def search_location(
         reason = 'not_confirmed'
         found = None
 
+        guess_seconds = 0.
+        correction_seconds = 0.
+        verification_seconds = 0.
+        evaluations = 0
+
         try:
 
-            if kind == 'reuse':
+            before = time.monotonic()
 
-                # A neighboring verified orbit is usually a much
-                # better initial guess than a random perturbation.
+            if kind == 'hopf_normal_form':
+
+                guess = seed
+
+            elif kind in (
+                'reuse',
+                'reuse_trajectory',
+            ):
+
                 state = feasible_seed(
                     np.exp(seed['log_state']),
                     p,
                 )
 
-                if state is not None:
+                if state is None:
+
+                    guess = None
+
+                elif kind == 'reuse':
 
                     guess = dict(
                         log_state=np.log(state),
@@ -989,7 +1594,11 @@ def search_location(
 
                 else:
 
-                    guess = None
+                    guess = trajectory_guess(
+                        p,
+                        state,
+                        equilibria,
+                    )
 
             else:
 
@@ -999,46 +1608,41 @@ def search_location(
                     equilibria,
                 )
 
+            guess_seconds = (
+                time.monotonic()-before
+            )
+
             if guess is not None:
+
+                before = time.monotonic()
 
                 corrected = correct_cycle(
                     p, guess
                 )
 
+                correction_seconds = (
+                    time.monotonic()-before
+                )
+
                 if corrected is not None:
 
+                    evaluations = int(
+                        corrected.get(
+                            'shooting_evaluations', 0
+                        )
+                    )
+
+                    before = time.monotonic()
+
+                    # Keep the independent, tighter Floquet
+                    # and periodic-closure verification.
                     found = verify_cycle(
                         p, corrected
                     )
 
-            direct_reuse = (
-                kind == 'reuse'
-                and found is not None
-            )
-
-            # If direct warm-start shooting fails, use forward
-            # integration from the previous periodic solution.
-            if (
-                found is None
-                and kind == 'reuse'
-                and state is not None
-            ):
-
-                guess = trajectory_guess(
-                    p, state, equilibria
-                )
-
-                if guess is not None:
-
-                    corrected = correct_cycle(
-                        p, guess
+                    verification_seconds = (
+                        time.monotonic()-before
                     )
-
-                    if corrected is not None:
-
-                        found = verify_cycle(
-                            p, corrected
-                        )
 
             if found is not None:
                 reason = 'verified_stable_cycle'
@@ -1056,27 +1660,32 @@ def search_location(
             kind=kind,
             uv=[float(u)],
             seconds=time.monotonic()-started,
+            guess_seconds=guess_seconds,
+            correction_seconds=correction_seconds,
+            verification_seconds=verification_seconds,
+            shooting_evaluations=evaluations,
             reason=reason,
         ))
 
-        if found is not None:
+        if found is None:
+            continue
 
-            found['row']['cycle_parent_u'] = (
-                float(seed['source_u'])
-                if (
-                    direct_reuse
-                    and 'source_u' in seed
-                )
-                else None
+        found['row']['cycle_parent_u'] = (
+            float(seed['source_u'])
+            if (
+                kind == 'reuse'
+                and 'source_u' in seed
             )
+            else None
+        )
 
-            found['row']['cycle_search_method'] = (
-                'direct_warm_start'
-                if direct_reuse
-                else 'trajectory_initialized_shooting'
-            )
+        found['row']['cycle_search_method'] = kind
 
-            return found
+        found['row']['shooting_evaluations'] = (
+            evaluations
+        )
+
+        return found
 
     return None
 
@@ -1091,28 +1700,49 @@ def analyze_stable_attractors(
     axis,
     checkpoint,
     folder,
+    options=None,
 ):
 
     from model.shared_eqn import solve_equilibria
+
+    options = options or {}
 
     folder = Path(folder)
 
     started = time.monotonic()
 
     coordinates = scan_coordinates(
-        data, base, axis
+        data,
+        base,
+        axis,
+        discovery_points=int(
+            options.get('discovery_points', 17)
+        ),
     )
+
+    coarse_count = len(coordinates)
 
     results = []
     attempts = []
     bank = []
 
+    scheduled = set(coordinates)
+
+    refinement_round = 0
+
     payload = dict(
+        # Keep the existing method name for plotting compatibility.
         method='Adaptive ODE integration and shooting',
+        algorithm='SIMP analytical adaptive search',
         status='running',
         settings=dict(
             scan_points=len(coordinates),
+            coarse_points=coarse_count,
             scan_resolution=int(axis.resolution),
+            analytical_screening=True,
+            analytical_shooting_jacobian=True,
+            hopf_normal_form_initialization=True,
+            adaptive_sampling=True,
             generic_seeds=GENERIC_SEEDS,
             initial_cycles=INITIAL_CYCLES,
             max_initial_days=MAX_INITIAL_DAYS,
@@ -1123,13 +1753,8 @@ def analyze_stable_attractors(
             floquet_tolerance=FLOQUET_TOL,
         ),
         locations=results,
-        sampling_coordinates=[
-            float(u) for u in coordinates
-        ],
+        sampling_coordinates=[],
         attempts=attempts,
-
-        # No periodic branches are claimed: these are independent
-        # verified parameter locations, not full continuation curves.
         branches=[],
         hopf=[],
         coverage={},
@@ -1150,28 +1775,62 @@ def analyze_stable_attractors(
             for row in results
         )
 
+        excluded = sum(
+            bool(row['analytical_exclusion'])
+            for row in results
+        )
+
+        unresolved = [
+            [row['u']]
+            for row in results
+            if (
+                not row['stable_cycle_found']
+                and not row['analytical_exclusion']
+            )
+        ]
+
+        payload['sampling_coordinates'] = [
+            float(u)
+            for u in coordinates
+        ]
+
+        payload['settings']['scan_points'] = (
+            len(coordinates)
+        )
+
         payload['coverage'].update(
             scheduled_locations=len(coordinates),
             checked_locations=completed,
             completed_locations=completed,
             native_attempts=0,
-            shooting_attempts=len(attempts),
+            shooting_attempts=len(attempts)-excluded,
+            analytical_exclusions=excluded,
+            refinement_rounds=refinement_round,
             elapsed_seconds=time.monotonic()-started,
             verified_periodic_locations=confirmed,
             unvisited_locations=[
-                [u] for u in coordinates[completed:]
+                [u]
+                for u in coordinates[completed:]
             ],
-            incomplete_locations=[],
+            incomplete_locations=unresolved,
             pending_branches=[],
             incomplete_arms=[],
             limit_reached=completed<len(coordinates),
         )
 
-        # Existing diagnostic exporter and ETA reader can access
-        # this file using their existing periodic_H*.json pattern.
-        write_json(
-            folder/f'periodic_{suffix}.json',
-            payload,
+        payload['timing'] = dict(
+            guess_seconds=sum(
+                a.get('guess_seconds', 0.)
+                for a in attempts
+            ),
+            correction_seconds=sum(
+                a.get('correction_seconds', 0.)
+                for a in attempts
+            ),
+            verification_seconds=sum(
+                a.get('verification_seconds', 0.)
+                for a in attempts
+            ),
         )
 
         ordered = sorted(
@@ -1179,199 +1838,318 @@ def analyze_stable_attractors(
             key=lambda row: row['u'],
         )
 
-        write_csv(
-            folder/f'stable_orbit_scan_{suffix}.csv',
-            ordered,
-        )
-
         data['stable_orbits'] = [
-            row for row in ordered
+            row
+            for row in ordered
             if (
-                row.get('stable_cycle_found')
-                and row.get('status') == 'verified_periodic'
-                and row.get('stability') == 'stable'
+                row['stable_cycle_found']
+                and row['status'] == 'verified_periodic'
+                and row['stability'] == 'stable'
             )
         ]
 
-        # Existing continuation plots and external consumers
-        # use this common periodic-results interface.
+        # Preserve the existing periodic-envelope interface.
         data['oscillations'] = list(
             data['stable_orbits']
+        )
+
+        write_json(
+            folder/f'periodic_{suffix}.json',
+            payload,
+        )
+
+        write_csv(
+            folder/f'stable_orbit_scan_{suffix}.csv',
+            ordered,
         )
 
     save()
 
     try:
 
-        for i, u in enumerate(
-            coordinates, 1
-        ):
+        i = 0
 
-            checkpoint(
-                f'Periodic stable scan '
-                f'{i}/{len(coordinates)}'
-            )
+        while True:
 
-            p = parameters_at(
-                base, [axis], [u]
-            )
+            # --------------------------------------------------
+            # Evaluate all currently scheduled locations.
+            # --------------------------------------------------
 
-            x = float(axis.physical(u))
+            while i < len(coordinates):
 
-            equilibrium_error = ''
+                u = coordinates[i]
 
-            try:
-
-                equilibria = solve_equilibria(p)
-
-            except (
-                ValueError,
-                RuntimeError,
-                ArithmeticError,
-                np.linalg.LinAlgError,
-            ) as exc:
-
-                equilibria = []
-                equilibrium_error = str(exc)
-
-            stable_communities = sorted({
-                e.community
-                for e in equilibria
-                if e.stability.classification
-                == 'stable'
-            })
-
-            oscillatory_instability = any(
-                e.community == 'MSP'
-                and any(
-                    value.real > 1e-8
-                    and abs(value.imag) > 1e-8
-                    for value in e.stability.eigenvalues
+                stage = (
+                    'coarse'
+                    if i < coarse_count
+                    else 'refinement'
                 )
-                for e in equilibria
-            )
 
-            # Reuse the nearest previously verified cycle.
-            warm_seed = None
+                prefix = (
+                    f'Periodic stable scan '
+                    f'{i+1}/{len(coordinates)}'
+                    f' · {stage}'
+                )
 
-            if bank:
+                checkpoint(prefix)
 
-                nearest = min(
-                    bank,
-                    key=lambda entry: abs(
-                        entry['u']-u
+                location_started = time.monotonic()
+
+                p = parameters_at(
+                    base, [axis], [u]
+                )
+
+                x = float(axis.physical(u))
+
+                # ----------------------------------------------
+                # Analytical screening
+                # ----------------------------------------------
+
+                exclusion = (
+                    analytical_cycle_exclusion(p)
+                    or ''
+                )
+
+                # Equilibrium analysis remains necessary even
+                # where positive periodic cycles are excluded.
+                equilibrium_error = ''
+
+                try:
+
+                    equilibria = solve_equilibria(p)
+
+                except (
+                    ValueError,
+                    RuntimeError,
+                    ArithmeticError,
+                    np.linalg.LinAlgError,
+                ) as exc:
+
+                    equilibria = []
+                    equilibrium_error = str(exc)
+
+                stable_equilibria = [
+                    e
+                    for e in equilibria
+                    if (
+                        e.stability.classification
+                        == 'stable'
+                    )
+                ]
+
+                stable_communities = sorted({
+                    e.community
+                    for e in stable_equilibria
+                })
+
+                oscillatory_instability = any(
+                    e.community == 'MSP'
+                    and any(
+                        value.real > 1e-8
+                        and abs(value.imag) > 1e-8
+                        for value in e.stability.eigenvalues
+                    )
+                    for e in equilibria
+                )
+
+                found = None
+
+                if exclusion:
+
+                    # A sufficient mathematical exclusion:
+                    # no forward integration or shooting needed.
+                    attempts.append(dict(
+                        kind='analytical_exclusion',
+                        uv=[float(u)],
+                        seconds=0.,
+                        reason=exclusion,
+                    ))
+
+                else:
+
+                    # ------------------------------------------
+                    # Reuse neighboring verified cycles.
+                    # ------------------------------------------
+
+                    warm_seed = None
+
+                    if bank:
+
+                        nearest = min(
+                            bank,
+                            key=lambda entry: abs(
+                                entry['u']-u
+                            ),
+                        )
+
+                        if abs(
+                            nearest['u']-u
+                        ) <= max(
+                            .02,
+                            3/axis.resolution,
+                        ):
+
+                            warm_seed = dict(
+                                nearest['seed'],
+                                source_u=float(
+                                    nearest['u']
+                                ),
+                            )
+
+                    # ------------------------------------------
+                    # Construct local Hopf approximations.
+                    # ------------------------------------------
+
+                    hopf_guesses = hopf_initial_guesses(
+                        data,
+                        base,
+                        axis,
+                        u,
+                        equilibria,
+                    )
+
+                    # ------------------------------------------
+                    # Search using cheapest methods first.
+                    # ------------------------------------------
+
+                    found = search_location(
+                        p,
+                        u,
+                        equilibria,
+                        warm_seed,
+                        checkpoint=lambda message: checkpoint(
+                            prefix+' · '+message
+                        ),
+                        record_attempt=attempts.append,
+                        hopf_guesses=hopf_guesses,
+                    )
+
+                stable_cycle = found is not None
+                stable_eq = bool(stable_equilibria)
+
+                if stable_cycle and stable_eq:
+
+                    classification = 'coexistence'
+
+                elif stable_cycle and equilibrium_error:
+
+                    classification = (
+                        'stable_cycle_equilibria_unresolved'
+                    )
+
+                elif stable_cycle:
+
+                    classification = (
+                        'stable_cycle_no_stable_equilibrium_found'
+                    )
+
+                elif stable_eq:
+
+                    classification = (
+                        'stable_equilibrium_cycle_not_confirmed'
+                    )
+
+                else:
+
+                    classification = 'unresolved'
+
+                row = dict(
+                    H=float(base.H),
+                    u=float(u),
+                    uv=[float(u)],
+                    x=x,
+                    stable_equilibria='+'.join(
+                        stable_communities
+                    ),
+                    stable_equilibrium_count=len(
+                        stable_equilibria
+                    ),
+                    equilibrium_search_error=(
+                        equilibrium_error
+                    ),
+                    oscillatory_instability=(
+                        oscillatory_instability
+                    ),
+                    analytical_exclusion=exclusion,
+                    stable_cycle_found=stable_cycle,
+                    coexistence_eq_and_cycle=(
+                        stable_cycle and stable_eq
+                    ),
+                    attractor_class=classification,
+                    sampling_stage=stage,
+                    status=(
+                        'verified_periodic'
+                        if stable_cycle
+                        else 'analytically_excluded'
+                        if exclusion
+                        else 'cycle_not_confirmed'
+                    ),
+                    seconds=(
+                        time.monotonic()-location_started
                     ),
                 )
 
-                if abs(nearest['u']-u) <= max(
-                    .02,
-                    3/axis.resolution,
-                ):
+                if found is not None:
 
-                    warm_seed = dict(
-                        nearest['seed'],
-                        source_u=float(nearest['u']),
+                    row.update(found['row'])
+
+                    bank.append(dict(
+                        u=float(u),
+                        seed=found['seed'],
+                    ))
+
+                results.append(row)
+
+                i += 1
+
+                save()
+
+                checkpoint(
+                    prefix+' complete'
+                )
+
+            # --------------------------------------------------
+            # Adaptively refine promising parameter intervals.
+            # --------------------------------------------------
+
+            additional = [
+                u
+                for u in adaptive_refinement_coordinates(
+                    results, axis
+                )
+                if u not in scheduled
+            ]
+
+            if not additional:
+                break
+
+            refinement_round += 1
+
+            if bank:
+
+                additional.sort(
+                    key=lambda u: min(
+                        abs(u-entry['u'])
+                        for entry in bank
                     )
-
-            before = time.monotonic()
-
-            found = search_location(
-                p,
-                u,
-                equilibria,
-                warm_seed,
-                checkpoint=lambda message: checkpoint(
-                    f'Periodic stable scan '
-                    f'{i}/{len(coordinates)} · '
-                    + message
-                ),
-                record_attempt=attempts.append,
-            )
-
-            stable_cycle = found is not None
-            stable_eq = bool(stable_communities)
-
-            if stable_cycle and stable_eq:
-
-                classification = 'coexistence'
-
-            elif stable_cycle and equilibrium_error:
-
-                classification = (
-                    'stable_cycle_equilibria_unresolved'
                 )
 
-            elif stable_cycle:
+            coordinates.extend(additional)
+            scheduled.update(additional)
 
-                classification = (
-                    'stable_cycle_no_stable_equilibrium_found'
-                )
-
-            elif stable_eq:
-
-                classification = (
-                    'stable_equilibrium_cycle_not_confirmed'
-                )
-
-            else:
-
-                classification = 'unresolved'
-
-            row = dict(
-                H=float(base.H),
-                u=float(u),
-                uv=[float(u)],
-                x=x,
-                stable_equilibria='+'.join(
-                    stable_communities
-                ),
-                stable_equilibrium_count=sum(
-                    e.stability.classification
-                    == 'stable'
-                    for e in equilibria
-                ),
-                equilibrium_search_error=(
-                    equilibrium_error
-                ),
-                oscillatory_instability=(
-                    oscillatory_instability
-                ),
-                stable_cycle_found=stable_cycle,
-                coexistence_eq_and_cycle=(
-                    stable_cycle and stable_eq
-                ),
-                attractor_class=classification,
-                status=(
-                    'verified_periodic'
-                    if stable_cycle
-                    else 'cycle_not_confirmed'
-                ),
-                seconds=time.monotonic()-before,
-            )
-
-            if found is not None:
-
-                row.update(found['row'])
-
-                bank.append(dict(
-                    u=float(u),
-                    seed=found['seed'],
-                ))
-
-            results.append(row)
-
-            # Preserve scientific results if a calculation is stopped.
             save()
 
             checkpoint(
-                f'Periodic stable scan '
-                f'{i}/{len(coordinates)} complete'
+                f'Adaptive periodic refinement '
+                f'{refinement_round} · '
+                f'{len(additional)} additional locations'
             )
 
         payload['status'] = (
             'completed_with_unresolved_searches'
             if any(
                 not row['stable_cycle_found']
+                and not row['analytical_exclusion']
                 for row in results
             )
             else 'completed'
@@ -1388,7 +2166,12 @@ def analyze_stable_attractors(
 
     summary = dict(
         method=payload['method'],
+        algorithm=payload['algorithm'],
         locations=len(results),
+        analytical_exclusions=sum(
+            bool(row['analytical_exclusion'])
+            for row in results
+        ),
         stable_periodic_locations=sum(
             row['stable_cycle_found']
             for row in results
@@ -1401,11 +2184,19 @@ def analyze_stable_attractors(
             row['attractor_class']
             for row in results
         )),
+        attempt_types=dict(Counter(
+            a['kind']
+            for a in attempts
+        )),
+        refinement_rounds=refinement_round,
         attempts=len(attempts),
+        timing=payload['timing'],
         seconds=time.monotonic()-started,
         limitations=(
-            'Finite initial conditions and finite parameter sampling '
-            'do not establish global absence of stable periodic orbits. '
+            'Analytical exclusions apply to strictly positive '
+            'MSP periodic orbits. Other unsuccessful searches '
+            'are inconclusive. Coarse sampling can miss narrow '
+            'disconnected periodic-attractor regions. '
             'Unstable cycles and exact periodic folds are not traced.'
         ),
     )
@@ -2086,9 +2877,17 @@ def _run_depth(
                     else current-1
                 )
 
+                fraction = completed/total
+
+                estimate = (
+                    .75+.10*fraction
+                    if '· coarse' in message
+                    else .85+.13*fraction
+                )
+
                 periodic_progress = max(
                     periodic_progress,
-                    .75+.24*completed/total,
+                    min(estimate, .98),
                 )
 
         elif message.startswith(
@@ -2157,6 +2956,7 @@ def _run_depth(
                 axes[0],
                 periodic_checkpoint,
                 folder,
+                options=options,
             )
 
         else:
