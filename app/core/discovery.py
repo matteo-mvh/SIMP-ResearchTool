@@ -40,6 +40,9 @@ def discover(directory=None) -> dict[str, Analysis]:
             if form == 'sensitivity':
                 from model.sensitivity_config import job_schema
                 pars = {**job_schema(), **pars}
+            if form == 'basin':
+                from model.basin_config import job_schema
+                pars = {**job_schema(), **pars}
             if form == 'timeseries':
                 from model.timeseries_config import job_schema
                 pars = {**job_schema(), **pars}

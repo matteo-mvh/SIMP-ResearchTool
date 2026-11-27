@@ -1,0 +1,6 @@
+id = "basin"
+name = "Basin of attraction"
+group = "Time integration and attractors"
+description = "Estimate basin volume fractions at fixed model parameters; inspect sampled initial conditions and attractors."
+entrypoint = "run.py"
+form = "basin"
