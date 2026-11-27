@@ -17,6 +17,10 @@ from app.core.dpi import get_dpi_for_window
 
 from app.core.discovery import discover, validate
 from app.core.storage import Repository
+from app.core.job_eta import (
+    bind_creation_estimate,
+    queue_columns,
+)
 from app.core.worker import request, start_worker, worker_is_alive
 from app.core.paths import ROOT, DATA_ROOT, RESULTS, STATE, ASSETS
 
@@ -426,9 +430,23 @@ class Application(tk.Tk):
         label(bottom,'Run name',11,True).pack(side='left',padx=(17,8),pady=16)
         self.job_name_var=tk.StringVar(value=spec.name+' test')
         ttk.Entry(bottom,textvariable=self.job_name_var,width=28).pack(side='left',padx=(0,14))
-        button(bottom,'Create (do not run)',lambda:self.save_job(False)).pack(side='right',padx=(7,15))
-        button(bottom,'Create & queue',lambda:self.save_job(True),primary=True).pack(side='right')
+        draft_button = button(bottom,'Create (do not run)',lambda:self.save_job(False))
+        draft_button.pack(side='right',padx=(7,15))
+        queue_button = button(bottom,'Create & queue',lambda:self.save_job(True),primary=True)
+        queue_button.pack(side='right')
+
         if seed_id:self.apply_seed_id(seed_id)
+
+        bind_creation_estimate(
+            bottom,
+            self.repo,
+            spec,
+            lambda: validate(spec,self.values_from_controls()),
+            (
+                (draft_button, 'Create draft'),
+                (queue_button, 'Create & queue'),
+            ),
+        )
 
     def _clear_extra_fields(self):
         if hasattr(self,'extra_seed_fields'):
@@ -554,9 +572,26 @@ class Application(tk.Tk):
                 button(top,'Queue all',self.queue_all).pack(side='right')
             if title.startswith('WAITING'):
                 button(top,'Remove selected from queue',self.dequeue_selected).pack(side='right')
-            tree=self.add_tree(block,('name','type','created','status'),
-                               ('Name','Analysis','Created','Status'),(220,210,130,95),height,
-                               [(j['id'],(j['name'],self.analysis_name(j['analysis_id']),human_date(j['created_at']),j['status'].upper())) for j in items])
+            tree=self.add_tree(
+                block,
+                ('name','type','created','status','workload','runtime'),
+                ('Name','Analysis','Created','Status','Workload','Est. runtime / left'),
+                (145,145,100,80,160,165),
+                height,
+                [
+                    (
+                        j['id'],
+                        (
+                            j['name'],
+                            self.analysis_name(j['analysis_id']),
+                            human_date(j['created_at']),
+                            j['status'].upper(),
+                            *queue_columns(self.repo,j),
+                        ),
+                    )
+                    for j in items
+                ],
+            )
             self.queue_trees[title.split(' · ')[0]]=tree
         row=tk.Frame(self.body,bg=C['bg']);row.pack(fill='x',pady=(3,0))
         button(row,'Delete selected drafts',self.delete_drafts).pack(side='left')
@@ -581,8 +616,13 @@ class Application(tk.Tk):
             for ident in tree.get_children():
                 if ident not in target:tree.delete(ident)
             for j in items:
-                values=(j['name'],self.analysis_name(j['analysis_id']),
-                        human_date(j['created_at']),j['status'].upper())
+                values=(
+                    j['name'],
+                    self.analysis_name(j['analysis_id']),
+                    human_date(j['created_at']),
+                    j['status'].upper(),
+                    *queue_columns(self.repo,j),
+                )
                 if tree.exists(j['id']):
                     if tuple(tree.item(j['id'],'values'))!=values:
                         tree.item(j['id'],values=values)

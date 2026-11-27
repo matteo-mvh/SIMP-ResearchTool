@@ -7,6 +7,10 @@ from model.shared_eqn import Parameters
 from model.parameter_metadata import GROUPS
 from model.sensitivity_config import default_ranges,parse_job
 from app.continuation_form import ContinuationForm
+from app.core.job_eta import (
+    bind_creation_estimate,
+    sensitivity_values,
+)
 
 
 class SensitivityForm(tk.Frame):
@@ -19,8 +23,10 @@ class SensitivityForm(tk.Frame):
         self.rows={};self.settings={};self.name=tk.StringVar(value=spec.name)
         bottom=tk.Frame(self,bg='white');bottom.pack(side='bottom',fill='x',pady=8)
         ttk.Entry(bottom,textvariable=self.name).pack(side='left',fill='x',expand=True)
-        button(bottom,'Create draft',lambda:self.save(False)).pack(side='left',padx=6)
-        button(bottom,'Create & queue',lambda:self.save(True),primary=True).pack(side='left')
+        draft_button = button(bottom,'Create draft',lambda:self.save(False))
+        draft_button.pack(side='left',padx=6)
+        queue_button = button(bottom,'Create & queue',lambda:self.save(True),primary=True)
+        queue_button.pack(side='left')
         # Split the available form width equally (excluding the draggable sash).
         sash_width=px(7)
         split=tk.PanedWindow(self,orient='horizontal',sashwidth=sash_width,
@@ -82,6 +88,17 @@ class SensitivityForm(tk.Frame):
         help_label=label(tasks,'Uniform, independent LHS sampling.\nStarting ranges are 50–150% of model defaults; these are editable suggestions, not thesis uncertainty bounds.\n\nBistability means at least two strictly stable equilibria. ΔS is the largest seagrass difference between them (mmol N/m²).\n\nStandard / Thorough: 257 / 513 root-grid points with refinement. Finite root searches can miss narrow branches.\n\nAll samples become seeds. Figures: PNG + PDF.',9,muted=True,wraplength=px(300),justify='left',anchor='w')
         help_label.pack(fill='x',padx=px(12),pady=px(15))
         tasks.bind('<Configure>',lambda e:help_label.configure(wraplength=max(1,e.width-px(24))),add='+')
+
+        bind_creation_estimate(
+            self,
+            app.repo,
+            spec,
+            lambda: sensitivity_values(self),
+            (
+                (draft_button, 'Create draft'),
+                (queue_button, 'Create & queue'),
+            ),
+        )
 
     def toggle(self,key):
         self.rows[key][0].set(not self.rows[key][0].get());self.render(key)

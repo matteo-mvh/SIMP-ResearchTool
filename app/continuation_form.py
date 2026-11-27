@@ -6,6 +6,10 @@ from app.parameter_inspection import seed_parameters
 from model.shared_eqn import Parameters
 from model.parameter_metadata import GROUPS
 from model.continuation_config import parse_job
+from app.core.job_eta import (
+    bind_creation_estimate,
+    continuation_values,
+)
 
 
 # Short display labels only; backend keys and validation remain unchanged.
@@ -58,8 +62,10 @@ class ContinuationForm(tk.Frame):
         bottom = tk.Frame(self, bg='white'); bottom.pack(side='bottom', fill='x', pady=(px(8),0))
         label(bottom, 'Run name', 10, True).pack(side='left', padx=px(8))
         ttk.Entry(bottom, textvariable=self.name, width=25).pack(side='left', fill='x', expand=True)
-        button(bottom, 'Create draft', lambda: self.save(False)).pack(side='left', padx=px(6))
-        button(bottom, 'Create & queue', lambda: self.save(True), primary=True).pack(side='left')
+        draft_button = button(bottom, 'Create draft', lambda: self.save(False))
+        draft_button.pack(side='left', padx=px(6))
+        queue_button = button(bottom, 'Create & queue', lambda: self.save(True), primary=True)
+        queue_button.pack(side='left')
         split = tk.PanedWindow(self, orient='horizontal', bg=C['line'], sashwidth=px(7), bd=0)
         split.pack(fill='both', expand=True)
         left, right = (tk.Frame(split,bg='white') for _ in range(2))
@@ -139,6 +145,17 @@ class ContinuationForm(tk.Frame):
         self.controls['depth_count'].trace_add('write',self.depth_layout)
         self.update_disabled()
         if seed_id:self.seed.set(seed_id);self.load_seed()
+
+        bind_creation_estimate(
+            self,
+            app.repo,
+            spec,
+            lambda: continuation_values(self),
+            (
+                (draft_button, 'Create draft'),
+                (queue_button, 'Create & queue'),
+            ),
+        )
 
     def scroll_panel(self,parent):
         canvas=tk.Canvas(parent,bg='white',highlightthickness=0)
