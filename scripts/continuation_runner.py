@@ -16,7 +16,6 @@ import tempfile
 
 from app.core.control import load_args, StopRequested
 from model.continuation_config import parse_job
-from model.periodic_config import PERIODIC_DEPTH_BUDGET
 
 
 def write_csv(path, rows):
@@ -24,25 +23,17 @@ def write_csv(path, rows):
         return
 
     fields = list(dict.fromkeys(
-        key for row in rows for key in row
+        k for row in rows for k in row
     ))
 
-    with Path(path).open(
-        'w', newline='', encoding='utf-8'
-    ) as stream:
-
-        writer = csv.DictWriter(
-            stream, fieldnames=fields
-        )
-
+    with Path(path).open('w', newline='', encoding='utf-8') as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
 
 
-def _run_depth(
-    p, axes, options, dimensions, folder, report
-):
-    """Calculate equilibria, bifurcations and periodic orbits."""
+def _run_depth(p, axes, options, dimensions, folder, report):
+    """Compute equilibrium branches, bifurcations and periodic solutions."""
 
     from model.pyoomph_continuation import (
         continue_1d,
@@ -50,7 +41,6 @@ def _run_depth(
         locate_events,
         native_session,
     )
-
     from model.continuation_refinement import refine_regions
 
     depth = p.H
@@ -60,8 +50,6 @@ def _run_depth(
     current_start = ''
 
     def checkpoint(message):
-        """Report equilibrium and bifurcation progress."""
-
         nonlocal local_progress, current_start
 
         counts = re.search(r'(\d+)/(\d+)', message)
@@ -69,21 +57,20 @@ def _run_depth(
         if counts and 'Equilibrium overview' in message:
             local_progress = max(
                 local_progress,
-                .15 * int(counts[1]) / int(counts[2]),
+                .15*int(counts[1])/int(counts[2]),
             )
 
         elif counts and 'Checking start' in message:
             local_progress = max(
                 local_progress,
-                .15 + .60 * int(counts[1]) / int(counts[2]),
+                .15+.60*int(counts[1])/int(counts[2]),
             )
-
             current_start = counts[0]
 
         elif counts and 'Checking region' in message:
             local_progress = max(
                 local_progress,
-                .75 + .20 * int(counts[1]) / int(counts[2]),
+                .75+.20*int(counts[1])/int(counts[2]),
             )
 
         elif 'correction' in message:
@@ -104,12 +91,11 @@ def _run_depth(
         ):
             phase += f' · start {current_start}'
 
-        # Reserve the final 25% of each depth for periodic analysis.
-        report(.75 * local_progress, phase)
+        report(.75*local_progress, phase)
 
-    # ============================================================
-    # STAGE 1: Equilibria and native bifurcation continuation
-    # ============================================================
+    # ------------------------------------------------------------
+    # Equilibrium and bifurcation continuation.
+    # ------------------------------------------------------------
 
     with native_session(
         reuse=(
@@ -130,15 +116,10 @@ def _run_depth(
 
         if dimensions == 1:
 
-            data = continue_1d(
-                p, axes[0], **common
-            )
+            data = continue_1d(p, axes[0], **common)
 
             if (
-                any(
-                    row['community'] != '0'
-                    for row in data['scan']
-                )
+                any(r['community'] != '0' for r in data['scan'])
                 and not any(
                     path
                     and path[0]['community'] != '0'
@@ -148,13 +129,11 @@ def _run_depth(
             ):
                 raise RuntimeError(
                     'No native branches could be traced. '
-                    'Inspect the worker log; discovery points '
-                    'are not a continuation result.'
+                    'Inspect the worker log.'
                 )
 
             events = []
 
-            # Detect events along the actual native branches.
             for path in data['paths']:
 
                 found, notes = locate_events(
@@ -168,15 +147,13 @@ def _run_depth(
 
                 for event in found:
 
-                    duplicate = any(
-                        old['kind'] == event['kind']
-                        and old['community'] == event['community']
-                        and old['invader'] == event['invader']
-                        and abs(old['u'] - event['u']) < 1e-5
-                        for old in events
-                    )
-
-                    if not duplicate:
+                    if not any(
+                        e['kind'] == event['kind']
+                        and e['community'] == event['community']
+                        and e['invader'] == event['invader']
+                        and abs(e['u']-event['u']) < 1e-5
+                        for e in events
+                    ):
                         events.append(event)
 
                 data['diagnostics'].extend(notes)
@@ -194,16 +171,11 @@ def _run_depth(
                         else 'pyoomph_arclength'
                     ),
                 )
-                for branch, path in enumerate(
-                    data['paths'], 1
-                )
+                for branch, path in enumerate(data['paths'], 1)
                 for i, row in enumerate(path)
             ]
 
-            write_csv(
-                folder / f'branches_H{depth:g}.csv',
-                rows,
-            )
+            write_csv(folder/f'branches_H{depth:g}.csv', rows)
 
         else:
 
@@ -220,35 +192,31 @@ def _run_depth(
             )
 
             discovery_seconds = (
-                time.monotonic() - discovery_start
+                time.monotonic()-discovery_start
             )
 
             refinement_start = time.monotonic()
 
             def save_refinement_checkpoint(current, history):
-                """Preserve partial native event curves."""
-
-                rows = [
-                    dict(
-                        row,
-                        curve=curve,
-                        point=i,
-                        method='pyoomph_event_arclength',
-                    )
-                    for curve, path in enumerate(
-                        current['curves'], 1
-                    )
-                    for i, row in enumerate(path)
-                ]
 
                 write_csv(
-                    folder / f'curves_H{depth:g}.csv',
-                    rows,
+                    folder/f'curves_H{depth:g}.csv',
+                    [
+                        dict(
+                            row,
+                            curve=curve,
+                            point=i,
+                            method='pyoomph_event_arclength',
+                        )
+                        for curve, path in enumerate(
+                            current['curves'], 1
+                        )
+                        for i, row in enumerate(path)
+                    ],
                 )
 
                 (
-                    folder
-                    / f'refinement_checkpoint_H{depth:g}.json'
+                    folder/f'refinement_checkpoint_H{depth:g}.json'
                 ).write_text(
                     json.dumps(
                         dict(
@@ -271,18 +239,16 @@ def _run_depth(
                 int(options['max_steps']),
                 checkpoint,
                 max_rounds=int(options['refinement_rounds']),
-                searches_per_round=int(
-                    options['refinement_searches']
-                ),
+                searches_per_round=int(options['refinement_searches']),
                 on_round=save_refinement_checkpoint,
             )
 
             refinement_seconds = (
-                time.monotonic() - refinement_start
+                time.monotonic()-refinement_start
             )
 
             (
-                folder / f'geometry_H{depth:g}.json'
+                folder/f'geometry_H{depth:g}.json'
             ).write_text(
                 json.dumps(
                     data.get('geometry_diagnostics', []),
@@ -292,7 +258,7 @@ def _run_depth(
             )
 
             (
-                folder / f'refinement_H{depth:g}.json'
+                folder/f'refinement_H{depth:g}.json'
             ).write_text(
                 json.dumps(data['refinement'], indent=2),
                 encoding='utf-8',
@@ -305,110 +271,128 @@ def _run_depth(
                     point=i,
                     method='pyoomph_event_arclength',
                 )
-                for curve, path in enumerate(
-                    data['curves'], 1
-                )
+                for curve, path in enumerate(data['curves'], 1)
                 for i, row in enumerate(path)
             ]
 
-            write_csv(
-                folder / f'curves_H{depth:g}.csv',
-                rows,
-            )
+            write_csv(folder/f'curves_H{depth:g}.csv', rows)
 
             write_csv(
-                folder / f'region_samples_H{depth:g}.csv',
+                folder/f'region_samples_H{depth:g}.csv',
                 [
                     dict(
-                        sample['selected'] or {},
+                        s['selected'] or {},
                         region=i,
-                        label=region['label'],
-                        u=sample['u'],
-                        v=sample['v'],
-                        signature=sample['signature'],
+                        label=r['label'],
+                        u=s['u'],
+                        v=s['v'],
+                        signature=s['signature'],
                     )
-                    for i, region in enumerate(
-                        data['regions'], 1
-                    )
-                    for sample in region['samples']
+                    for i, r in enumerate(data['regions'], 1)
+                    for s in r['samples']
                 ],
             )
 
             (
-                folder / f'regions_H{depth:g}.json'
+                folder/f'regions_H{depth:g}.json'
             ).write_text(
                 json.dumps(
                     [
                         dict(
-                            label=region['label'],
-                            normalized_polygon_wkt=(
-                                region['polygon'].wkt
-                            ),
-                            area=region['polygon'].area,
-                            signatures=region['signatures'],
-                            reasons=region['reasons'],
+                            label=r['label'],
+                            normalized_polygon_wkt=r['polygon'].wkt,
+                            area=r['polygon'].area,
+                            signatures=r['signatures'],
+                            reasons=r['reasons'],
                         )
-                        for region in data['regions']
+                        for r in data['regions']
                     ],
                     indent=2,
                 ),
                 encoding='utf-8',
             )
 
-        # Save equilibrium results before any periodic calculations.
+        # Save equilibrium results before periodic analysis starts.
         write_csv(
-            folder / f'overview_H{depth:g}.csv',
+            folder/f'overview_H{depth:g}.csv',
             data['scan'],
         )
 
         write_csv(
-            folder / f'events_H{depth:g}.csv',
+            folder/f'events_H{depth:g}.csv',
             data['events'],
         )
 
         (
-            folder / f'diagnostics_H{depth:g}.json'
+            folder/f'diagnostics_H{depth:g}.json'
         ).write_text(
             json.dumps(data['diagnostics'], indent=2),
             encoding='utf-8',
         )
 
-    # The native equilibrium session has now closed.
-    # No cached equilibrium problem remains active here.
+    stats['equilibrium_seconds'] = time.monotonic()-started
 
-    stats['equilibrium_seconds'] = (
-        time.monotonic() - started
-    )
-
-    # ============================================================
-    # STAGE 2: Periodic-orbit discovery and continuation
-    # ============================================================
-
-    from model.periodic_orbits import (
-        analyze_periodic,
-        export_periodic,
-    )
+    # ------------------------------------------------------------
+    # Periodic analysis.
+    # All native equilibrium problems have been released.
+    # ------------------------------------------------------------
 
     oscillation_start = time.monotonic()
+    periodic_progress = .75
 
     def periodic_checkpoint(message):
-        """Report approximate progress within the periodic budget."""
+        """Approximate progress based on completed search locations."""
 
-        elapsed = time.monotonic() - oscillation_start
+        nonlocal periodic_progress
 
-        fraction = min(
-            elapsed / PERIODIC_DEPTH_BUDGET,
-            .99,
-        )
+        if message.startswith('Periodic Hopf seeds'):
+
+            counts = re.search(r'(\d+)/(\d+)', message)
+
+            if counts:
+                fraction = (
+                    (int(counts[1])-1)/max(int(counts[2]), 1)
+                )
+
+                periodic_progress = max(
+                    periodic_progress,
+                    .75+.06*fraction,
+                )
+
+        elif message.startswith('Periodic discovery'):
+
+            counts = re.search(
+                r'(\d+)/(\d+).*round (\d+)/(\d+)',
+                message,
+            )
+
+            if counts:
+
+                current, total, round_index, rounds = map(
+                    int, counts.groups()
+                )
+
+                fraction = (
+                    round_index-1
+                    + (current-1)/max(total, 1)
+                )/max(rounds, 1)
+
+                periodic_progress = max(
+                    periodic_progress,
+                    .82+.17*fraction,
+                )
 
         report(
-            .75 + .24 * fraction,
+            min(periodic_progress, .99),
             f'H={depth:g} m · {message}',
         )
 
-    periodic_checkpoint('Starting periodic analysis')
+    periodic_checkpoint('Starting automatic periodic analysis')
 
     try:
+
+        from model.periodic_orbits import analyze_periodic
+
         analyze_periodic(
             data,
             p,
@@ -419,25 +403,20 @@ def _run_depth(
         )
 
     except StopRequested:
-        # Preserve the existing cooperative stop behaviour.
         raise
 
     except Exception as exc:
-        # Do not discard successfully computed equilibria because
-        # an optional numerical stage encountered a Python error.
-        # Periodic analysis is still attempted for every run.
+
+        # Periodic failures must not discard valid equilibrium results.
         traceback.print_exc()
+        error_text = traceback.format_exc()
 
-        payload = data.setdefault(
-            'periodic_analysis', {}
-        )
+        payload = data.setdefault('periodic_analysis', {})
 
-        payload.setdefault('branches', [])
-        payload.setdefault('locations', [])
-        payload.setdefault('attempts', [])
-        payload.setdefault('hopf', [])
+        for key in ('branches', 'locations', 'attempts', 'hopf'):
+            payload.setdefault(key, [])
+
         payload.setdefault('coverage', {})
-
         payload['status'] = 'failed'
         payload['reason'] = str(exc)
         payload['coverage']['limit_reached'] = True
@@ -449,15 +428,16 @@ def _run_depth(
                 if arm['termination'] == 'running':
                     arm['termination'] = 'failed'
 
-        error_text = traceback.format_exc()
-
         try:
+
             (
-                folder / f'periodic_error_H{depth:g}.txt'
+                folder/f'periodic_error_H{depth:g}.txt'
             ).write_text(
                 error_text,
                 encoding='utf-8',
             )
+
+            from model.periodic_orbits import export_periodic
 
             export_periodic(data, folder, depth)
 
@@ -465,19 +445,17 @@ def _run_depth(
             traceback.print_exc()
 
         periodic_checkpoint(
-            'Periodic analysis failed '
-            '· retaining equilibrium results'
+            'Periodic analysis failed · retaining equilibrium results'
         )
 
     stats['oscillation_seconds'] = (
-        time.monotonic() - oscillation_start
+        time.monotonic()-oscillation_start
     )
 
-    stats['elapsed_seconds'] = (
-        time.monotonic() - started
-    )
+    stats['elapsed_seconds'] = time.monotonic()-started
 
     if dimensions == 2:
+
         stats.update(
             discovery_seconds=discovery_seconds,
             refinement_seconds=refinement_seconds,
@@ -486,7 +464,7 @@ def _run_depth(
     data['performance'] = stats
 
     (
-        folder / f'performance_H{depth:g}.json'
+        folder/f'performance_H{depth:g}.json'
     ).write_text(
         json.dumps(stats, indent=2),
         encoding='utf-8',
@@ -498,7 +476,7 @@ def _run_depth(
 
 
 def _atomic_bytes(path, data):
-    """Write private multiprocessing data atomically."""
+    """Atomically exchange private multiprocessing files."""
 
     temp = path.with_suffix('.tmp')
     temp.write_bytes(data)
@@ -507,18 +485,13 @@ def _atomic_bytes(path, data):
         try:
             os.replace(temp, path)
             return
-
         except PermissionError:
             if attempt == 7:
                 raise
+            time.sleep(.025*(attempt+1))
 
-            time.sleep(.025 * (attempt + 1))
 
-
-def _child(
-    p, axes, options, dimensions, folder, work, index
-):
-    """Independent spawned depth worker."""
+def _child(p, axes, options, dimensions, folder, work, index):
 
     last = 0.
 
@@ -527,34 +500,30 @@ def _child(
 
         now = time.monotonic()
 
-        if now - last >= .5 or progress == 1.:
+        if now-last >= .5 or progress == 1.:
 
             _atomic_bytes(
-                work / f'{index}.progress',
-                json.dumps(
-                    [progress, phase]
-                ).encode('utf-8'),
+                work/f'{index}.progress',
+                json.dumps([progress, phase]).encode('utf-8'),
             )
 
             last = now
 
     try:
+
         data = _run_depth(
             p, axes, options, dimensions, folder, report
         )
 
         _atomic_bytes(
-            work / f'{index}.result',
-            pickle.dumps(
-                data,
-                protocol=pickle.HIGHEST_PROTOCOL,
-            ),
+            work/f'{index}.result',
+            pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL),
         )
 
     except BaseException:
 
         _atomic_bytes(
-            work / f'{index}.error',
+            work/f'{index}.error',
             traceback.format_exc().encode('utf-8'),
         )
 
@@ -564,29 +533,26 @@ def _child(
 def _parallel_depths(
     base, depths, axes, options, dimensions, ctx, workers
 ):
-    """Run independent depth calculations in spawned processes."""
 
     mpctx = mp.get_context('spawn')
 
     active = {}
-    progress = [0.] * len(depths)
+    progress = [0.]*len(depths)
     results = {}
     next_index = 0
 
     with tempfile.TemporaryDirectory(
-        prefix='simp_workers_',
-        dir=ctx.folder,
+        prefix='simp_workers_', dir=ctx.folder
     ) as temp:
 
         work = Path(temp)
 
         try:
+
             while len(results) < len(depths):
 
-                while (
-                    next_index < len(depths)
-                    and len(active) < workers
-                ):
+                while next_index < len(depths) and len(active) < workers:
+
                     i = next_index
                     next_index += 1
 
@@ -603,7 +569,6 @@ def _parallel_depths(
                         ),
                     )
 
-                    # Prevent multiplication of native BLAS threads.
                     keys = (
                         'OMP_NUM_THREADS',
                         'OPENBLAS_NUM_THREADS',
@@ -613,26 +578,20 @@ def _parallel_depths(
                         'PYTHONFAULTHANDLER',
                     )
 
-                    old = {
-                        key: os.environ.get(key)
-                        for key in keys
-                    }
+                    old = {k: os.environ.get(k) for k in keys}
 
                     try:
-                        os.environ.update({
-                            key: '1' for key in keys
-                        })
 
+                        os.environ.update({k: '1' for k in keys})
                         process.start()
 
                     finally:
-                        for key, value in old.items():
 
-                            if value is None:
-                                os.environ.pop(key, None)
-
+                        for k, v in old.items():
+                            if v is None:
+                                os.environ.pop(k, None)
                             else:
-                                os.environ[key] = value
+                                os.environ[k] = v
 
                     active[i] = process
 
@@ -640,20 +599,17 @@ def _parallel_depths(
 
                 for i, process in list(active.items()):
 
-                    path = work / f'{i}.progress'
+                    path = work/f'{i}.progress'
 
                     if path.exists():
+
                         try:
+
                             fraction, phase = json.loads(
-                                path.read_text(
-                                    encoding='utf-8'
-                                )
+                                path.read_text(encoding='utf-8')
                             )
 
-                            progress[i] = max(
-                                progress[i], fraction
-                            )
-
+                            progress[i] = max(progress[i], fraction)
                             phases.append(phase)
 
                         except (OSError, ValueError):
@@ -663,51 +619,39 @@ def _parallel_depths(
 
                         process.join()
 
-                        error = work / f'{i}.error'
-                        result = work / f'{i}.result'
+                        error = work/f'{i}.error'
+                        result = work/f'{i}.result'
 
-                        if (
-                            process.exitcode != 0
-                            or not result.exists()
-                        ):
+                        if process.exitcode != 0 or not result.exists():
+
                             detail = (
-                                error.read_text(
-                                    encoding='utf-8'
-                                )
+                                error.read_text(encoding='utf-8')
                                 if error.exists()
-                                else (
-                                    f'exit code '
-                                    f'{process.exitcode}'
-                                )
+                                else f'exit code {process.exitcode}'
                             )
 
                             raise RuntimeError(
-                                f'Depth H={depths[i]:g} '
-                                f'worker failed: {detail}'
+                                f'Depth H={depths[i]:g} worker failed: '
+                                + detail
                             )
 
-                        results[i] = pickle.loads(
-                            result.read_bytes()
-                        )
-
+                        results[i] = pickle.loads(result.read_bytes())
                         progress[i] = 1.
 
                         process.close()
                         del active[i]
 
                 ctx.checkpoint(
-                    5 + 80 * sum(progress) / len(depths),
-                    (
-                        f'Parallel depths '
-                        f'{len(results)}/{len(depths)} · '
-                        + ' | '.join(phases[:workers])
-                    ),
+                    5+80*sum(progress)/len(depths),
+                    f'Parallel depths {len(results)}/{len(depths)} · '
+                    + ' | '.join(phases[:workers]),
                 )
 
                 if len(results) < len(depths):
                     time.sleep(.25)
 
         finally:
+
             for process in active.values():
 
                 if process.is_alive():
@@ -721,55 +665,39 @@ def _parallel_depths(
 
                 process.close()
 
-    return [
-        results[i] for i in range(len(depths))
-    ]
+    return [results[i] for i in range(len(depths))]
 
 
 def run(values, ctx, dimensions):
+
     ctx.plot_start = 90.
 
-    ctx.checkpoint(
-        0, 'Preparing continuation', force=True
-    )
+    ctx.checkpoint(0, 'Preparing continuation', force=True)
 
-    base, depths, axes, options = parse_job(
-        values, dimensions
-    )
+    base, depths, axes, options = parse_job(values, dimensions)
 
     started = time.monotonic()
 
     workers = (
-        min(
-            len(depths),
-            int(options.get('depth_workers', 1)),
-        )
+        min(len(depths), int(options.get('depth_workers', 1)))
         if dimensions == 2 else 1
     )
 
-    # ============================================================
-    # Compute the individual depths
-    # ============================================================
-
     if workers > 1:
+
         datasets = _parallel_depths(
-            base,
-            depths,
-            axes,
-            options,
-            dimensions,
-            ctx,
-            workers,
+            base, depths, axes, options, dimensions, ctx, workers
         )
 
     else:
+
         datasets = []
 
         for index, depth in enumerate(depths):
 
             def report(fraction, phase):
                 ctx.checkpoint(
-                    5 + 80 * (index + fraction) / len(depths),
+                    5+80*(index+fraction)/len(depths),
                     phase,
                 )
 
@@ -782,113 +710,87 @@ def run(values, ctx, dimensions):
                 report,
             ))
 
-    # ============================================================
-    # Generate figures from all available verified results
-    # ============================================================
-
-    from scripts.continuation_plots import (
-        plot_1d,
-        plot_2d,
-    )
+    from scripts.continuation_plots import plot_1d, plot_2d
 
     ctx.checkpoint(
-        90,
-        'Rendering PNG and PDF figures',
-        force=True,
+        90, 'Rendering PNG and PDF figures', force=True
     )
 
     if dimensions == 1:
-        plot_1d(
-            datasets,
-            axes[0],
-            ctx.folder / 'figures',
-        )
-
+        plot_1d(datasets, axes[0], ctx.folder/'figures')
     else:
-        plot_2d(
-            datasets,
-            axes,
-            ctx.folder / 'figures',
-        )
+        plot_2d(datasets, axes, ctx.folder/'figures')
 
     summary = dict(
         engine='pyoomph native pseudo-arclength',
         dimensions=dimensions,
         depths=depths,
-        axes=[vars(axis) for axis in axes],
-        seconds=time.monotonic() - started,
+        axes=[vars(a) for a in axes],
+        seconds=time.monotonic()-started,
         equation_source='model/shared_eqn.py',
-
         limitations=(
-            'Finite periodic discovery cannot prove absence '
-            'of cycles. Only verified periodic BVP solutions '
-            'are shown. Failed or budget-limited searches '
-            'remain unresolved. Two-dimensional periodic '
-            'results represent checked locations and '
-            'continuation transects, not certified regions.'
+            'Only numerically verified periodic BVP solutions are shown. '
+            'Finite grids, finite initial guesses and numerical '
+            'continuation cannot prove global absence of cycles. '
+            'Failed searches and incomplete branches remain unresolved. '
+            '2D cycles represent verified locations and transects, '
+            'not certified regions.'
         ),
-
         diagnostics=sum(
-            len(data['diagnostics'])
-            for data in datasets
+            len(d['diagnostics']) for d in datasets
         ),
-
         depth_workers=workers,
-
         performance={
-            str(data['H']): data['performance']
-            for data in datasets
+            str(d['H']): d['performance']
+            for d in datasets
         },
     )
 
     summary['periodic'] = {
-        str(data['H']): dict(
-            verified_points=len(
-                data.get('oscillations', [])
-            ),
-            status=data.get(
+        str(d['H']): dict(
+            verified_points=len(d.get('oscillations', [])),
+            status=d.get(
                 'periodic_analysis', {}
             ).get('status', 'unavailable'),
-            coverage=data.get(
+            coverage=d.get(
                 'periodic_analysis', {}
             ).get('coverage', {}),
         )
-        for data in datasets
+        for d in datasets
     }
 
     if dimensions == 2:
 
         summary['refinement'] = {
-            str(data['H']): data['refinement']
-            for data in datasets
+            str(d['H']): d['refinement']
+            for d in datasets
         }
 
         summary['unresolved_area'] = {
-            str(data['H']): sum(
-                region['polygon'].area
-                for region in data['regions']
-                if region['label'] == '?'
+            str(d['H']): sum(
+                r['polygon'].area
+                for r in d['regions']
+                if r['label'] == '?'
             )
-            for data in datasets
+            for d in datasets
         }
 
     (
-        ctx.folder / 'summary.json'
+        ctx.folder/'summary.json'
     ).write_text(
         json.dumps(summary, indent=2),
         encoding='utf-8',
     )
 
     ctx.checkpoint(
-        100,
-        'Completed native continuation',
-        force=True,
+        100, 'Completed native continuation', force=True
     )
 
     return datasets
 
 
 def main(dimensions):
+
     mp.freeze_support()
 
     values, ctx, job = load_args()

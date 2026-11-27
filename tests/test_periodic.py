@@ -1,5 +1,5 @@
 
-"""Regression and numerical verification tests for periodic analysis."""
+"""Regression tests for automatic MSP periodic analysis."""
 
 import ast
 import json
@@ -16,13 +16,11 @@ import numpy as np
 
 from model.shared_eqn import Parameters, solve_equilibria
 from model.continuation_config import Axis, parse_job, job_schema
-
 from model.periodic_config import (
     periodic_options,
     standard_periodic_options,
     node_count,
 )
-
 from model.periodic_math import (
     absence_certificate,
     deterministic_guesses,
@@ -30,8 +28,8 @@ from model.periodic_math import (
     sample_metrics,
     admissible_msp,
 )
-
 from model.periodic_orbits import (
+    orbit_exclusion,
     equilibrium_evidence,
     analyze_periodic,
     run_isolated,
@@ -41,6 +39,7 @@ from model.periodic_orbits import (
 class PeriodicTests(unittest.TestCase):
 
     def row(self, n=80):
+
         p = Parameters(N_wc=n)
 
         e = next(
@@ -55,7 +54,6 @@ class PeriodicTests(unittest.TestCase):
         )
 
     def test_automatic_configuration(self):
-        """Normal jobs cannot disable periodic analysis."""
 
         for dimensions in (1, 2):
 
@@ -75,10 +73,7 @@ class PeriodicTests(unittest.TestCase):
                 dimensions,
             )[3]
 
-            self.assertEqual(
-                options['periodic_analysis'],
-                'on',
-            )
+            self.assertEqual(options['periodic_analysis'], 'on')
 
             self.assertEqual(
                 options['periodic_samples'],
@@ -93,11 +88,7 @@ class PeriodicTests(unittest.TestCase):
         })
 
         self.assertEqual(node_count(options), 36)
-
-        self.assertEqual(
-            periodic_options(options),
-            options,
-        )
+        self.assertEqual(periodic_options(options), options)
 
         invalid = (
             {'periodic_amplitudes': 'nan'},
@@ -113,11 +104,23 @@ class PeriodicTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 periodic_options(values)
 
-    def test_absence_is_not_a_failed_search(self):
+    def test_mathematical_orbit_exclusion(self):
 
-        result = equilibrium_evidence(
-            Parameters(I_0=0)
+        self.assertIsNotNone(
+            orbit_exclusion(Parameters(I_0=0))
         )
+
+        self.assertIsNotNone(
+            orbit_exclusion(Parameters(N_wc=0))
+        )
+
+        self.assertIsNotNone(
+            orbit_exclusion(Parameters(g_M=0))
+        )
+
+    def test_absence_is_not_failed_search(self):
+
+        result = equilibrium_evidence(Parameters(I_0=0))
 
         self.assertEqual(
             result['status'],
@@ -144,6 +147,22 @@ class PeriodicTests(unittest.TestCase):
                 'equilibrium_discovery_failed',
             )
 
+    def test_equilibrium_exclusion_is_not_orbit_exclusion(self):
+
+        p, _ = self.row()
+
+        with patch(
+            'model.periodic_orbits.orbit_exclusion',
+            return_value=None,
+        ), patch(
+            'model.periodic_orbits.absence_certificate',
+            return_value='No equilibrium under reduced bounds',
+        ):
+
+            result = equilibrium_evidence(p)
+
+        self.assertEqual(result['status'], 'msp_not_found')
+
     def test_exclusion_does_not_reject_known_msp(self):
 
         for n in (25, 40, 65, 80, 100, 120, 150):
@@ -154,19 +173,13 @@ class PeriodicTests(unittest.TestCase):
                 e.community == 'MSP'
                 for e in solve_equilibria(p)
             ):
-                self.assertIsNone(
-                    absence_certificate(p),
-                    n,
-                )
+                self.assertIsNone(absence_certificate(p), n)
 
     def test_stable_msp_is_included_and_reused(self):
 
         p, row = self.row(100)
 
-        self.assertEqual(
-            row['stability'],
-            'stable',
-        )
+        self.assertEqual(row['stability'], 'stable')
 
         with patch(
             'model.periodic_orbits.solve_equilibria',
@@ -174,19 +187,11 @@ class PeriodicTests(unittest.TestCase):
         ):
             result = equilibrium_evidence(p, [row])
 
-        self.assertEqual(
-            result['status'],
-            'msp_present',
-        )
-
-        self.assertTrue(
-            admissible_msp(row, p)
-        )
+        self.assertEqual(result['status'], 'msp_present')
+        self.assertTrue(admissible_msp(row, p))
 
         self.assertFalse(
-            admissible_msp(
-                dict(row, community='MP'), p
-            )
+            admissible_msp(dict(row, community='MP'), p)
         )
 
     def test_deterministic_guesses_include_real_spectra(self):
@@ -194,18 +199,14 @@ class PeriodicTests(unittest.TestCase):
         p, row = self.row()
         options = standard_periodic_options()
 
-        first = list(
-            deterministic_guesses(row, p, options)
-        )
+        first = list(deterministic_guesses(row, p, options))
 
         self.assertEqual(
             first,
             list(deterministic_guesses(row, p, options)),
         )
 
-        self.assertTrue(
-            first[0]['mode'].startswith('complex')
-        )
+        self.assertTrue(first[0]['mode'].startswith('complex'))
 
         self.assertEqual(
             {g['amplitude'] for g in first},
@@ -216,9 +217,8 @@ class PeriodicTests(unittest.TestCase):
             'model.periodic_math.jacobian',
             return_value=np.diag([-1., -2., -3.]),
         ):
-            real = list(
-                deterministic_guesses(row, p, options)
-            )
+
+            real = list(deterministic_guesses(row, p, options))
 
         self.assertTrue(real)
 
@@ -239,61 +239,37 @@ class PeriodicTests(unittest.TestCase):
 
         for values, expected in cases:
 
-            result = floquet_classification(
-                values, 1e-4
-            )
-
             self.assertEqual(
-                result['stability'],
+                floquet_classification(values, 1e-4)['stability'],
                 expected,
             )
 
     def test_stationary_and_nonphysical_curves_rejected(self):
 
         p, row = self.row()
-
-        state = np.array([
-            row[c] for c in 'MSP'
-        ])
-
+        state = np.array([row[c] for c in 'MSP'])
         options = standard_periodic_options()
 
-        with self.assertRaisesRegex(
-            ValueError, 'Collapsed'
-        ):
+        with self.assertRaisesRegex(ValueError, 'Collapsed'):
             sample_metrics(
-                np.tile(state, (128, 1)),
-                450,
-                p,
-                options,
+                np.tile(state, (128, 1)), 450, p, options
             )
 
         bad = np.tile(state, (128, 1))
         bad[0, 2] = -1
 
-        with self.assertRaisesRegex(
-            ValueError, 'MSP-positive'
-        ):
-            sample_metrics(
-                bad, 450, p, options
-            )
+        with self.assertRaisesRegex(ValueError, 'MSP-positive'):
+            sample_metrics(bad, 450, p, options)
 
         bad = np.tile(state, (128, 1))
         bad[0, 0] = p.N_wc
 
-        with self.assertRaisesRegex(
-            ValueError, 'nitrogen'
-        ):
-            sample_metrics(
-                bad, 450, p, options
-            )
+        with self.assertRaisesRegex(ValueError, 'nitrogen'):
+            sample_metrics(bad, 450, p, options)
 
     def test_periodic_modules_have_no_time_integration_calls(self):
 
-        root = (
-            Path(__file__).resolve().parents[1]
-            / 'model'
-        )
+        root = Path(__file__).resolve().parents[1]/'model'
 
         forbidden = (
             'solve_ivp',
@@ -305,9 +281,7 @@ class PeriodicTests(unittest.TestCase):
 
         for path in root.glob('periodic*.py'):
 
-            tree = ast.parse(
-                path.read_text(encoding='utf-8')
-            )
+            tree = ast.parse(path.read_text(encoding='utf-8'))
 
             for node in ast.walk(tree):
 
@@ -316,24 +290,17 @@ class PeriodicTests(unittest.TestCase):
 
                 if isinstance(node.func, ast.Name):
                     name = node.func.id
-
                 elif isinstance(node.func, ast.Attribute):
                     name = node.func.attr
-
                 else:
                     name = ''
 
-                self.assertNotIn(
-                    name, forbidden, str(path)
-                )
+                self.assertNotIn(name, forbidden, str(path))
 
-                self.assertFalse(
-                    any(
-                        key.arg == 'timestep'
-                        for key in node.keywords
-                    ),
-                    str(path),
-                )
+                self.assertFalse(any(
+                    keyword.arg == 'timestep'
+                    for keyword in node.keywords
+                ))
 
     def test_excluded_locations_start_no_workers(self):
 
@@ -358,23 +325,19 @@ class PeriodicTests(unittest.TestCase):
                 folder,
             )
 
-            self.assertEqual(
-                data['oscillations'],
-                [],
-            )
-
-            self.assertTrue(
-                list(
-                    Path(folder).glob('periodic_H*.json')
-                )
-            )
+            self.assertEqual(data['oscillations'], [])
 
             self.assertTrue(all(
-                loc['status'] == 'excluded_no_msp'
-                for loc in data['periodic_analysis']['locations']
+                location['status'] == 'excluded_no_msp'
+                for location in data['periodic_analysis']['locations']
             ))
 
-    def test_unsuccessful_native_search_is_not_cycle_absence(self):
+            self.assertEqual(
+                data['periodic_analysis']['coverage']['native_attempts'],
+                0,
+            )
+
+    def test_unsuccessful_search_is_not_cycle_absence(self):
 
         p, row = self.row(100)
 
@@ -415,81 +378,51 @@ class PeriodicTests(unittest.TestCase):
             )
 
         self.assertTrue(all(
-            loc['status'] == 'orbit_discovery_unsuccessful'
-            for loc in data['periodic_analysis']['locations']
+            location['status'] == 'orbit_discovery_unsuccessful'
+            for location in data['periodic_analysis']['locations']
         ))
 
-        self.assertEqual(
-            data['oscillations'],
-            [],
-        )
+        self.assertEqual(data['oscillations'], [])
 
         self.assertEqual(
             data['periodic_analysis']['status'],
             'completed_with_unresolved_searches',
         )
 
-    def test_budget_preserves_verified_solutions(self):
-        """An exhausted search must retain previously verified cycles."""
+    def test_no_global_attempt_cap(self):
+        """All scheduled guesses are attempted, including beyond 64."""
 
-        p, equilibrium = self.row(100)
+        p, row = self.row(100)
 
-        row = dict(
-            status='verified_periodic',
-            community='MSP',
-            stability='unstable',
-            period=100.,
-            H=p.H,
-            u=0.,
-            x=90.,
-        )
-
-        for component in ('M', 'S', 'P_area'):
-
-            row[component + '_min'] = 1.
-            row[component + '_max'] = 2.
-            row[component + '_mean'] = 1.5
-
-        seed = dict(
-            uv=[0.],
-            period=100.,
-            log_states=[[0., 0., 0.]],
-        )
+        def guesses(*args):
+            return iter([
+                dict(
+                    kind='manual',
+                    equilibrium=row,
+                    amplitude=float(i+1)/100,
+                )
+                for i in range(25)
+            ])
 
         with tempfile.TemporaryDirectory() as folder, patch(
-            'model.periodic_orbits.PERIODIC_MAX_ATTEMPTS',
-            1,
-        ), patch(
             'model.periodic_orbits.equilibrium_evidence',
             return_value=dict(
                 status='msp_present',
-                roots=[equilibrium],
-                msp=[equilibrium],
+                roots=[row],
+                msp=[row],
             ),
         ), patch(
             'model.periodic_orbits.deterministic_guesses',
-            side_effect=lambda *args: iter([
-                dict(
-                    kind='manual',
-                    equilibrium=equilibrium,
-                )
-            ]),
+            side_effect=guesses,
         ), patch(
             'model.periodic_orbits.run_isolated',
             return_value=dict(
-                reason='completed',
-                exit_code=0,
+                reason='solver_failed',
+                events=[],
+                exit_code=1,
                 seconds=1,
-                events=[
-                    dict(
-                        type='orbit',
-                        row=row,
-                        seed=seed,
-                    ),
-                    dict(type='complete'),
-                ],
             ),
-        ):
+        ) as worker:
 
             data = {'scan': []}
 
@@ -505,31 +438,17 @@ class PeriodicTests(unittest.TestCase):
                 folder,
             )
 
-            self.assertEqual(
-                data['periodic_analysis']['status'],
-                'budget_exhausted',
-            )
+            self.assertEqual(worker.call_count, 75)
 
             self.assertEqual(
-                len(data['oscillations']),
-                1,
-            )
-
-            self.assertEqual(
-                data['oscillations'][0]['stability'],
-                'unstable',
-            )
-
-            self.assertTrue(
-                data['periodic_analysis']
-                ['coverage']['limit_reached']
+                data['periodic_analysis']['coverage']['native_attempts'],
+                75,
             )
 
     def test_collocation_plot_keeps_stability_and_branch_order(self):
 
         from scripts.continuation_plots import (
-            plt,
-            draw_periodic_envelopes,
+            plt, draw_periodic_envelopes
         )
 
         def point(x, stability):
@@ -550,9 +469,7 @@ class PeriodicTests(unittest.TestCase):
                 branches=[
                     dict(
                         points=[first, middle, last],
-                        arms=[
-                            dict(records=[middle, last])
-                        ],
+                        arms=[dict(records=[middle, last])],
                     )
                 ]
             )
@@ -560,22 +477,11 @@ class PeriodicTests(unittest.TestCase):
 
         fig, ax = plt.subplots()
 
-        draw_periodic_envelopes(
-            ax, data, 'S', True
-        )
+        draw_periodic_envelopes(ax, data, 'S', True)
 
-        self.assertEqual(
-            len(ax.collections), 2
-        )
-
-        self.assertEqual(
-            len(ax.lines), 2
-        )
-
-        self.assertEqual(
-            list(ax.lines[0].get_xdata()),
-            [2, 1.8],
-        )
+        self.assertEqual(len(ax.collections), 2)
+        self.assertEqual(len(ax.lines), 2)
+        self.assertEqual(list(ax.lines[0].get_xdata()), [2, 1.8])
 
         plt.close(fig)
 
@@ -583,7 +489,7 @@ class PeriodicTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as folder:
 
-            output = Path(folder) / 'normal_form.json'
+            output = Path(folder)/'normal_form.json'
 
             env = os.environ.copy()
 
@@ -613,41 +519,22 @@ class PeriodicTests(unittest.TestCase):
             self.assertEqual(
                 result.returncode,
                 0,
-                (result.stdout + result.stderr)[-3000:],
+                (result.stdout+result.stderr)[-3000:],
             )
 
-            rows = json.loads(
-                output.read_text()
-            )
+            rows = json.loads(output.read_text())
 
-        self.assertEqual(
-            rows[0]['stability'],
-            'unstable',
-        )
+        self.assertEqual(rows[0]['stability'], 'unstable')
+        self.assertEqual(rows[-1]['stability'], 'stable')
 
-        self.assertEqual(
-            rows[-1]['stability'],
-            'stable',
-        )
-
-        u = np.array([
-            row['u'] for row in rows
-        ])
-
+        u = np.array([r['u'] for r in rows])
         du = np.diff(u)
 
-        self.assertTrue(
-            np.any(du < 0) and np.any(du > 0)
-        )
-
-        self.assertAlmostEqual(
-            float(u.min()),
-            .25,
-            delta=.01,
-        )
+        self.assertTrue(np.any(du < 0) and np.any(du > 0))
+        self.assertAlmostEqual(float(u.min()), .25, delta=.01)
 
         self.assertTrue(all(
-            abs(row['period'] - 2 * np.pi) < .002
+            abs(row['period']-2*np.pi) < .002
             for row in rows
         ))
 
@@ -691,32 +578,17 @@ class PeriodicTests(unittest.TestCase):
                 seen.append,
             )
 
-        self.assertEqual(
-            result['reason'],
-            'native_worker_crashed',
-        )
+        self.assertEqual(result['reason'], 'native_worker_crashed')
+        self.assertEqual(result['exit_code'], 37)
+        self.assertEqual(seen, [dict(type='checkpoint', value=7)])
 
-        self.assertEqual(
-            result['exit_code'],
-            37,
-        )
-
-        self.assertEqual(
-            seen,
-            [dict(type='checkpoint', value=7)],
-        )
-
-    def test_worker_timeout_does_not_escape_supervisor(self):
+    def test_worker_timeout(self):
 
         real_popen = subprocess.Popen
 
         def launch(command, **kwargs):
             return real_popen(
-                [
-                    sys.executable,
-                    '-c',
-                    'import time; time.sleep(10)',
-                ],
+                [sys.executable, '-c', 'import time; time.sleep(10)'],
                 **kwargs,
             )
 
@@ -737,10 +609,7 @@ class PeriodicTests(unittest.TestCase):
                 lambda _: None,
             )
 
-        self.assertEqual(
-            result['reason'],
-            'worker_timeout',
-        )
+        self.assertEqual(result['reason'], 'worker_timeout')
 
 
 if __name__ == '__main__':

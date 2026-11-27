@@ -1,90 +1,75 @@
 
-"""Internal numerical configuration for MSP periodic orbit analysis."""
+"""Automatic numerical settings for MSP periodic-orbit analysis."""
 
 import math
 
 
-# Computational budgets per depth.
-PERIODIC_DEPTH_BUDGET = 300.0
-PERIODIC_MAX_ATTEMPTS = 64
-
-
 def periodic_schema():
-    """Internal settings, deliberately hidden from the GUI."""
+    def integer(default, low, high):
+        return dict(type='integer', default=default, min=low, max=high)
 
-    def integer(default, low, high, description):
-        return dict(type='integer', default=default,
-                    min=low, max=high, description=description)
+    def real(default, low, high):
+        return dict(type='float', default=default, min=low, max=high)
 
-    def real(default, low, high, description):
-        return dict(type='float', default=default,
-                    min=low, max=high, description=description)
+    def choice(default, options):
+        return dict(type='choice', default=default, options=options)
 
-    def choice(default, options, description):
-        return dict(type='choice', default=default,
-                    options=options, description=description)
-
-    def string(default, description):
-        return dict(type='string', default=default,
-                    description=description)
+    def string(default):
+        return dict(type='string', default=default)
 
     return {
-        # General configuration.
-        'periodic_analysis': choice('on', ['on', 'off'], 'Periodic analysis'),
-        'periodic_mode': choice('collocation', ['collocation', 'bspline'], 'Discretization'),
+        # Always enabled in ordinary continuation jobs.
+        'periodic_analysis': choice('on', ['on', 'off']),
 
-        # Periodic orbit discovery.
-        'periodic_samples': integer(5, 3, 301, 'Discovery locations per axis'),
-        'periodic_amplitudes': string('0.08,0.35', 'Initial amplitudes'),
-        'periodic_period_factors': string('1,2', 'Period multipliers'),
-        'periodic_real_modes': choice('fallback', ['fallback', 'always'], 'Real-mode guesses'),
-        'periodic_max_locations': integer(36, 3, 5000, 'Maximum discovery locations'),
-        'periodic_refinement_rounds': integer(1, 0, 4, 'Parameter refinement rounds'),
+        # Initial discovery and local refinement.
+        'periodic_samples': integer(9, 3, 301),
+        'periodic_amplitudes': string('0.03,0.15,0.4,0.8'),
+        'periodic_period_factors': string('0.5,1,2'),
+        'periodic_real_modes': choice('fallback', ['fallback', 'always']),
+        'periodic_refinement_rounds': integer(1, 0, 8),
 
         # Temporal discretization.
-        'periodic_nodes': integer(30, 12, 600, 'Initial temporal nodes'),
-        'periodic_order': integer(3, 2, 5, 'Collocation order'),
-        'periodic_refinement_levels': integer(3, 1, 5, 'Maximum mesh doublings'),
+        'periodic_mode': choice('collocation', ['collocation', 'bspline']),
+        'periodic_nodes': integer(30, 12, 600),
+        'periodic_order': integer(3, 2, 5),
+        'periodic_refinement_levels': integer(4, 1, 5),
 
-        # Native pseudo-arclength continuation.
-        'periodic_max_steps': integer(75, 0, 10000, 'Steps per direction'),
-        'periodic_max_step': real(.015, 1e-6, .2, 'Maximum normalized step'),
-        'periodic_min_step': real(1e-7, 1e-12, .01, 'Minimum normalized step'),
+        # Native arclength continuation.
+        # Increased automatically for high-resolution axes.
+        'periodic_max_steps': integer(1200, 1, 20000),
+        'periodic_max_step': real(.015, 1e-6, .2),
+        'periodic_min_step': real(1e-7, 1e-12, .01),
 
         # Newton correction.
-        'periodic_global_newton': choice('on', ['on', 'off'], 'Globalized Newton correction'),
-        'periodic_newton_tolerance': real(1e-9, 1e-13, 1e-4, 'Newton tolerance'),
-        'periodic_newton_iterations': integer(25, 5, 100, 'Maximum Newton iterations'),
+        'periodic_global_newton': choice('on', ['on', 'off']),
+        'periodic_newton_tolerance': real(1e-9, 1e-13, 1e-4),
+        'periodic_newton_iterations': integer(25, 5, 100),
 
         # Numerical verification.
-        'periodic_validation_tolerance': real(.005, 1e-6, .05, 'Mesh convergence tolerance'),
-        'periodic_defect_tolerance': real(.005, 1e-6, .05, 'Periodic balance tolerance'),
-        'periodic_floquet_tolerance': real(1e-4, 1e-8, .02, 'Floquet tolerance'),
-        'periodic_min_amplitude': real(1e-4, 1e-8, .1, 'Minimum relative amplitude'),
-        'periodic_min_period': real(.1, 1e-5, 1e5, 'Minimum period in days'),
-        'periodic_max_period': real(1e5, 1, 1e8, 'Maximum period in days'),
+        'periodic_validation_tolerance': real(.005, 1e-6, .05),
+        'periodic_defect_tolerance': real(.005, 1e-6, .05),
+        'periodic_floquet_tolerance': real(1e-4, 1e-8, .02),
+        'periodic_min_amplitude': real(1e-4, 1e-8, .1),
+        'periodic_min_period': real(.1, 1e-5, 1e5),
+        'periodic_max_period': real(1e5, 1, 1e8),
 
-        # Hopf switching and native worker isolation.
-        'periodic_hopf_offset': real(.0004, 1e-8, .02, 'Hopf branch-switch offset'),
-        'periodic_timeout': real(45, 5, 86400, 'Native worker timeout'),
+        # Native Hopf switching.
+        'periodic_hopf_offset': real(.0004, 1e-8, .02),
+
+        # Maximum time without new native solution records.
+        # NOT a total runtime limit for the periodic analysis.
+        'periodic_timeout': real(180, 5, 86400),
     }
 
 
 def periodic_options(values):
-    """Validate and normalize internal numerical settings."""
+    """Validate and normalize the internal solver configuration."""
 
     schema = periodic_schema()
-
     result = {
         key: values.get(key, spec['default'])
         for key, spec in schema.items()
     }
-
-    # Compatibility for direct low-level calls.
-    # Ordinary continuation jobs always enable periodic analysis.
-    if ('periodic_analysis' not in values
-            and values.get('oscillation_checks') == 'off'):
-        result['periodic_analysis'] = 'off'
 
     for key, spec in schema.items():
         value = result[key]
@@ -96,8 +81,10 @@ def periodic_options(values):
         elif spec['type'] in ('float', 'integer'):
             number = float(value)
 
-            if (not math.isfinite(number)
-                    or not spec['min'] <= number <= spec['max']):
+            if (
+                not math.isfinite(number)
+                or not spec['min'] <= number <= spec['max']
+            ):
                 raise ValueError(
                     f'{key} must be between '
                     f'{spec["min"]} and {spec["max"]}'
@@ -106,9 +93,7 @@ def periodic_options(values):
             if spec['type'] == 'integer':
                 if number != int(number):
                     raise ValueError(f'{key} must be an integer')
-
                 result[key] = int(number)
-
             else:
                 result[key] = number
 
@@ -120,12 +105,12 @@ def periodic_options(values):
                     float(v.strip()) for v in str(value).split(',')
                 )
 
-            if (not numbers
-                    or len(numbers) > 12
-                    or any(not math.isfinite(n) or n <= 0 for n in numbers)):
-                raise ValueError(
-                    f'{key}: enter 1–12 positive finite numbers'
-                )
+            if (
+                not numbers
+                or len(numbers) > 12
+                or any(not math.isfinite(n) or n <= 0 for n in numbers)
+            ):
+                raise ValueError(f'{key}: enter 1–12 positive numbers')
 
             result[key] = numbers
 
@@ -139,11 +124,9 @@ def periodic_options(values):
 
 
 def standard_periodic_options():
-    """Automatic numerical policy for all normal continuation jobs."""
+    """Fixed numerical policy for all ordinary continuation jobs."""
 
-    return periodic_options({
-        'periodic_analysis': 'on',
-    })
+    return periodic_options({'periodic_analysis': 'on'})
 
 
 def node_count(options, level=0):
