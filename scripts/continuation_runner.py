@@ -187,24 +187,6 @@ def log_jacobian(z, p):
     return ((J-np.diag(F)) * y[None, :] / y[:, None])
 
 
-def integrate_log(z0, duration, p, rtol=RTOL, atol=ATOL, dense_output=False, events=None,):
-    solution = solve_ivp(
-        lambda t, z: log_rhs(t, z, p),
-        (0., duration),
-        np.asarray(z0, dtype=float),
-        method='LSODA',
-        rtol=rtol,
-        atol=atol,
-        dense_output=dense_output,
-        events=events,
-    )
-    if not solution.success:
-        raise RuntimeError(solution.message)
-
-    if not physical_trajectory(np.exp(solution.y), p):
-        raise ValueError('Integration left physical domain')
-
-    return solution
 
 
 def equilibrium_distance(state, equilibrium):
@@ -247,58 +229,140 @@ def estimate_period(equilibria):
 # Obtain a periodic guess from a forward trajectory
 # ==============================================================
 
-def trajectory_guess(p, state, equilibria):
+# Poincare return and local solver settings (not global search limits).
+RETURN_TOL = 2e-7
+RETURN_REL_TOL = .005
+RETURN_EXTRA_CYCLES = 12
+POINCARE_MAXFEV = 32
+
+
+def profiled_ivp(fun, span, y0, diagnostic, stage, heartbeat=None, **kwargs):
+    """Time every IVP, including failed evaluations and slow live calls."""
+    started = time.monotonic()
+    calls, rhs_seconds, last = 0, 0., started
+    item = dict(stage=stage, requested_days=float(span[1]-span[0]),
+                dimension=len(y0), method=kwargs.get('method', 'LSODA'))
+    diagnostic['active_ivp'] = item
+
+    def wrapped(t, y):
+        nonlocal calls, rhs_seconds, last
+        before = time.monotonic()
+        calls += 1
+        try:
+            return fun(t, y)
+        finally:
+            now = time.monotonic()
+            rhs_seconds += now-before
+            if heartbeat and now-last >= 2.:
+                item.update(seconds=now-started, rhs_calls=calls, rhs_seconds=rhs_seconds,
+                            integrated_days=float(t-span[0]))
+                heartbeat(diagnostic)
+                last = now
+
+    solution = None
+    try:
+        solution = solve_ivp(wrapped, span, y0, **kwargs)
+        if not solution.success:
+            raise RuntimeError(solution.message)
+        return solution
+    except BaseException as exc:
+        item['error'] = str(exc)
+        raise
+    finally:
+        item.update(seconds=time.monotonic()-started, rhs_calls=calls, rhs_seconds=rhs_seconds)
+        if solution is not None:
+            dt = np.diff(solution.t)
+            item.update(nfev=int(solution.nfev), njev=int(solution.njev or 0),
+                        nlu=int(solution.nlu or 0), steps=len(dt), success=bool(solution.success),
+                        integrated_days=float(solution.t[-1]-span[0]),
+                        min_step=float(dt.min()) if len(dt) else None,
+                        max_step=float(dt.max()) if len(dt) else None,
+                        message=str(solution.message))
+        totals = diagnostic.setdefault('ivp_totals', {})
+        group = totals.setdefault(stage, {})
+        for key in ('seconds', 'rhs_calls', 'rhs_seconds', 'nfev', 'njev', 'nlu', 'steps'):
+            group[key] = group.get(key, 0)+item.get(key, 0)
+        group['solves'] = group.get('solves', 0)+1
+        diagnostic['last_ivp'] = dict(item)
+        slow = diagnostic.setdefault('slowest_ivps', [])
+        slow.append(dict(item))
+        slow.sort(key=lambda record: record['seconds'], reverse=True)
+        del slow[5:]
+        diagnostic.pop('active_ivp', None)
+
+
+def trajectory_guess(p, state, equilibria, diagnostic=None, heartbeat=None, period_hint=None):
+    """Use successive downward crossings of dlog(P)/dt=0 (P maxima)."""
+    diagnostic = {} if diagnostic is None else diagnostic
     state = feasible_seed(state, p)
     if state is None:
+        diagnostic['trajectory_reason'] = 'infeasible_seed'
         return None
+    T = float(period_hint or estimate_period(equilibria))
+    T = float(np.clip(T, MIN_PERIOD, MAX_PERIOD))
+    duration = min(MAX_INITIAL_DAYS, max(1000., INITIAL_CYCLES*T))
+    z = np.log(state)
 
-    period_guess = estimate_period(equilibria)
-    duration = min(MAX_INITIAL_DAYS, max(1000., INITIAL_CYCLES*period_guess,),)
-
-    # A maximum of phytoplankton biomass provides a convenient
-    # Poincare section: d(log(P))/dt changes from positive to negative.
     def peak(t, z):
         return log_rhs(t, z, p)[2]
-
     peak.direction = -1
     peak.terminal = False
-    solution = integrate_log(np.log(state), duration, p, events=peak, dense_output=True,)
-    terminal = np.exp(solution.y[:, -1])
-    if near_stable_equilibrium(terminal, equilibria):
-        return None
 
-    times = solution.t_events[0]
-    states = solution.y_events[0]
+    def integrate(z, days):
+        sol = profiled_ivp(lambda t, y: log_rhs(t, y, p), (0., days), z,
+                           diagnostic, 'trajectory', heartbeat, method='LSODA',
+                           rtol=VERIFY_RTOL, atol=VERIFY_ATOL, dense_output=True,
+                           events=peak, max_step=max(MIN_PERIOD, T/30))
+        if not physical_trajectory(np.exp(sol.y), p):
+            raise ValueError('nonphysical_trajectory')
+        return sol
 
-    # Ignore the initial point if it lies on the section.
-    mask = times > 1e-5
-    times = times[mask]
-    states = states[mask]
-    if len(times) < 3:
-        return None
+    def inspect(sol):
+        times, states = sol.t_events[0], sol.y_events[0]
+        mask = times > 1e-5
+        times, states = times[mask], states[mask]
+        diagnostic['peak_count'] = len(times)
+        if len(times) < 4:
+            diagnostic['trajectory_reason'] = 'insufficient_returns'
+            return None
+        periods = np.diff(times[-4:])
+        Tlast = float(periods[-1])
+        returns = np.max(np.abs(np.diff(states[-4:], axis=0)), axis=1)
+        sampled = np.exp(sol.sol(np.linspace(times[-2], times[-1], 257)))
+        amplitude = float(np.max(np.ptp(sampled, axis=1)/np.maximum(sampled.mean(axis=1), 1e-8)))
+        drift = float(np.max(np.abs(periods/Tlast-1))) if Tlast > 0 else 1.
+        diagnostic.update(return_errors=returns.tolist(), period_drift=drift,
+                          candidate_period=Tlast, candidate_amplitude=amplitude)
+        if not MIN_PERIOD <= Tlast <= MAX_PERIOD or drift > .2:
+            diagnostic['trajectory_reason'] = 'inconsistent_return_period'
+            return None
+        if amplitude < MIN_AMPLITUDE or np.min(sampled) <= 1e-8:
+            diagnostic['trajectory_reason'] = 'stationary_or_boundary_candidate'
+            return None
+        if returns[-1] > .5:
+            diagnostic['trajectory_reason'] = 'insufficient_recurrence'
+            return None
+        converged = bool(np.max(returns[-2:]) <= RETURN_TOL and drift <= 1e-5)
+        diagnostic['trajectory_reason'] = 'recurrent' if converged else 'approximate_return'
+        return dict(log_state=states[-1], period=Tlast, recurrence=float(returns[-1]),
+                    converged=converged, amplitude=amplitude)
 
-    periods = np.diff(times[-3:])
-    period = float(periods[-1])
-    if not MIN_PERIOD <= period <= MAX_PERIOD:
-        return None
-
-    # Candidate intervals should already have similar periods,
-    # but full convergence is not necessary before shooting.
-    if abs(periods[-1]-periods[-2])/period > .2:
-        return None
-
-    z0 = states[-2]
-    sampled = np.exp(solution.sol(np.linspace(times[-2], times[-1], 129,)))
-    amplitude = np.max(np.ptp(sampled, axis=1) / np.maximum(np.mean(sampled, axis=1), 1e-8,))
-    if amplitude < MIN_AMPLITUDE:
-        return None
-
-    # Require recurrence in the complete state, not only P peaks.
-    recurrence = float(np.max(np.abs(states[-1]-states[-2])))
-    if recurrence > .5:
-        return None
-
-    return dict(log_state=z0, period=period, initial_recurrence=recurrence,)
+    sol = integrate(z, duration)
+    guess = inspect(sol)
+    # Only extend a genuinely contracting return sequence. Very slow convergence
+    # near Hopf is handled by local correction rather than thousands of cycles.
+    if guess and not guess['converged']:
+        errors = diagnostic['return_errors']
+        if errors[-2] > 0 and 0 < errors[-1]/errors[-2] < .85:
+            ratio = errors[-1]/errors[-2]
+            needed = max(1, int(np.ceil(np.log(RETURN_TOL/errors[-1])/np.log(ratio))))
+            extra = min(RETURN_EXTRA_CYCLES, needed+3)*guess['period']
+            extra = min(extra, MAX_INITIAL_DAYS-duration)
+            if needed <= RETURN_EXTRA_CYCLES and extra >= 4*guess['period']:
+                improved = inspect(integrate(sol.y[:, -1], extra))
+                if improved is not None:
+                    guess = improved
+    return guess
 
 # ==============================================================
 # Fixed-parameter shooting
@@ -469,220 +533,153 @@ def hopf_initial_guesses(data, base, axis, u, equilibria):
     return guesses
 
 
-def shooting_system(values, reference, tangent, p):
-    """Shooting residual and its analytical Jacobian.
 
-    Unknown vector:
 
-        v = (log(M0), log(S0), log(P0), log(T))
+def correct_cycle(p, guess, diagnostic=None, heartbeat=None):
+    """Fallback shooting: two-dimensional transverse Poincare return map.
 
-    Residual:
-
-        R = (Phi_T(z0)-z0, phase_condition)
-
-    Integrating the variational equations supplies
-
-        dR/dz0 = Psi(T)-I
-        dR/dlog(T) = T*F(z(T)).
-
-    One augmented IVP therefore provides both the residual
-    and the Newton matrix.
+    Use only the three original ODEs during root correction; variational
+    equations are reserved for independent Floquet verification.
     """
-    values = np.asarray(values, dtype=float)
-    if not np.all(np.isfinite(values)):
-        raise ValueError('Nonfinite shooting unknowns')
-
-    z0 = values[:3]
-    if not (np.log(MIN_PERIOD) <= values[3] <= np.log(MAX_PERIOD)):
-        raise ValueError('Invalid shooting period')
-
-    T = float(np.exp(values[3]))
-    if np.max(abs(z0-reference)) > 5.:
-        raise ValueError('Shooting left initial-state neighborhood')
-
-    initial = np.r_[z0, np.eye(3).ravel(),]
-
-    def augmented_rhs(t, state):
-        z = state[:3]
-        Psi = state[3:].reshape(3, 3)
-        return np.r_[log_rhs(t, z, p), (log_jacobian(z, p) @ Psi).ravel(),]
-
-    solution = solve_ivp(augmented_rhs, (0., T), initial, method='LSODA', rtol=RTOL, atol=ATOL,)
-    if not solution.success:
-        raise RuntimeError(solution.message)
-
-    if not np.all(np.isfinite(solution.y)):
-        raise ValueError('Nonfinite shooting trajectory')
-
-    if not physical_trajectory(np.exp(solution.y[:3]), p):
-        raise ValueError('Shooting trajectory left physical domain')
-
-    zT = solution.y[:3, -1]
-    PsiT = solution.y[3:, -1].reshape(3, 3)
-    residual = np.r_[zT-z0, np.dot(z0-reference, tangent),]
-    J = np.zeros((4, 4))
-    J[:3, :3] = PsiT-np.eye(3)
-    J[:3, 3] = (T*log_rhs(T, zT, p))
-    J[3, :3] = tangent
-    return residual, J
-
-
-def correct_cycle(p, guess):
-    """Correct a periodic guess using analytical shooting derivatives."""
-    reference = np.asarray(guess['log_state'], dtype=float,)
-    period = float(guess['period'])
+    diagnostic = {} if diagnostic is None else diagnostic
+    reference = np.asarray(guess['log_state'], float)
+    T = float(guess['period'])
     tangent = log_rhs(0., reference, p)
     norm = np.linalg.norm(tangent)
     if norm < 1e-9:
+        diagnostic['correction_reason'] = 'stationary_phase_section'
         return None
+    normal = tangent/norm
+    basis = np.linalg.svd(normal[None, :], full_matrices=True)[2][1:].T
+    cache = {}
+    evaluations = 0
 
-    tangent /= norm
-    initial = np.r_[reference, np.log(period),]
+    def section(t, z):
+        return float(normal @ (z-reference))
+    section.direction = 1
+    section.terminal = True
 
-    # Cache the latest evaluation to avoid integrating the
-    # identical initial-value problem more than once.
-    cache = {'values': None, 'result': None,}
-
-    def evaluate(values):
-        if (cache['values'] is None or not np.array_equal(cache['values'], values)):
-            cache['values'] = np.array(values, copy=True)
-            cache['result'] = shooting_system(values, reference, tangent, p,)
-
-        return cache['result']
+    def evaluate(q):
+        nonlocal evaluations
+        key = tuple(float(v) for v in q)
+        if key in cache:
+            return cache[key]
+        evaluations += 1
+        diagnostic['shooting_evaluations'] = evaluations
+        if not np.all(np.isfinite(q)) or np.linalg.norm(q) > 3.:
+            raise ValueError('shooting_left_local_section')
+        z0 = reference+basis@q
+        if not physical_trajectory(np.exp(z0[:, None]), p):
+            raise ValueError('nonphysical_shooting_seed')
+        # Advance away from t=0 so the section event is a genuine return.
+        advance = min(.01*T, .1)
+        common = dict(method='LSODA', rtol=VERIFY_RTOL, atol=VERIFY_ATOL,
+                      max_step=max(MIN_PERIOD, T/40))
+        fun = lambda t, z: log_rhs(t, z, p)
+        first = profiled_ivp(fun, (0., advance), z0, diagnostic, 'return_map', heartbeat, **common)
+        sol = profiled_ivp(fun, (advance, 1.6*T), first.y[:, -1], diagnostic,
+                           'return_map', heartbeat, events=section, **common)
+        if not len(sol.t_events[0]):
+            raise ValueError('no_transverse_return')
+        period = float(sol.t_events[0][0])
+        if not .5*T <= period <= 1.6*T or not MIN_PERIOD <= period <= MAX_PERIOD:
+            raise ValueError('unexpected_return_period')
+        z1 = sol.y_events[0][0]
+        if not physical_trajectory(np.exp(sol.y), p):
+            raise ValueError('nonphysical_return_map')
+        residual = basis.T@(z1-z0)
+        closure = float(np.max(np.abs(z1-z0)))
+        cache[key] = residual, z0, period, closure
+        diagnostic['last_return_residual'] = closure
+        return cache[key]
 
     try:
-
-        # jac=True tells SciPy that evaluate returns both
-        # the residual vector and its Jacobian matrix.
-        result = root(
-            evaluate,
-            initial,
-            jac=True,
-            method='hybr',
-            options=dict(
-                xtol=1e-8,
-                maxfev=60,
-            ),
-        )
-        residual, _ = evaluate(result.x)
-        error = float(np.max(abs(residual)))
-        if error > SHOOTING_TOL:
+        result = root(lambda q: evaluate(q)[0], np.zeros(2), method='hybr',
+                      options=dict(xtol=1e-8, eps=1e-8, maxfev=POINCARE_MAXFEV))
+        residual, z0, period, closure = evaluate(result.x)
+        diagnostic.update(root_success=bool(result.success), root_status=int(result.status),
+                          root_message=str(result.message), final_return_residual=closure)
+        # MINPACK's R factor estimates conditioning of the local return equation.
+        if hasattr(result, 'r') and len(result.r) == 3:
+            a, b, c = result.r
+            condition = float(np.linalg.cond([[a, b], [0., c]]))
+            diagnostic['return_condition'] = condition if np.isfinite(condition) else None
+        if closure > RETURN_TOL:
+            diagnostic['correction_reason'] = 'return_residual_too_large'
             return None
-
-        return dict(
-            log_state=result.x[:3],
-            period=float(
-                np.exp(result.x[3])
-            ),
-            shooting_residual=error,
-            shooting_evaluations=int(
-                result.nfev
-            ),
-        )
-
-    except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError,):
+        diagnostic['correction_reason'] = 'corrected'
+        return dict(log_state=z0, period=period, shooting_residual=closure,
+                    shooting_evaluations=evaluations, method='poincare_shooting')
+    except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError) as exc:
+        diagnostic['correction_reason'] = str(exc)
         return None
 
 # ==============================================================
 # Floquet stability from the analytical Jacobian
 # ==============================================================
 
-def verify_cycle(p, cycle):
-    """Independently verify the orbit using tighter integration.
-
-    Integrate:
-        dz/dt = F(z)
-        dPsi/dt = J_log(z) Psi
-
-    The monodromy matrix has dimension 3 x 3.
-    No temporal collocation mesh is required.
-    """
+def verify_cycle(p, cycle, diagnostic=None, heartbeat=None):
+    """Independent closure, nonstationarity, feasibility and Floquet checks."""
     from model.periodic_math import floquet_classification
-    z0 = np.asarray(cycle['log_state'], dtype=float)
-    period = float(cycle['period'])
-    initial = np.r_[z0, np.eye(3).ravel(),]
+    diagnostic = {} if diagnostic is None else diagnostic
+    z0 = np.asarray(cycle['log_state'], float)
+    T = float(cycle['period'])
+    initial = np.r_[z0, np.eye(3).ravel()]
+
+    def reject(reason):
+        diagnostic['verification_reason'] = reason
+        return None
 
     def variational_rhs(t, values):
         z = values[:3]
-        matrix = values[3:].reshape(3, 3)
-        return np.r_[log_rhs(t, z, p), (log_jacobian(z, p)@matrix).ravel(),]
+        before = time.monotonic()
+        J = log_jacobian(z, p)
+        diagnostic['variational_jacobian_seconds'] = (
+            diagnostic.get('variational_jacobian_seconds', 0.)+time.monotonic()-before)
+        return np.r_[log_rhs(t, z, p), (J@values[3:].reshape(3, 3)).ravel()]
 
     try:
-        solution = solve_ivp(
-            variational_rhs,
-            (0., period),
-            initial,
-            method='LSODA',
-            rtol=VERIFY_RTOL,
-            atol=VERIFY_ATOL,
-            dense_output=True,
-        )
-        if not solution.success:
-            return None
-
-        if not np.all(np.isfinite(solution.y)):
-            return None
-
-        closure_error = float(np.max(np.abs(solution.y[:3, -1]-z0)))
-        if closure_error > 5*SHOOTING_TOL:
-            return None
-
-        monodromy = solution.y[3:, -1].reshape(3, 3)
-        multipliers = np.linalg.eigvals(monodromy)
-        stability = floquet_classification(multipliers, FLOQUET_TOL,)
-
-        # Only confirmed attracting periodic orbits are exported.
+        sol = profiled_ivp(variational_rhs, (0., T), initial, diagnostic, 'floquet', heartbeat,
+                           method='LSODA', rtol=VERIFY_RTOL, atol=VERIFY_ATOL,
+                           dense_output=True, max_step=max(MIN_PERIOD, T/50))
+        if not np.all(np.isfinite(sol.y)):
+            return reject('nonfinite_verification')
+        closure = float(np.max(abs(sol.y[:3, -1]-z0)))
+        diagnostic['verified_closure'] = closure
+        if closure > 5*SHOOTING_TOL:
+            return reject('independent_closure_failed')
+        multipliers = np.linalg.eigvals(sol.y[3:, -1].reshape(3, 3))
+        stability = floquet_classification(multipliers, FLOQUET_TOL)
+        diagnostic['floquet_check'] = stability
         if stability['stability'] != 'stable':
-            return None
-
-        # Sampling is used only for reporting extrema and means.
-        # These are NOT collocation nodes or solver unknowns.
-        sample_times = np.linspace(0., period, 513)
-        states = np.exp(solution.sol(sample_times)[:3])
-        if not physical_trajectory(states, p):
-            return None
-
-        if np.min(states) <= 1e-8:
-            return None
-
-        amplitude = float(np.max(
-            np.ptp(states, axis=1)
-            / np.maximum(
-                np.mean(states, axis=1),
-                1e-8,
-            )
-        ))
+            return reject('floquet_'+stability['stability'])
+        states = np.exp(sol.sol(np.linspace(0., T, 513))[:3])
+        if not physical_trajectory(states, p) or np.min(states) <= 1e-8:
+            return reject('nonphysical_or_boundary_cycle')
+        amplitude = float(np.max(np.ptp(states, axis=1)/np.maximum(states.mean(axis=1), 1e-8)))
         if amplitude < MIN_AMPLITUDE:
-            return None
-
-        nitrogen = (p.N_wc-states[0]-p.H*states[2])
-        area = np.vstack((states[0], states[1], p.H*states[2], nitrogen,))
-        row = dict(
-            status='verified_periodic',
-            method='adaptive_shooting',
-            community='MSP',
-            period=period,
-            relative_amplitude=amplitude,
-            closure_error=closure_error,
-            shooting_residual=cycle[
-                'shooting_residual'
-            ],
-            nitrogen_min=float(
-                np.min(nitrogen)
-            ),
-            **stability,
-        )
-        for name, values in zip(('M', 'S', 'P_area', 'N_area'), area,):
-            row[name+'_min'] = float(np.min(values))
-            row[name+'_max'] = float(np.max(values))
-
-            # Equally spaced phase samples approximate cycle means.
-            row[name+'_mean'] = float(np.mean(values[:-1]))
-
-        return dict(row=row, seed=dict(log_state=z0.tolist(), period=period,),)
-
-    except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError,):
-        return None
+            return reject('collapsed_stationary_solution')
+        # Near a weakly attracting cycle, a tiny closure error can hide a large
+        # distance from the true fixed point. This is a conservative numerical
+        # heuristic, not a rigorous error bound for a nonnormal map.
+        radius = stability['spectral_radius']
+        relative_drift = closure/max(1.-radius, 1e-12)/amplitude
+        diagnostic['contraction_scaled_closure'] = float(relative_drift)
+        if relative_drift > RETURN_REL_TOL:
+            return reject('weak_contraction_requires_correction')
+        nitrogen = p.N_wc-states[0]-p.H*states[2]
+        area = np.vstack((states[0], states[1], p.H*states[2], nitrogen))
+        row = dict(status='verified_periodic', method=cycle.get('method', 'poincare_return'),
+                   community='MSP', period=T, relative_amplitude=amplitude, closure_error=closure,
+                   shooting_residual=cycle.get('shooting_residual', closure),
+                   nitrogen_min=float(nitrogen.min()), **stability)
+        for name, values in zip(('M', 'S', 'P_area', 'N_area'), area):
+            row.update({name+'_min': float(values.min()), name+'_max': float(values.max()),
+                        name+'_mean': float(values[:-1].mean())})
+        diagnostic['verification_reason'] = 'verified_stable_cycle'
+        return dict(row=row, seed=dict(log_state=z0.tolist(), period=T))
+    except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError) as exc:
+        return reject(str(exc))
 
 # ==============================================================
 # Deterministic initial conditions
@@ -890,99 +887,80 @@ def adaptive_refinement_coordinates(results, axis):
 # Search for a stable attractor at one parameter location
 # ==============================================================
 
-def search_location(p, u, equilibria, warm_seed, checkpoint, record_attempt, hopf_guesses=None,):
-    """Search using increasingly expensive initialization methods.
-
-    Priority:
-        1. Direct shooting from a neighboring verified cycle.
-        2. Direct shooting from a Hopf normal-form approximation.
-        3. Forward integration from a neighboring cycle.
-        4. Forward integration from deterministic initial states.
-    """
-    tasks = []
+def search_location(p, u, equilibria, warm_seed, checkpoint, record_attempt,
+                    hopf_guesses=None, live=None, at_hopf=False):
+    """Try recurrent trajectories first, then correct only unresolved candidates."""
+    tasks, fallback = [], []
     if warm_seed is not None:
-        tasks.append(('reuse', warm_seed,))
+        tasks.append(('reuse', np.exp(warm_seed['log_state']), warm_seed['period'], warm_seed.get('source_u')))
+    if not at_hopf:
+        tasks.extend(('hopf_normal_form', np.exp(g['log_state']), g['period'], None)
+                     for g in hopf_guesses or [])
+    tasks.extend(('manual', state, None, None) for state in initial_states(p, equilibria))
 
-    for guess in hopf_guesses or []:
-        tasks.append(('hopf_normal_form', guess,))
-
-    if warm_seed is not None:
-        tasks.append(('reuse_trajectory', warm_seed,))
-
-    tasks.extend(('manual', state) for state in initial_states(p, equilibria))
-    for kind, seed in tasks:
-        checkpoint(f'{kind} · u={u:.6f}')
+    def attempt(kind, state, period, parent, guess=None):
+        diagnostic = dict(kind=kind, uv=[float(u)])
         started = time.monotonic()
-        reason = 'not_confirmed'
+        diagnostic.update(guess_seconds=0., correction_seconds=0., verification_seconds=0.)
         found = None
-        guess_seconds = 0.
-        correction_seconds = 0.
-        verification_seconds = 0.
-        evaluations = 0
+
+        def heartbeat(info):
+            if live:
+                live(info)
+            checkpoint(f'{kind} · {info.get("active_ivp", {}).get("stage", "search")}')
+
         try:
-            before = time.monotonic()
-            if kind == 'hopf_normal_form':
-                guess = seed
-
-            elif kind in ('reuse', 'reuse_trajectory',):
-                state = feasible_seed(np.exp(seed['log_state']), p,)
-                if state is None:
-                    guess = None
-
-                elif kind == 'reuse':
-                    guess = dict(log_state=np.log(state), period=seed['period'],)
-
-                else:
-                    guess = trajectory_guess(p, state, equilibria,)
-
-            else:
-                guess = trajectory_guess(p, seed, equilibria,)
-
-            guess_seconds = (time.monotonic()-before)
-            if guess is not None:
+            heartbeat(diagnostic)
+            if guess is None:
                 before = time.monotonic()
-                corrected = correct_cycle(p, guess)
-                correction_seconds = (time.monotonic()-before)
-                if corrected is not None:
-                    evaluations = int(corrected.get('shooting_evaluations', 0))
+                guess = trajectory_guess(p, state, equilibria, diagnostic, heartbeat, period)
+                diagnostic['guess_seconds'] = time.monotonic()-before
+                if guess and guess['converged']:
                     before = time.monotonic()
-
-                    # Keep the independent, tighter Floquet
-                    # and periodic-closure verification.
-                    found = verify_cycle(p, corrected)
-                    verification_seconds = (time.monotonic()-before)
-
-            if found is not None:
-                reason = 'verified_stable_cycle'
-
-        except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError,) as exc:
-            reason = str(exc)
-
-        record_attempt(dict(
-            kind=kind,
-            uv=[float(u)],
-            seconds=time.monotonic()-started,
-            guess_seconds=guess_seconds,
-            correction_seconds=correction_seconds,
-            verification_seconds=verification_seconds,
-            shooting_evaluations=evaluations,
-            reason=reason,
-        ))
-        if found is None:
-            continue
-
-        found['row']['cycle_parent_u'] = (
-            float(seed['source_u'])
-            if (
-                kind == 'reuse'
-                and 'source_u' in seed
-            )
-            else None
-        )
-        found['row']['cycle_search_method'] = kind
-        found['row']['shooting_evaluations'] = (evaluations)
+                    found = verify_cycle(p, dict(guess, method='poincare_return'), diagnostic, heartbeat)
+                    diagnostic['verification_seconds'] = time.monotonic()-before
+                if guess is not None and found is None:
+                    # Peak-based guesses at the same location have a common phase.
+                    # Do not correct nearly identical return candidates repeatedly.
+                    duplicate = any(abs(np.log(guess['period']/g['period'])) < .02 and
+                                    np.max(abs(guess['log_state']-g['log_state'])) < .005
+                                    for _, _, g in fallback)
+                    if not duplicate:
+                        fallback.append((kind, parent, guess))
+                    else:
+                        diagnostic['trajectory_reason'] = 'duplicate_return_candidate'
+            else:
+                before = time.monotonic()
+                corrected = correct_cycle(p, guess, diagnostic, heartbeat)
+                diagnostic['correction_seconds'] = time.monotonic()-before
+                if corrected is not None:
+                    before = time.monotonic()
+                    found = verify_cycle(p, corrected, diagnostic, heartbeat)
+                    diagnostic['verification_seconds'] = time.monotonic()-before
+            diagnostic['reason'] = ('verified_stable_cycle' if found else
+                                    diagnostic.get('verification_reason') or diagnostic.get('correction_reason') or
+                                    diagnostic.get('trajectory_reason', 'not_confirmed'))
+        except (ValueError, RuntimeError, ArithmeticError, np.linalg.LinAlgError) as exc:
+            diagnostic['reason'] = str(exc)
+        finally:
+            diagnostic['seconds'] = time.monotonic()-started
+            diagnostic.setdefault('shooting_evaluations', 0)
+            record_attempt(diagnostic)
+        if found:
+            found['row'].update(cycle_parent_u=parent, cycle_search_method=kind,
+                                shooting_evaluations=diagnostic['shooting_evaluations'])
         return found
 
+    for kind, state, period, parent in tasks:
+        found = attempt(kind, state, period, parent)
+        if found:
+            return found
+    # All independent trajectories have been tested before expensive correction.
+    # Most recurrent candidates are attempted first; no global attempt cap.
+    for kind, parent, guess in sorted(fallback, key=lambda entry: entry[2]['recurrence']):
+        found = attempt('poincare_shooting_'+kind, None, None, parent, guess)
+        if found:
+            return found
     return None
 
 # ==============================================================
@@ -1011,14 +989,16 @@ def analyze_stable_attractors(data, base, axis, checkpoint, folder, options=None
     payload = dict(
         # Keep the existing method name for plotting compatibility.
         method='Adaptive ODE integration and shooting',
-        algorithm='SIMP analytical adaptive search',
+        algorithm='SIMP Poincare return-first search',
         status='running',
         settings=dict(
             scan_points=len(coordinates),
             coarse_points=coarse_count,
             scan_resolution=int(axis.resolution),
             analytical_screening=True,
-            analytical_shooting_jacobian=True,
+            analytical_shooting_jacobian=False,
+            return_first=True,
+            poincare_shooting=True,
             hopf_normal_form_initialization=True,
             adaptive_sampling=True,
             generic_seeds=GENERIC_SEEDS,
@@ -1061,7 +1041,9 @@ def analyze_stable_attractors(data, base, axis, checkpoint, folder, options=None
             checked_locations=completed,
             completed_locations=completed,
             native_attempts=0,
-            shooting_attempts=len(attempts)-excluded,
+            search_attempts=len(attempts)-excluded,
+            shooting_attempts=sum(a.get('kind', '').startswith('poincare_shooting_') for a in attempts),
+            direct_return_cycles=sum(r.get('method') == 'poincare_return' for r in results),
             analytical_exclusions=excluded,
             refinement_rounds=refinement_round,
             elapsed_seconds=time.monotonic()-started,
@@ -1104,6 +1086,15 @@ def analyze_stable_attractors(data, base, axis, checkpoint, folder, options=None
         data['oscillations'] = list(data['stable_orbits'])
         write_json(folder/f'periodic_{suffix}.json', payload,)
         write_csv(folder/f'stable_orbit_scan_{suffix}.csv', ordered,)
+
+    def record_attempt(attempt):
+        attempts.append(attempt)
+        payload.pop('active_attempt', None)
+        save()
+
+    def live_attempt(attempt):
+        payload['active_attempt'] = attempt
+        save()
 
     save()
     try:
@@ -1194,8 +1185,13 @@ def analyze_stable_attractors(data, base, axis, checkpoint, folder, options=None
                         checkpoint=lambda message: checkpoint(
                             prefix+' · '+message
                         ),
-                        record_attempt=attempts.append,
+                        record_attempt=record_attempt,
                         hopf_guesses=hopf_guesses,
+                        live=live_attempt,
+                        at_hopf=any(e.get('kind') == 'hopf' and e.get('community') == 'MSP'
+                                    and e.get('classification_status') == 'verified'
+                                    and abs(float(e['u'])-u) < 1e-8
+                                    for e in data.get('events', [])),
                     )
 
                 stable_cycle = found is not None

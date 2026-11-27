@@ -204,6 +204,10 @@ def summarize_periodic(source, target):
             summary = dict(
                 status=data.get('status'),
                 settings=data.get('settings'),
+                algorithm=data.get('algorithm'),
+                timing=data.get('timing'),
+                active_attempt=data.get('active_attempt'),
+                slowest_searches=sorted(attempts, key=lambda a: a.get('seconds', 0), reverse=True)[:5],
                 coverage=coverage,
                 attempts=len(attempts),
                 attempt_types=dict(Counter(

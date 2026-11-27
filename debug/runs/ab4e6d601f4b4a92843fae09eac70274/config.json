@@ -1,0 +1,22 @@
+{
+  "id": "ab4e6d601f4b4a92843fae09eac70274",
+  "name": "Sweep",
+  "analysis_id": "sensitivity_demo",
+  "parameters": {
+    "sample_count": 6,
+    "random_seed": 22,
+    "kw": 0.3,
+    "depth": 4.0,
+    "delay_ms": 0
+  },
+  "declared_parameters": {
+    "sample_count": 6,
+    "random_seed": 22,
+    "kw": 0.3,
+    "depth": 4.0,
+    "delay_ms": 0
+  },
+  "seed_id": "",
+  "created_at": "2026-11-27T09:39:28+00:00",
+  "batch_id": null
+}

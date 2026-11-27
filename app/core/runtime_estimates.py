@@ -282,6 +282,7 @@ def uv_key(values):
 def periodic_metrics(payload):
     """Extract useful work counters from periodic diagnostics."""
     coverage = payload.get('coverage', {})
+    sampled = payload.get('method') == 'Adaptive ODE integration and shooting'
     locations = payload.get('locations', [])
     attempts = payload.get('attempts', [])
     incomplete = {uv_key(uv) for uv in coverage.get('incomplete_locations', [])}
@@ -315,6 +316,11 @@ def periodic_metrics(payload):
             if seconds > 0:
                 costly_locations.add(key)
 
+    if sampled:
+        costs = [max(0., number(row.get('seconds'))) for row in locations]
+        discovery_cost = sum(costs)
+        costly_locations = {uv_key(row['uv']) for row in locations
+                            if 'uv' in row and number(row.get('seconds')) > 0}
     queue_remaining = max(0, scheduled-done)
 
     # Do not extrapolate from just one or two expensive locations.
@@ -334,7 +340,11 @@ def periodic_metrics(payload):
         scheduled=scheduled,
         completed=done,
         checked=int(number(coverage.get('checked_locations'))),
-        attempts=len(attempts),
+        attempts=(int(number(coverage.get('search_attempts'), len(attempts)))
+                  if sampled else len(attempts)),
+        sampled=sampled,
+        confirmed=int(number(coverage.get('verified_periodic_locations'))),
+        shooting_attempts=int(number(coverage.get('shooting_attempts'))),
         branches=len(payload.get('branches', [])),
         pending_branches=len(coverage.get('pending_branches', [])),
         elapsed=max(0., number(coverage.get('elapsed_seconds'))),
@@ -633,7 +643,12 @@ def continuation_label(job, history, data, paused):
             attempts = sum(p['attempts'] for p in periodic)
             pending = sum(p['pending_branches'] for p in periodic)
             details.append(f'periodic: {done}/{total} locations')
-            details.append(f'{attempts} native attempts')
+            if any(p.get('sampled') for p in periodic):
+                confirmed = sum(p.get('confirmed', 0) for p in periodic)
+                corrections = sum(p.get('shooting_attempts', 0) for p in periodic)
+                details.append(f'{attempts} searches · {corrections} shooting · {confirmed} cycle locations')
+            else:
+                details.append(f'{attempts} native attempts')
             if pending:
                 details.append(f'{pending} branches pending')
 
