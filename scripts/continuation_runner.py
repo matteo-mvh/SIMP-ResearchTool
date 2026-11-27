@@ -330,6 +330,29 @@ def _run_depth(p, axes, options, dimensions, folder, report):
             encoding='utf-8',
         )
 
+    # Save and classify equilibrium results before the expensive
+    # periodic-orbit stage. This includes independently corrected
+    # Hopf candidates missed by native event detection.
+    report(.74, f'H={depth:g} m · Preparing equilibrium previews')
+
+    try:
+        from scripts.continuation_preflight import prepare_equilibrium_results
+
+        prepare_equilibrium_results(
+            data, p, axes, folder
+        )
+
+    except StopRequested:
+        raise
+
+    except Exception:
+        traceback.print_exc()
+
+        (folder/f'equilibrium_preview_error_H{depth:g}.txt').write_text(
+            traceback.format_exc(),
+            encoding='utf-8',
+        )
+
     stats['equilibrium_seconds'] = time.monotonic()-started
 
     # ------------------------------------------------------------

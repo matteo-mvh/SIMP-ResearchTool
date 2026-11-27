@@ -1,0 +1,20 @@
+{
+  "run_id": "5962b17c027e48fa93663e849c9ff507",
+  "analysis_id": "sensitivity",
+  "created_at": "2026-11-26T15:08:22+00:00",
+  "started_at": "2026-11-26T20:49:30+00:00",
+  "python": "3.13.1",
+  "command": [
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\.venv\\Scripts\\pythonw.exe",
+    "-u",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\scripts\\sensitivity\\run.py",
+    "--config",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\results\\runs\\20261126_160822_LHS_sensitivity_5962b17c\\config.json",
+    "--output",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\results\\runs\\20261126_160822_LHS_sensitivity_5962b17c"
+  ],
+  "status": "completed",
+  "ended_at": "2026-11-26T21:08:06+00:00",
+  "exit_code": 0,
+  "registered_seeds": 200000
+}

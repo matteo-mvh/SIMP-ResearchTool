@@ -1,0 +1,127 @@
+[
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "subresolution_polygons",
+    "count": 153,
+    "area": 1.6979098905716178e-10
+  }
+]

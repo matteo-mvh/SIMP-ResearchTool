@@ -1,0 +1,70 @@
+{
+  "engine": "pyoomph native pseudo-arclength",
+  "dimensions": 2,
+  "depths": [
+    4.0
+  ],
+  "axes": [
+    {
+      "name": "kw",
+      "low": 1.0,
+      "high": 200.0,
+      "resolution": 100
+    },
+    {
+      "name": "g_P",
+      "low": 0.0,
+      "high": 0.8,
+      "resolution": 100
+    }
+  ],
+  "seconds": 139.56257919990458,
+  "equation_source": "model/shared_eqn.py",
+  "limitations": "Finite MSP periodic discovery cannot prove absence of cycles. Only validated BVPs are shown; failed searches and unverified equilibrium absence remain unresolved. 2D cycles are checked locations/continuation transects, not certified regions.",
+  "diagnostics": 32,
+  "depth_workers": 1,
+  "performance": {
+    "4.0": {
+      "native_initialisations": 74,
+      "native_reuses": 0,
+      "reuse_failures": 0,
+      "native_setup_seconds": 36.23230460018385,
+      "native_total_seconds": 65.45010790007655,
+      "prepared_seeds": 32,
+      "covered_seeds": 16,
+      "native_corrections": 42,
+      "adaptive_steps": 0,
+      "adaptive_fallbacks": 0,
+      "oscillation_seconds": 1.9605393999954686,
+      "elapsed_seconds": 96.3344171999488,
+      "discovery_seconds": 89.9843071999494,
+      "refinement_seconds": 3.946682000067085
+    }
+  },
+  "periodic": {
+    "4.0": {
+      "verified_points": 0,
+      "status": "completed",
+      "coverage": {
+        "checked_locations": 81,
+        "max_locations": 150,
+        "unvisited_locations": [],
+        "suggested_refinement_locations": [],
+        "limit_reached": false
+      }
+    }
+  },
+  "refinement": {
+    "4.0": {
+      "rounds": [],
+      "equilibrium_checks": 564,
+      "stop_reason": "resolved",
+      "unresolved_regions": 0,
+      "unresolved_area": 0,
+      "geometry_actions": 16
+    }
+  },
+  "unresolved_area": {
+    "4.0": 0
+  }
+}

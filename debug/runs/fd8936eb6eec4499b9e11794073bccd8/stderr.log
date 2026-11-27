@@ -1,0 +1,15 @@
+
+
+======================================================================
+Oomph-lib ERROR
+
+ at D:/a/pyoomph/pyoomph/src/thirdparty/oomph-lib/include/problem.cc:9753
+
+ in void oomph::Problem::steady_newton_solve(const unsigned int&)
+
+--------------------------------------------------------
+
+Error occured in Newton solver. 
+
+======================================================================
+

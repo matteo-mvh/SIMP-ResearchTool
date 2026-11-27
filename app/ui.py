@@ -43,7 +43,7 @@ def px(n):
 
 def human_date(iso):
     if not iso: return '—'
-    try: return datetime.fromisoformat(iso).strftime('%d %b · %H:%M')
+    try: return datetime.fromisoformat(iso).astimezone().strftime('%d %b · %H:%M')
     except (ValueError,TypeError): return str(iso)[:16]
 
 

@@ -1,0 +1,18 @@
+{
+  "id": "2a44f2d882244462b938a255538c2dd0",
+  "name": "2D continuation",
+  "analysis_id": "continuation_2d",
+  "status": "completed",
+  "progress": 100.0,
+  "phase": "Completed",
+  "error": "",
+  "exit_code": 0,
+  "created_at": "2026-11-26T15:28:37+00:00",
+  "started_at": "2026-11-26T15:29:22+00:00",
+  "ended_at": "2026-11-26T15:41:34+00:00",
+  "exported_at": 1795768401.9326227,
+  "final_snapshot": true,
+  "python": "3.13.1 (tags/v3.13.1:0671451, Dec  3 2024, 19:06:28) [MSC v.1942 64 bit (AMD64)]",
+  "worker_exception": null,
+  "skipped_files": []
+}

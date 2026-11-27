@@ -1,0 +1,1196 @@
+{
+  "method": "pyoomph periodic boundary-value problem; no time integration",
+  "settings": {
+    "periodic_analysis": "on",
+    "periodic_mode": "collocation",
+    "periodic_samples": 9,
+    "periodic_amplitudes": [
+      0.03,
+      0.15,
+      0.4,
+      0.8
+    ],
+    "periodic_global_newton": "on",
+    "periodic_real_modes": "fallback",
+    "periodic_period_factors": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "periodic_nodes": 30,
+    "periodic_order": 3,
+    "periodic_refinement_levels": 4,
+    "periodic_refinement_rounds": 1,
+    "periodic_max_steps": 100,
+    "periodic_max_locations": 150,
+    "periodic_max_step": 0.015,
+    "periodic_min_step": 1e-07,
+    "periodic_newton_tolerance": 1e-09,
+    "periodic_newton_iterations": 25,
+    "periodic_validation_tolerance": 0.005,
+    "periodic_defect_tolerance": 0.005,
+    "periodic_floquet_tolerance": 0.0001,
+    "periodic_min_amplitude": 0.0001,
+    "periodic_min_period": 0.1,
+    "periodic_max_period": 100000.0,
+    "periodic_hopf_offset": 0.0004,
+    "periodic_timeout": 180.0
+  },
+  "excluded_communities": [
+    "0",
+    "M",
+    "S",
+    "P",
+    "MS",
+    "MP",
+    "SP"
+  ],
+  "exclusion_reason": "Bendixson\u2013Dulac exclusion for the current SIMP formulation (MSP-only search)",
+  "locations": [
+    {
+      "uv": [
+        0.0,
+        0.0
+      ],
+      "x": 1.0,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible seagrass growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.0,
+        0.125
+      ],
+      "x": 1.0,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible seagrass growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.0,
+        0.25
+      ],
+      "x": 1.0,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible seagrass growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.0,
+        0.375
+      ],
+      "x": 1.0,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible seagrass growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.0,
+        0.5
+      ],
+      "x": 1.0,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible seagrass growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.0,
+        0.625
+      ],
+      "x": 1.0,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible seagrass growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.0,
+        0.75
+      ],
+      "x": 1.0,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.0,
+        0.875
+      ],
+      "x": 1.0,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.0,
+        1.0
+      ],
+      "x": 1.0,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        0.0
+      ],
+      "x": 25.875,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        0.125
+      ],
+      "x": 25.875,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        0.25
+      ],
+      "x": 25.875,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        0.375
+      ],
+      "x": 25.875,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        0.5
+      ],
+      "x": 25.875,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        0.625
+      ],
+      "x": 25.875,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        0.75
+      ],
+      "x": 25.875,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        0.875
+      ],
+      "x": 25.875,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.125,
+        1.0
+      ],
+      "x": 25.875,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        0.0
+      ],
+      "x": 50.75,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        0.125
+      ],
+      "x": 50.75,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        0.25
+      ],
+      "x": 50.75,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        0.375
+      ],
+      "x": 50.75,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        0.5
+      ],
+      "x": 50.75,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        0.625
+      ],
+      "x": 50.75,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        0.75
+      ],
+      "x": 50.75,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        0.875
+      ],
+      "x": 50.75,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.25,
+        1.0
+      ],
+      "x": 50.75,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        0.0
+      ],
+      "x": 75.625,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        0.125
+      ],
+      "x": 75.625,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        0.25
+      ],
+      "x": 75.625,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        0.375
+      ],
+      "x": 75.625,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        0.5
+      ],
+      "x": 75.625,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        0.625
+      ],
+      "x": 75.625,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        0.75
+      ],
+      "x": 75.625,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        0.875
+      ],
+      "x": 75.625,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.375,
+        1.0
+      ],
+      "x": 75.625,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        0.0
+      ],
+      "x": 100.5,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        0.125
+      ],
+      "x": 100.5,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        0.25
+      ],
+      "x": 100.5,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        0.375
+      ],
+      "x": 100.5,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        0.5
+      ],
+      "x": 100.5,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        0.625
+      ],
+      "x": 100.5,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        0.75
+      ],
+      "x": 100.5,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        0.875
+      ],
+      "x": 100.5,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.5,
+        1.0
+      ],
+      "x": 100.5,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        0.0
+      ],
+      "x": 125.375,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        0.125
+      ],
+      "x": 125.375,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        0.25
+      ],
+      "x": 125.375,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        0.375
+      ],
+      "x": 125.375,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        0.5
+      ],
+      "x": 125.375,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        0.625
+      ],
+      "x": 125.375,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        0.75
+      ],
+      "x": 125.375,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        0.875
+      ],
+      "x": 125.375,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.625,
+        1.0
+      ],
+      "x": 125.375,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        0.0
+      ],
+      "x": 150.25,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        0.125
+      ],
+      "x": 150.25,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        0.25
+      ],
+      "x": 150.25,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        0.375
+      ],
+      "x": 150.25,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        0.5
+      ],
+      "x": 150.25,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        0.625
+      ],
+      "x": 150.25,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        0.75
+      ],
+      "x": 150.25,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        0.875
+      ],
+      "x": 150.25,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.75,
+        1.0
+      ],
+      "x": 150.25,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        0.0
+      ],
+      "x": 175.125,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        0.125
+      ],
+      "x": 175.125,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        0.25
+      ],
+      "x": 175.125,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        0.375
+      ],
+      "x": 175.125,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        0.5
+      ],
+      "x": 175.125,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        0.625
+      ],
+      "x": 175.125,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        0.75
+      ],
+      "x": 175.125,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        0.875
+      ],
+      "x": 175.125,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        0.875,
+        1.0
+      ],
+      "x": 175.125,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        0.0
+      ],
+      "x": 200.0,
+      "y": 0.0,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        0.125
+      ],
+      "x": 200.0,
+      "y": 0.1,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        0.25
+      ],
+      "x": 200.0,
+      "y": 0.2,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        0.375
+      ],
+      "x": 200.0,
+      "y": 0.30000000000000004,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        0.5
+      ],
+      "x": 200.0,
+      "y": 0.4,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        0.625
+      ],
+      "x": 200.0,
+      "y": 0.5,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        0.75
+      ],
+      "x": 200.0,
+      "y": 0.6000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        0.875
+      ],
+      "x": 200.0,
+      "y": 0.7000000000000001,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    },
+    {
+      "uv": [
+        1.0,
+        1.0
+      ],
+      "x": 200.0,
+      "y": 0.8,
+      "equilibrium_status": "msp_absent_certified",
+      "reason": "Maximum possible phytoplankton growth is below its loss rate",
+      "msp_count": 0,
+      "round": 0,
+      "branches": [],
+      "status": "excluded_no_msp"
+    }
+  ],
+  "branches": [],
+  "hopf": [],
+  "attempts": [],
+  "coverage": {
+    "checked_locations": 81,
+    "max_locations": 150,
+    "unvisited_locations": [],
+    "suggested_refinement_locations": [],
+    "limit_reached": false
+  },
+  "status": "completed"
+}

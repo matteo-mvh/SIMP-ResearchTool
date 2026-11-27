@@ -214,7 +214,7 @@ def run_isolated(
             events.append(item)
 
             # A completed verified orbit resets the inactivity timer.
-            if item['type'] in ('orbit', 'hopf'):
+            if item['type'] in ('orbit', 'hopf', 'trace_progress'):
                 last_record = time.monotonic()
 
             if not covered and on_event(item) is False:
@@ -565,7 +565,8 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
             for branch in payload['branches']
             for arm in branch['arms']
             if arm['termination'] not in (
-                'covered_branch', 'closed_loop', 'range_boundary'
+                'covered_branch', 'closed_loop', 'range_boundary',
+                'approached_verified_hopf' 
             )
         ]
 
@@ -621,6 +622,11 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
             reason=result['reason'],
             exit_code=result['exit_code'],
             seconds=result['seconds'],
+            trace_statistics=next((
+                event['statistics']
+                for event in reversed(result['events'])
+                if 'statistics' in event
+            ), {}),
             failures=[
                 e['reason'] for e in result['events']
                 if e['type'] == 'failure'
@@ -718,7 +724,10 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
 
                     branch['arms'].append(arm_info)
 
+                    last_trace_save = 0.
+
                     def on_event(event):
+                        nonlocal last_trace_save
                         if event['type'] != 'orbit':
                             return
 
@@ -746,10 +755,23 @@ def analyze_periodic(data, base, axes, values, checkpoint, folder):
                             branch=branch['id'],
                         ))
 
-                        save()
+                        now = time.monotonic()
+
+                        # Avoid rewriting the growing JSON and CSV
+                        # files unnecessarily at every native point.
+                        if now-last_trace_save >= 2.:
+                            save()
+                            last_trace_save = now
 
                     result = attempt(dict(
                         kind='trace',
+                        hopf_points=[
+                            row
+                            for roots in hopf.values()
+                            for row in roots
+                            if row.get('classification_status')
+                            == 'verified'
+                        ],
                         seed=seed,
                         axis=axis,
                         direction=direction,

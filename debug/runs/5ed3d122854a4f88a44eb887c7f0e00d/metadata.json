@@ -1,0 +1,20 @@
+{
+  "run_id": "5ed3d122854a4f88a44eb887c7f0e00d",
+  "analysis_id": "continuation_2d",
+  "created_at": "2026-11-27T06:33:13+00:00",
+  "started_at": "2026-11-27T06:33:13+00:00",
+  "python": "3.13.1",
+  "command": [
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\.venv\\Scripts\\pythonw.exe",
+    "-u",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\scripts\\continuation_2d\\run.py",
+    "--config",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\results\\runs\\20261127_073313_2D_continuation_5ed3d122\\config.json",
+    "--output",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\results\\runs\\20261127_073313_2D_continuation_5ed3d122"
+  ],
+  "status": "completed",
+  "ended_at": "2026-11-27T06:35:40+00:00",
+  "exit_code": 0,
+  "registered_seeds": 0
+}

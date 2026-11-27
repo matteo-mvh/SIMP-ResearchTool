@@ -1,0 +1,527 @@
+[
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "MS",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "MS",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "SP",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "SP",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "MSP",
+      "hopf",
+      ""
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "MS",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "M",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "MS",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "SP",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "P",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "SP",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "S",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "duplicate_curve_geometry",
+    "family": [
+      "0",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "endpoint_join",
+    "distance": 2.1303398794162348e-11,
+    "family": [
+      "P",
+      "invasion",
+      "S"
+    ],
+    "target_family": [
+      "S",
+      "invasion",
+      "P"
+    ]
+  },
+  {
+    "action": "endpoint_join",
+    "distance": 3.505830430888861e-11,
+    "family": [
+      "S",
+      "invasion",
+      "P"
+    ],
+    "target_family": [
+      "0",
+      "invasion",
+      "S"
+    ]
+  },
+  {
+    "action": "endpoint_join",
+    "distance": 3.6862054263819216e-10,
+    "family": [
+      "MS",
+      "invasion",
+      "P"
+    ],
+    "target_family": [
+      "SP",
+      "invasion",
+      "M"
+    ]
+  },
+  {
+    "action": "endpoint_join",
+    "distance": 1.8302731289516517e-06,
+    "family": [
+      "MSP",
+      "hopf",
+      ""
+    ],
+    "target_family": [
+      "MSP",
+      "hopf",
+      ""
+    ]
+  },
+  {
+    "action": "subresolution_polygons",
+    "count": 255,
+    "area": 3.273057250297897e-08
+  }
+]

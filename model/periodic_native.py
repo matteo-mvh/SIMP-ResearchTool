@@ -214,12 +214,14 @@ def equilibrium_context(p):
         )
 
 
-def verify_point(problem, orbit, base, axes, options):
+def verify_point(problem, orbit, base, axes, options,
+                 working_level=0, preferred_level=None, coarse=None):
     """Verify a periodic solution through independent finer-mesh solves."""
 
-    coarse = inspect_orbit(
-        problem, orbit, base, axes, options
-    )
+    if coarse is None:
+        coarse = inspect_orbit(
+            problem, orbit, base, axes, options
+        )
 
     uv = [coarse[k] for k in 'uv'[:len(axes)]]
     p = parameters_at(base, axes, uv)
@@ -229,12 +231,24 @@ def verify_point(problem, orbit, base, axes, options):
     context = equilibrium_context(p)
 
     previous = coarse
+    previous_level = working_level
 
     seed = snapshot(
-        problem, orbit, node_count(options)*2
+        problem, orbit, node_count(options, working_level)*2
     )
 
-    for level in range(1, options['periodic_refinement_levels']+1):
+    maximum = options['periodic_refinement_levels']
+
+    # Start near the previously successful verification mesh.
+    # Still require comparison of two successive mesh levels.
+    start = max(
+        working_level+1,
+        (preferred_level or 1)-1,
+    )
+
+    start = min(start, maximum)
+
+    for level in range(start, maximum+1):
 
         n = node_count(options, level)
 
@@ -277,9 +291,11 @@ def verify_point(problem, orbit, base, axes, options):
             )
 
             saved = snapshot(fine, refined, n)
+            saved['mesh_level'] = level
 
             if (
-                error <= options['periodic_validation_tolerance']
+                level == previous_level+1
+                and error <= options['periodic_validation_tolerance']
                 and floquet_error <= options['periodic_validation_tolerance']
                 and row['balance_defect'] <= options['periodic_defect_tolerance']
                 and row.get('trivial_error', float('inf'))
@@ -300,6 +316,7 @@ def verify_point(problem, orbit, base, axes, options):
                 return row, saved
 
             previous = row
+            previous_level = level
             seed = saved
 
     raise ValueError(
@@ -442,113 +459,8 @@ def discover_task(task, base, axes, options, emit):
 
 
 def trace_task(task, base, axes, options, emit):
-    """Continue a periodic branch until a physical or numerical endpoint."""
-
-    seed = task['seed']
-    uv = seed['uv']
-
-    logs = resample_logs(
-        seed['log_states'],
-        node_count(options),
-    )
-
-    axis = task['axis']
-    direction = task['direction']
-
-    history = []
-
-    with periodic_problem(
-        base, axes, uv, np.exp(logs[0])
-    ) as problem:
-
-        orbit = install_guess(
-            problem, logs, seed['period'], options
-        )
-
-        max_step = min(
-            options['periodic_max_step'],
-            1/axes[axis].resolution,
-        )
-
-        ds = direction*min(
-            max_step/4,
-            options['periodic_hopf_offset']/4,
-        )
-
-        problem.reset_arc_length_parameters()
-
-        stop = 'step_limit'
-
-        for step in range(options['periodic_max_steps']):
-
-            ds = problem.arclength_continuation(
-                problem.controls[axis],
-                ds,
-                max_ds=max_step,
-                min_ds=options['periodic_min_step'],
-                **solve_options(options),
-            )
-
-            current_uv = [
-                float(c.value) for c in problem.controls
-            ]
-
-            # Normal termination at the selected parameter range.
-            if any(not 0 <= value <= 1 for value in current_uv):
-                stop = 'range_boundary'
-                break
-
-            row, saved = verify_point(
-                problem, orbit, base, axes, options
-            )
-
-            row.update(
-                step=step+1,
-                direction=direction,
-                continuation_axis=axis,
-            )
-
-            if len(history) >= 2:
-
-                k = 'uv'[axis]
-
-                if (
-                    (row[k]-history[-1][k])
-                    * (history[-1][k]-history[-2][k]) < 0
-                ):
-                    row['event'] = 'cycle_fold_bracket'
-
-                if row['stability'] != history[-1]['stability']:
-                    row['stability_transition'] = True
-
-            emit(dict(
-                type='orbit',
-                row=row,
-                seed=saved,
-            ))
-
-            # Stop if the branch returns to its starting neighborhood.
-            if (
-                len(history) > 12
-                and same_orbit(row, history[0], .002)
-                and max(
-                    abs(row[k]-history[0][k])
-                    for k in 'uv'[:len(axes)]
-                ) < .001
-            ):
-                stop = 'closed_loop'
-                break
-
-            history.append(row)
-
-            # Resolve folds and stability changes more carefully.
-            if row.get('event') or row.get('stability_transition'):
-                ds = np.sign(ds)*min(abs(ds), max_step/4)
-
-        emit(dict(
-            type='termination',
-            reason=stop,
-        ))
+    from model.periodic_tracking import trace
+    return trace(task, base, axes, options, emit)
 
 
 def execute_task(task, base, axes, options, emit):

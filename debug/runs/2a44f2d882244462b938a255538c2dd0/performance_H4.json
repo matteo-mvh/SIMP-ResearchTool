@@ -1,0 +1,15 @@
+{
+  "native_initialisations": 321,
+  "native_reuses": 0,
+  "reuse_failures": 0,
+  "native_setup_seconds": 194.6847743979888,
+  "native_total_seconds": 328.9595862994902,
+  "prepared_seeds": 150,
+  "covered_seeds": 102,
+  "native_corrections": 173,
+  "adaptive_steps": 1081,
+  "adaptive_fallbacks": 26,
+  "elapsed_seconds": 614.0050137999933,
+  "discovery_seconds": 485.292969299946,
+  "refinement_seconds": 124.78837570000906
+}

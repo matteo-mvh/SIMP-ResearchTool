@@ -1079,16 +1079,17 @@ def plot_classification(
 
     name = folder/f'bifurcation_classification_H{depth:g}'
 
-    fig.savefig(name.with_suffix('.png'), dpi=270,
+    fig.savefig(Path(str(name)+'.png'), dpi=270,
                 bbox_inches='tight')
 
-    fig.savefig(name.with_suffix('.pdf'),
+    fig.savefig(Path(str(name)+'.pdf'),
                 bbox_inches='tight')
 
     plt.close(fig)
 
 
-def classify_output(folder, dimensions=None, report=print):
+def classify_output(folder, dimensions=None, report=print,
+                    reuse_preflight=False):
     """Classify a continuation result directory."""
 
     folder = Path(folder)
@@ -1118,6 +1119,14 @@ def classify_output(folder, dimensions=None, report=print):
 
         p = replace(base, H=depth)
         suffix = f'H{depth:g}'
+
+        marker = folder/f'bifurcation_summary_{suffix}.json'
+
+        if reuse_preflight and marker.is_file():
+            summaries[suffix] = json.loads(
+                marker.read_text(encoding='utf-8')
+            )
+            continue
 
         report(f'Classifying bifurcations · H={depth:g} m')
 
@@ -1386,6 +1395,7 @@ def classified_main(dimensions):
         classify_output(
             ctx.folder,
             dimensions,
+            reuse_preflight=True,
             report=lambda message: ctx.checkpoint(
                 100., message, force=True
             ),

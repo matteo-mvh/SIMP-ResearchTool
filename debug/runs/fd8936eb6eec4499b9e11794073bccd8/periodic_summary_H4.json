@@ -1,0 +1,312 @@
+{
+  "status": "interrupted",
+  "settings": {
+    "periodic_analysis": "on",
+    "periodic_samples": 9,
+    "periodic_amplitudes": [
+      0.03,
+      0.15,
+      0.4,
+      0.8
+    ],
+    "periodic_period_factors": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "periodic_real_modes": "fallback",
+    "periodic_refinement_rounds": 1,
+    "periodic_mode": "collocation",
+    "periodic_nodes": 30,
+    "periodic_order": 3,
+    "periodic_refinement_levels": 4,
+    "periodic_max_steps": 1200,
+    "periodic_max_step": 0.015,
+    "periodic_min_step": 1e-07,
+    "periodic_global_newton": "on",
+    "periodic_newton_tolerance": 1e-09,
+    "periodic_newton_iterations": 25,
+    "periodic_validation_tolerance": 0.005,
+    "periodic_defect_tolerance": 0.005,
+    "periodic_floquet_tolerance": 0.0001,
+    "periodic_min_amplitude": 0.0001,
+    "periodic_min_period": 0.1,
+    "periodic_max_period": 100000.0,
+    "periodic_hopf_offset": 0.0004,
+    "periodic_timeout": 180.0
+  },
+  "coverage": {
+    "scheduled_locations": 19,
+    "checked_locations": 1,
+    "completed_locations": 0,
+    "native_attempts": 3,
+    "elapsed_seconds": 991.786244399962,
+    "pending_branches": [
+      1
+    ],
+    "incomplete_arms": [
+      {
+        "branch": 1,
+        "axis": 0,
+        "direction": -1,
+        "reason": "solver_failed"
+      },
+      {
+        "branch": 1,
+        "axis": 0,
+        "direction": 1,
+        "reason": "running"
+      }
+    ],
+    "limit_reached": true,
+    "unvisited_locations_count": 18,
+    "unvisited_locations_examples": [
+      [
+        0.0
+      ],
+      [
+        0.01455037308
+      ],
+      [
+        0.01455037978
+      ],
+      [
+        0.01455148464
+      ],
+      [
+        0.01473444168
+      ],
+      [
+        0.03806023374
+      ],
+      [
+        0.07176132486
+      ],
+      [
+        0.07216878082
+      ],
+      [
+        0.07217124192
+      ],
+      [
+        0.07217125678
+      ]
+    ],
+    "incomplete_locations_count": 1,
+    "incomplete_locations_examples": [
+      [
+        0.03488529659
+      ]
+    ]
+  },
+  "attempts": 2,
+  "attempt_types": {
+    "hopf": 1,
+    "trace": 1
+  },
+  "attempt_outcomes": {
+    "completed": 1,
+    "solver_failed": 1
+  },
+  "total_worker_seconds": 89.06634949997533,
+  "median_attempt_seconds": 44.533174749987666,
+  "location_statuses": {
+    "verified_periodic": 1
+  },
+  "branches": [
+    {
+      "id": 1,
+      "points": 94,
+      "stability": {
+        "stable": 94
+      },
+      "mesh_sizes": {
+        "241": 13,
+        "121": 1,
+        "481": 80
+      },
+      "first_point": {
+        "period": 457.12058248461324,
+        "relative_amplitude": 0.46115829360804733,
+        "differential_defect": 0.011436134233680856,
+        "balance_defect": 0.0033231873329549492,
+        "nitrogen_min": 2.246910211384394,
+        "inventory_error": 1.4210854715202004e-14,
+        "M_min": 47.352047295945205,
+        "M_max": 55.633732915910365,
+        "M_mean": 51.50421053939491,
+        "S_min": 77.35869053501352,
+        "S_max": 91.81660053030424,
+        "S_mean": 84.5310084669406,
+        "P_area_min": 13.639427157800085,
+        "P_area_max": 21.808355086635615,
+        "P_area_mean": 17.713934763967508,
+        "N_area_min": 2.246910211384394,
+        "N_area_max": 2.3813809602430815,
+        "N_area_mean": 2.317162581101735,
+        "floquet": [
+          [
+            -1.1102230246251565e-16,
+            0.0
+          ],
+          [
+            0.9559939913227882,
+            0.0
+          ],
+          [
+            1.0000000000000664,
+            0.0
+          ]
+        ],
+        "stability": "stable",
+        "trivial_index": 2,
+        "trivial_error": 6.639133687258436e-14,
+        "spectral_radius": 0.9559939913227882,
+        "residual": 6.119887582811678e-15,
+        "nodes": 241,
+        "community": "MSP",
+        "H": 4.0,
+        "u": 0.03528529659052734,
+        "x": 71.53530788446416,
+        "mesh_error": 4.7878308262604744e-05,
+        "floquet_mesh_error": 2.8031132970340877e-11,
+        "verification_level": 3,
+        "stable_equilibria": "",
+        "equilibrium_search_status": "msp_found",
+        "status": "verified_periodic",
+        "lyapunov_coefficient": -5.267427135262025,
+        "hopf_classification": "supercritical",
+        "hopf_uv": [
+          0.03488529659
+        ],
+        "hopf_equilibrium": [
+          50.444697661740626,
+          84.11928611398952,
+          4.492957527743725
+        ]
+      },
+      "last_point": {
+        "period": 449.603429415174,
+        "relative_amplitude": 1.3948751200656324,
+        "differential_defect": 0.007853820436170713,
+        "balance_defect": 0.001891001060214714,
+        "nitrogen_min": 2.059391859290078,
+        "inventory_error": 0.0,
+        "M_min": 61.649825018278975,
+        "M_max": 80.70282052609666,
+        "M_mean": 72.04265939783816,
+        "S_min": 71.92378275339861,
+        "S_max": 105.75214802352022,
+        "S_mean": 89.58380462621821,
+        "P_area_min": 4.932077902447679,
+        "P_area_max": 23.741981947815457,
+        "P_area_mean": 13.485009356595826,
+        "N_area_min": 2.059391859290078,
+        "N_area_max": 2.421350512242096,
+        "N_area_mean": 2.2686848887545765,
+        "floquet": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.6956384610335629,
+            0.0
+          ],
+          [
+            1.0000000000002067,
+            0.0
+          ]
+        ],
+        "stability": "stable",
+        "trivial_index": 2,
+        "trivial_error": 2.0672352718520415e-13,
+        "spectral_radius": 0.6956384610335629,
+        "residual": 1.929359449981405e-14,
+        "nodes": 481,
+        "community": "MSP",
+        "H": 4.0,
+        "u": 0.04341988676497678,
+        "x": 87.79635364318858,
+        "mesh_error": 8.268242521460927e-05,
+        "floquet_mesh_error": 8.83471074075532e-12,
+        "verification_level": 4,
+        "stable_equilibria": "",
+        "equilibrium_search_status": "msp_found",
+        "status": "verified_periodic",
+        "step": 86,
+        "direction": 1,
+        "continuation_axis": 0
+      },
+      "arms": [
+        {
+          "axis": 0,
+          "direction": -1,
+          "termination": "solver_failed",
+          "points": 7,
+          "notes": [
+            {
+              "type": "failure",
+              "reason": "Collapsed stationary solution",
+              "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\model\\periodic_worker.py\", line 19, in main\n    execute_task(payload['task'],Parameters(**payload['base']),\n    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                 [Axis(**a) for a in payload['axes']],periodic_options(payload['options']),emit)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\model\\periodic_native.py\", line 557, in execute_task\n    trace_task(task, base, axes, options, emit)\n    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\model\\periodic_native.py\", line 501, in trace_task\n    row, saved = verify_point(\n                 ~~~~~~~~~~~~^\n        problem, orbit, base, axes, options\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\model\\periodic_native.py\", line 220, in verify_point\n    coarse = inspect_orbit(\n        problem, orbit, base, axes, options\n    )\n  File \"C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\model\\periodic_native.py\", line 135, in inspect_orbit\n    row = sample_metrics(\n        sample_orbit(problem, orbit, count),\n    ...<2 lines>...\n        options,\n    )\n  File \"C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\model\\periodic_math.py\", line 134, in sample_metrics\n    if amplitude<options['periodic_min_amplitude']:raise ValueError('Collapsed stationary solution')\n                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: Collapsed stationary solution\n"
+            }
+          ]
+        },
+        {
+          "axis": 0,
+          "direction": 1,
+          "termination": "running",
+          "points": 86,
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "hopf": [
+    {
+      "type": "hopf",
+      "lyapunov_coefficient": -5.267427135262025,
+      "hopf_classification": "supercritical",
+      "hopf_uv": [
+        0.03488529659
+      ],
+      "hopf_equilibrium": [
+        50.444697661740626,
+        84.11928611398952,
+        4.492957527743725
+      ]
+    }
+  ],
+  "recent_attempts": [
+    {
+      "task": 1,
+      "kind": "hopf",
+      "uv": [
+        0.03488529659
+      ],
+      "mode": null,
+      "amplitude": null,
+      "period": null,
+      "reason": "completed",
+      "exit_code": 0,
+      "seconds": 20.24750880000647,
+      "failures": []
+    },
+    {
+      "task": 2,
+      "kind": "trace",
+      "uv": [
+        0.03528529659052734
+      ],
+      "mode": null,
+      "amplitude": null,
+      "period": null,
+      "reason": "solver_failed",
+      "exit_code": 1,
+      "seconds": 68.81884069996886,
+      "failures": [
+        "Collapsed stationary solution"
+      ]
+    }
+  ]
+}

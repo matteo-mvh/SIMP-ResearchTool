@@ -1,0 +1,58 @@
+{
+  "status": "completed",
+  "settings": {
+    "periodic_analysis": "on",
+    "periodic_mode": "collocation",
+    "periodic_samples": 9,
+    "periodic_amplitudes": [
+      0.03,
+      0.15,
+      0.4,
+      0.8
+    ],
+    "periodic_global_newton": "on",
+    "periodic_real_modes": "fallback",
+    "periodic_period_factors": [
+      0.5,
+      1.0,
+      2.0
+    ],
+    "periodic_nodes": 30,
+    "periodic_order": 3,
+    "periodic_refinement_levels": 4,
+    "periodic_refinement_rounds": 1,
+    "periodic_max_steps": 100,
+    "periodic_max_locations": 150,
+    "periodic_max_step": 0.015,
+    "periodic_min_step": 1e-07,
+    "periodic_newton_tolerance": 1e-09,
+    "periodic_newton_iterations": 25,
+    "periodic_validation_tolerance": 0.005,
+    "periodic_defect_tolerance": 0.005,
+    "periodic_floquet_tolerance": 0.0001,
+    "periodic_min_amplitude": 0.0001,
+    "periodic_min_period": 0.1,
+    "periodic_max_period": 100000.0,
+    "periodic_hopf_offset": 0.0004,
+    "periodic_timeout": 180.0
+  },
+  "coverage": {
+    "checked_locations": 81,
+    "max_locations": 150,
+    "suggested_refinement_locations": [],
+    "limit_reached": false,
+    "unvisited_locations_count": 0,
+    "unvisited_locations_examples": []
+  },
+  "attempts": 0,
+  "attempt_types": {},
+  "attempt_outcomes": {},
+  "total_worker_seconds": 0,
+  "median_attempt_seconds": null,
+  "location_statuses": {
+    "excluded_no_msp": 81
+  },
+  "branches": [],
+  "hopf": [],
+  "recent_attempts": []
+}

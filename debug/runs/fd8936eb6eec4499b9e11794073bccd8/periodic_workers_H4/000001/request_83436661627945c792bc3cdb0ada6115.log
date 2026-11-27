@@ -1,0 +1,61 @@
+Rotating eigenvector by -6.48748 to get <Re(eigenvector),Im(eigenvector)> = -8.32667e-17 ~ 0, maximize <Re(eigenvector),Re(eigenvector)>=0.948093 and <Im(eigenvector),Im(eigenvector)>= 0.0519069
+Rotating eigenvector by 0 to get <Re(eigenvector),Im(eigenvector)> = -7.41792e-12 ~ 0, maximize <Re(eigenvector),Re(eigenvector)>=1 and <Im(eigenvector),Im(eigenvector)>= 0.0547487
+Rotating eigenvector by 0 to get <Re(eigenvector),Im(eigenvector)> = -7.03289e-12 ~ 0, maximize <Re(eigenvector),Re(eigenvector)>=0.948093 and <Im(eigenvector),Im(eigenvector)>= 0.0519069
+Using collocation order 3 and integration order 3
+Created PeriodicOrbitHandler with -5  BASIS 0
+Using collocation order 3 and integration order 3
+Created PeriodicOrbitHandler with -5  BASIS 0
+Using collocation order 3 and integration order 3
+Created PeriodicOrbitHandler with -5  BASIS 0
+Using collocation order 3 and integration order 3
+Created PeriodicOrbitHandler with -5  BASIS 0
+EIGEN SOLVER WAS SET TO: scipy
+Dofs after augmentation 11
+Currently at Hopf tracking with omega= -0.01374150046603204
+Step 1: eigenvector/adjoint residuals (all should be zero)
+   A*qR + omega0*M*qI       6.915e-15
+   A*qI - omega0*M*qR       1.180e-15
+   AT*pR - omega0*MT*pI     1.811e-14
+   AT*pI + omega0*MT*pR     9.836e-16
+   <q,q> - 1                1.110e-16
+   <qR,qI>                  7.033e-12
+   Re<p,Mq> - 1             1.110e-16
+   Im<p,Mq>                 2.862e-17
+Step 2
+A magnitude 44.07234604073809
+B magnitude 0.20482760056641583
+C magnitude 2.861060619644443
+Step 3: normal-form solve residuals (all should be zero)
+   A*r - B(q,qb)            7.105e-15   |r| =5.047e+00
+   Re[(2i*w*M-A)s - B(q,q)] 7.105e-15   |sR|=3.778e+00
+   Im[(2i*w*M-A)s - B(q,q)] 1.776e-15   |sI|=2.186e+00
+Step 4
+sig1 -0.6649648047740446
+sig2 0.10510748227994
+sig -0.5598573224941046
+Step 5
+d1 0.670939900983966
+d2 -0.013523360478841062
+d3 0.1053927112504649
+d4 -0.1055023487831733
+d0 0.8683116005387632
+Step 6
+g1 -2.0933728457250353
+g2 -0.010536769880675664
+g3 -4.762226554086874
+g4 0.38111931413996925
+g0 -2.1327909503949583
+Step 7
+ga -5.267427135262025
+c1 -0.07238235243399294
+Activating eigenbranch tracking for a complex branch with with starting eigenvalue 0.01374150046603204j
+dmu_dparam -0.11706713818172197 1.271748265730696
+Will return -1 1.271748265730696
+AL 1.271748265730696 QR MAGNITUDE 0.9999999999999999
+Amplitude perturbation factor: 0.050869930629227844
+Parameter step 0.0004
+Average 'radius'^2 of the starting guess orbit: 0.0013312798524184946
+Average 'radius'^2 of the solved guess orbit: 0.0013847512095222724
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy

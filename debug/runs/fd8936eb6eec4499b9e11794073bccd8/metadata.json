@@ -1,0 +1,20 @@
+{
+  "run_id": "fd8936eb6eec4499b9e11794073bccd8",
+  "analysis_id": "continuation_1d",
+  "created_at": "2026-11-27T08:03:53+00:00",
+  "started_at": "2026-11-27T08:03:53+00:00",
+  "python": "3.13.1",
+  "command": [
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\.venv\\Scripts\\pythonw.exe",
+    "-u",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\scripts\\continuation_1d\\run.py",
+    "--config",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\results\\runs\\20261127_090353_1D_continuation_fd8936eb\\config.json",
+    "--output",
+    "C:\\Users\\Mmm\\OneDrive\\Master Studies\\Master Thesis\\code\\SIMP_Control_Center\\results\\runs\\20261127_090353_1D_continuation_fd8936eb"
+  ],
+  "status": "stopped",
+  "ended_at": "2026-11-27T08:22:09+00:00",
+  "exit_code": 130,
+  "registered_seeds": 0
+}

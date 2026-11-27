@@ -1,0 +1,386 @@
+[
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 53,
+    "endpoint": [
+      0.008525871641172973,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 19,
+    "endpoint": [
+      0.0,
+      0.6579623373266554
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 53,
+    "endpoint": [
+      0.0010549750896077918,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 53,
+    "endpoint": [
+      0.0010549750896077918,
+      1.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "M",
+    "invader": "P",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 15,
+    "endpoint": [
+      0.0,
+      0.3890369873849705
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "M",
+    "invader": "P",
+    "direction": 1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 298,
+    "endpoint": [
+      0.001054975089479875,
+      0.5424386752863385
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "P",
+    "invader": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 6,
+    "endpoint": [
+      0.0,
+      0.47718107672317867
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "P",
+    "invader": "M",
+    "direction": 1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 278,
+    "endpoint": [
+      0.0010549750873785528,
+      0.5424386752387773
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "P",
+    "invader": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0,
+      0.47718107672317883
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "P",
+    "invader": "M",
+    "direction": 1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 267,
+    "endpoint": [
+      0.00105497508742344,
+      0.5424386752400113
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "P",
+    "invader": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0,
+      0.4771810767231788
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "P",
+    "invader": "M",
+    "direction": 1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 267,
+    "endpoint": [
+      0.0010549750874234397,
+      0.5424386752400113
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "M",
+    "invader": "P",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0,
+      0.38903698738497045
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "M",
+    "invader": "P",
+    "direction": 1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 298,
+    "endpoint": [
+      0.0010549750894816943,
+      0.5424386752865341
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "M",
+    "invader": "P",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0,
+      0.38903698738497045
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "M",
+    "invader": "P",
+    "direction": 1,
+    "reason": "Resident biomass reached a presence boundary",
+    "points": 298,
+    "endpoint": [
+      0.0010549750894816943,
+      0.5424386752865341
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0,
+      0.6579623373266554
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 41,
+    "endpoint": [
+      0.008525871641172973,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0,
+      0.6579623373266554
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 41,
+    "endpoint": [
+      0.008525871641172973,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.008525871641172973,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 69,
+    "endpoint": [
+      0.0,
+      0.6579623373266554
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.008525871641172973,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "P",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 69,
+    "endpoint": [
+      0.0,
+      0.6579623373266554
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0010549750896077918,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 103,
+    "endpoint": [
+      0.0010549750896077918,
+      1.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0010549750896077918,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 103,
+    "endpoint": [
+      0.0010549750896077918,
+      1.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 103,
+    "endpoint": [
+      0.0010549750896077918,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0010549750896077918,
+      1.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": -1,
+    "reason": "range_boundary",
+    "points": 103,
+    "endpoint": [
+      0.0010549750896077918,
+      0.0
+    ]
+  },
+  {
+    "kind": "invasion",
+    "community": "0",
+    "invader": "M",
+    "direction": 1,
+    "reason": "range_boundary",
+    "points": 2,
+    "endpoint": [
+      0.0010549750896077918,
+      1.0
+    ]
+  }
+]

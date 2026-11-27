@@ -1,0 +1,182 @@
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+PARDISO WARNING: backward error 2.582e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 4.447e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 6.376e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+PARDISO WARNING: backward error 2.582e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 4.447e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 6.376e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+PARDISO WARNING: backward error 1.759e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 2.989e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 4.084e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+PARDISO WARNING: backward error 1.759e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 3.001e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 2.989e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 1.000e+00 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 5.331e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 4.084e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+PARDISO WARNING: backward error 7.905e-02 exceeds the 1e-04 limit. repair_bad_solves is off, so the solution is used as it stands and only the factorisation is discarded. Set repair_bad_solves=True to have stronger pivoting tried, or switch to a dynamically pivoting solver (umfpack, or MUMPS via --petsc_mumps).
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
+EIGEN SOLVER WAS SET TO: scipy
